@@ -1,0 +1,1000 @@
+                            {(simState === "filled" || simState === "finished") && (
+                                <div style={{ display: "flex", gap: 12, alignItems: "flex-start", animation: "fadeIn 0.3s ease-out" }}>
+                                    <div style={{ width: 24, height: 24, borderRadius: 12, background: "#00B67A", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Shield size={12} color="white" /></div>
+                                    <div>
+                                        <div style={{ fontWeight: 600, fontSize: 14, color: "#00B67A" }}>Slot Filled Automatically</div>
+                                        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>Elena R. accepted via SMS link. $1,400 production secured. Calendar updated.</div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
+        </div>
+    );
+}
+
+export function VoiceAgentPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen, escalations, setEscalations, handleMarkDone }) {
+    const [callActive, setCallActive] = React.useState(false);
+    const [transcriptIndex, setTranscriptIndex] = React.useState(0);
+
+    const fullTranscript = [
+        { speaker: "ai", text: "Thank you for calling Smile Dental Group. This is Ava, your AI scheduling assistant. How can I help you today?" },
+        { speaker: "patient", text: "Hi, I'd like to schedule an appointment as a new patient. My tooth is hurting." },
+        { speaker: "ai", text: "I'm so sorry to hear you're experiencing pain! Let's get you in right away. May I have your first and last name?" },
+        { speaker: "patient", text: "It's Daniel Reyes." },
+        { speaker: "ai", text: "Thank you, Daniel. I have an emergency exam opening today at 2:00 PM with Dr. Cifor, or tomorrow at 9:00 AM. Do either of those work for you?" },
+        { speaker: "patient", text: "Today at 2:00 PM would be great." },
+        { speaker: "ai", text: "Wonderful. I have you booked for 2:00 PM today. Since you are a new patient, I've just sent a text message to this number with a link to our secure Intake Forms so you don't have to fill paper out in the waiting room." },
+        { speaker: "patient", text: "Got the text. I'll fill it out now." },
+        { speaker: "ai", text: "Perfect! We look forward to seeing you at 2:00 PM, Daniel. Feel better!" }
+    ];
+
+    React.useEffect(() => {
+        let interval;
+        let timeout;
+        if (callActive) {
+            interval = setInterval(() => {
+                setTranscriptIndex(prev => {
+                    if (prev < fullTranscript.length) {
+                        return prev + 1;
+                    } else {
+                        clearInterval(interval);
+                        timeout = setTimeout(() => {
+                            setCallActive(false);
+                        }, 2000);
+                        return prev;
+                    }
+                });
+            }, 2000);
+        }
+        return () => {
+            clearInterval(interval);
+            clearTimeout(timeout);
+        };
+    }, [callActive, fullTranscript.length]);
+
+    const handleStartCall = () => {
+        setTranscriptIndex(0);
+        setCallActive(true);
+    };
+
+    const transcript = fullTranscript.slice(0, transcriptIndex);
+
+    return (
+        <div style={{ padding: "20px 40px" }}>
+            <TopGreetingUI2 currentUI={currentUI} setUI={setUI} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} subtitle="Review and configure AI patient communications." />
+            <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+                    <div>
+                        <h2 style={{ fontSize: 24, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0 }}>Voice Agent Insights</h2>
+                        <p style={{ color: GEO_TEXT_MUTED, margin: "4px 0 0 0", fontSize: 14 }}>Live call monitoring and AI resolution analytics</p>
+                    </div>
+                </div>
+
+                <div className="stack-on-mobile" style={{ display: "flex", gap: 20, marginBottom: 32 }}>
+                    <div style={{ flex: 1, background: GEO_BG, borderRadius: 16, padding: 20, display: "flex", alignItems: "center", gap: 16 }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 12, background: GEO_WHITE, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                            <PhoneCall size={24} color={GEO_TEXT_MAIN} />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, fontWeight: 600 }}>Calls This Month</div>
+                            <div style={{ fontSize: 24, fontWeight: 700, color: GEO_TEXT_MAIN }}>847</div>
+                        </div>
+                    </div>
+                    <div style={{ flex: 1, background: "#E8F5E9", borderRadius: 16, padding: 20, display: "flex", alignItems: "center", gap: 16, border: "1px solid rgba(0, 182, 122, 0.2)" }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 12, background: GEO_WHITE, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                            <Activity size={24} color={GEO_GREEN} />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: 13, color: GEO_GREEN, fontWeight: 600 }}>AI Resolved</div>
+                            <div style={{ fontSize: 24, fontWeight: 700, color: GEO_GREEN }}>94%</div>
+                        </div>
+                    </div>
+                    <div style={{ flex: 1, background: GEO_BG, borderRadius: 16, padding: 20, display: "flex", alignItems: "center", gap: 16 }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 12, background: GEO_WHITE, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                            <Clock size={24} color={GEO_TEXT_MAIN} />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, fontWeight: 600 }}>Avg Duration</div>
+                            <div style={{ fontSize: 24, fontWeight: 700, color: GEO_TEXT_MAIN }}>2.3m</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="stack-grid-mobile" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 24, paddingBottom: 40 }}>
+                    <div style={{ background: GEO_WHITE, borderRadius: 24, padding: 32, border: `1px solid #E5E7EB`, display: "flex", flexDirection: "column", height: 600, boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, paddingBottom: 20, borderBottom: `1px solid #F3F4F6` }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                                <div style={{ position: "relative" }}>
+                                    <div style={{ width: 48, height: 48, borderRadius: 24, background: callActive ? "#EF4444" : "#F4F5F7", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.3s" }}>
+                                        <Phone color={callActive ? "white" : GEO_TEXT_MUTED} size={20} />
+                                    </div>
+                                    {callActive && <div style={{ position: "absolute", top: -4, right: -4, width: 14, height: 14, background: "#EF4444", borderRadius: 7, border: "2px solid white", animation: "pulse 2s infinite" }} />}
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: 18, fontWeight: 700, color: GEO_TEXT_MAIN, fontFamily: "monospace" }}>+1 (555) 019-8372</div>
+                                    <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, marginTop: 4, display: "flex", alignItems: "center", gap: 6 }}>
+                                        {callActive ? <><span style={{ color: "#EF4444", fontWeight: 700 }}>LIVE</span> • Patient caller</> : "Ready for incoming calls"}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                {!callActive ? (
+                                    <button onClick={handleStartCall} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: GEO_BLACK, color: "white", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}><Play size={16} fill="currentColor" /> Monitor Next Call</button>
+                                ) : (
+                                    <button onClick={() => setCallActive(false)} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: "#EF4444", color: "white", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}><Square size={16} fill="currentColor" /> End Simulation</button>
+                                )}
+                            </div>
+                        </div>
+
+                        <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 20, paddingRight: 12 }}>
+                            {transcript.length === 0 && !callActive && (
+                                <div style={{ margin: "auto", textAlign: "center", color: GEO_TEXT_MUTED, fontSize: 15, background: "#F9FAFB", padding: 32, borderRadius: 16, border: "1px dashed #E5E7EB" }}>
+                                    <Mic size={32} color="#D1D5DB" style={{ marginBottom: 12 }} />
+                                    <div>Waiting for incoming call...</div>
+                                </div>
+                            )}
+                            {transcript.map((msg, i) => (
+                                <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: msg.speaker === "ai" ? "flex-start" : "flex-end", maxWidth: "85%", alignSelf: msg.speaker === "ai" ? "flex-start" : "flex-end", animation: "fadeIn 0.4s ease-out" }}>
+                                    <div style={{ fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: 6 }}>
+                                        {msg.speaker === "ai" ? <><Sparkles size={12} color={GEO_GREEN} /> Ava (AI)</> : "Caller"}
+                                    </div>
+                                    <div style={{ padding: "16px 20px", borderRadius: 20, borderBottomLeftRadius: msg.speaker === "ai" ? 6 : 20, borderBottomRightRadius: msg.speaker === "patient" ? 6 : 20, background: msg.speaker === "ai" ? GEO_BG : "#E8F5E9", color: msg.speaker === "ai" ? GEO_TEXT_MAIN : GEO_GREEN, fontSize: 15, lineHeight: 1.6, boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+                                        {msg.text}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: 24, height: 600 }}>
+                        <div style={{ background: GEO_WHITE, borderRadius: 24, padding: 32, border: `1px solid #E5E7EB`, boxShadow: "0 8px 30px rgba(0,0,0,0.04)", flex: 1 }}>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+                                <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>Autonomous Actions</h3>
+                                {callActive && transcript.length > 0 && <span style={{ padding: "4px 10px", background: "#F0FDF4", color: "#00B67A", borderRadius: "9999px", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}><Activity size={12} className="lucide-spin" /> Processing</span>}
+                            </div>
+
+                            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "20px", background: transcript.length > 2 ? "#F0FDF4" : "#F9FAFB", borderRadius: 16, color: transcript.length > 2 ? GEO_GREEN : GEO_TEXT_MUTED, border: `1px solid ${transcript.length > 2 ? '#86EFAC' : '#F3F4F6'}`, transition: "all 0.3s" }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 16, background: transcript.length > 2 ? GEO_GREEN : "#E5E7EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <UsersRound size={16} color="white" />
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 700, fontSize: 15 }}>Caller Authenticated</div>
+                                        <div style={{ fontSize: 13, marginTop: 4, display: transcript.length > 2 ? "block" : "none" }}>Created New Patient Profile: Daniel Reyes</div>
+                                    </div>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "20px", background: transcript.length > 5 ? "#F0FDF4" : "#F9FAFB", borderRadius: 16, color: transcript.length > 5 ? GEO_GREEN : GEO_TEXT_MUTED, border: `1px solid ${transcript.length > 5 ? '#86EFAC' : '#F3F4F6'}`, transition: "all 0.3s" }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 16, background: transcript.length > 5 ? GEO_GREEN : "#E5E7EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <CalendarCheck size={16} color="white" />
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 700, fontSize: 15 }}>Schedule Intent Parsed</div>
+                                        <div style={{ fontSize: 13, marginTop: 4, display: transcript.length > 5 ? "block" : "none" }}>Confirmed 'Emergency Exam' block at 2:00 PM</div>
+                                    </div>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "20px", background: transcript.length > 6 ? "#EFF6FF" : "#F9FAFB", borderRadius: 16, color: transcript.length > 6 ? "#3B82F6" : GEO_TEXT_MUTED, border: `1px solid ${transcript.length > 6 ? '#BFDBFE' : '#F3F4F6'}`, transition: "all 0.3s" }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 16, background: transcript.length > 6 ? "#3B82F6" : "#E5E7EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <FileText size={16} color="white" />
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 700, fontSize: 15, color: transcript.length > 6 ? "#1D4ED8" : "inherit" }}>Forms Automation Dispatched</div>
+                                        <div style={{ fontSize: 13, marginTop: 4, display: transcript.length > 6 ? "block" : "none", color: "#2563EB", fontWeight: 600 }}>Sent 'New Patient Intake Packet' via SMS.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ESCALATION QUEUE */}
+                    <div style={{ marginTop: 40, paddingTop: 40, borderTop: `1px solid #E5E7EB` }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                            <div>
+                                <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0, display: "flex", alignItems: "center", gap: 12 }}>
+                                    Requires Human Action
+                                    {escalations.length > 0 && (
+                                        <span style={{ background: "#FEE2E2", color: "#DC2626", padding: "4px 8px", borderRadius: 12, fontSize: 13, fontWeight: 800 }}>{escalations.length} Callbacks Pending</span>
+                                    )}
+                                </h3>
+                                <p style={{ color: GEO_TEXT_MUTED, margin: "4px 0 0 0", fontSize: 14 }}>Calls that failed automated resolution (e.g. Clinical advice, complex finances)</p>
+                            </div>
+                        </div>
+
+                        <div className="table-scroll-mobile">
+                            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
+                                <thead>
+                                    <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Time</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Patient</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Category</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>AI Summary context</th>
+                                        <th style={{ padding: "0 16px 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {escalations.map((escalation) => (
+                                        <tr key={escalation.id} style={{ borderBottom: `1px solid #F4F5F7`, transition: "background 0.2s" }} onMouseOver={e => e.currentTarget.style.background = "#F9FAFB"} onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+                                            <td style={{ padding: "24px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{escalation.time}</td>
+                                            <td style={{ padding: "24px 0" }}>
+                                                <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{escalation.patientName}</div>
+                                                <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, marginTop: 4, fontFamily: "monospace" }}>{escalation.phone}</div>
+                                            </td>
+                                            <td style={{ padding: "24px 0" }}>
+                                                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: GEO_PILL, fontSize: 12, fontWeight: 700, background: escalation.bgColor, color: escalation.color }}>
+                                                    <escalation.icon size={12} fill="currentColor" /> {escalation.type}
+                                                </span>
+                                            </td>
+                                            <td style={{ padding: "24px 0", fontSize: 14, color: GEO_TEXT_MAIN, maxWidth: 350, lineHeight: 1.5 }}>
+                                                {escalation.summary}
+                                            </td>
+                                            <td style={{ padding: "24px 16px 24px 0", textAlign: "right" }}>
+                                                <button onClick={() => handleMarkDone(escalation.id)} style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: `1px solid #E5E7EB`, background: GEO_WHITE, color: GEO_TEXT_MAIN, fontWeight: 600, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "background 0.2s" }} onMouseOver={e => e.currentTarget.style.background = "#F3F4F6"} onMouseOut={e => e.currentTarget.style.background = GEO_WHITE}>
+                                                    <Check size={14} /> Done
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {escalations.length === 0 && (
+                                        <tr>
+                                            <td colSpan="5" style={{ padding: "40px 0", textAlign: "center", color: GEO_TEXT_MUTED, fontSize: 15 }}>
+                                                <CheckCircle size={32} color={GEO_GREEN} style={{ marginBottom: 16 }} />
+                                                <div style={{ fontWeight: 600, color: GEO_TEXT_MAIN }}>You're all caught up!</div>
+                                                <div>SOAP NOTE:</div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+    const FORECAST_DATA = [
+        { date: "Current", actual: 125000, projected: 125000 },
+        { date: "+7 Days", actual: null, projected: 142000, riskAdjusted: 138000 },
+        { date: "+14 Days", actual: null, projected: 158000, riskAdjusted: 151000 },
+        { date: "+21 Days", actual: null, projected: 175000, riskAdjusted: 162000 },
+        { date: "+30 Days", actual: null, projected: 195000, riskAdjusted: 178000 },
+    ];
+
+    const CHAIR_UTILIZATION = [
+        { time: "8 AM", Mon: 90, Tue: 95, Wed: 85, Thu: 90, Fri: 95 },
+        { time: "10 AM", Mon: 100, Tue: 100, Wed: 90, Thu: 95, Fri: 100 },
+        { time: "12 PM", Mon: 60, Tue: 50, Wed: 55, Thu: 60, Fri: 40 },
+        { time: "2 PM", Mon: 85, Tue: 90, Wed: 80, Thu: 85, Fri: 70 },
+        { time: "4 PM", Mon: 75, Tue: 80, Wed: 70, Thu: 90, Fri: 60 },
+    ];
+
+    const getHeatmapColor = (value) => {
+        if (value >= 90) return "#00B67A"; // High utilization (Green)
+        if (value >= 70) return "#86EFAC"; // Medium-High (Light Green)
+        if (value >= 50) return "#FEF08A"; // Medium (Yellow)
+        return "#FECACA"; // Low (Red)
+    };
+
+    return (
+        <div className="mobile-no-padding-main" style={{ padding: "20px 40px", paddingBottom: 60 }}>
+            <TopGreetingUI2 currentUI={currentUI} setUI={setUI} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} subtitle="AI-driven revenue forecasting and capacity planning." />
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+                {/* Top Row: AI Insight & KPI Cards */}
+                <div className="stack-grid-mobile" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 24 }}>
+                    <div style={{ background: "linear-gradient(135deg, #1C1E23 0%, #333 100%)", borderRadius: 24, padding: 32, color: "white", boxShadow: "0 12px 24px rgba(0,0,0,0.15)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                        <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                                <div style={{ width: 40, height: 40, borderRadius: 20, background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <Sparkles size={20} color="#00B67A" />
+                                </div>
+                                <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Revenue Intelligence</h3>
+                            </div>
+                            <div style={{ fontSize: 15, lineHeight: 1.6, color: "rgba(255,255,255,0.9)", marginBottom: 24 }}>
+                                Based on current scheduling velocity and historical no-show rates, you are pacing to miss your $200k monthly goal by <strong>$22,000</strong>.
+                            </div>
+                            <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 16, padding: 20, border: "1px solid rgba(255,255,255,0.1)" }}>
+                                <div style={{ fontSize: 13, fontWeight: 700, color: "#00B67A", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>AI Recommendation</div>
+                                <div style={{ fontSize: 14, color: "white", lineHeight: 1.5 }}>Launch reactivation campaign to 142 overdue hygiene patients. Expected uplift: <strong>+$18k</strong>.</div>
+                            </div>
+                        </div>
+                        <button style={{ marginTop: 24, padding: "14px 0", borderRadius: GEO_PILL, border: "none", background: GEO_GREEN, color: "white", fontWeight: 700, fontSize: 15, cursor: "pointer", width: "100%", transition: "all 0.2s" }}>Execute Campaign Strategy</button>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateRows: "1fr 1fr", gap: 24 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+                            <div style={{ background: GEO_WHITE, borderRadius: 24, padding: 24, border: `1px solid #E5E7EB`, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                                    <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>30-Day Forecast</div>
+                                    <TrendingUp size={20} color={GEO_GREEN} />
+                                </div>
+                                <div style={{ fontSize: 36, fontWeight: 800, color: GEO_TEXT_MAIN }}>$195k</div>
+                                <div style={{ fontSize: 14, color: GEO_GREEN, fontWeight: 600, marginTop: 4 }}>+8% vs last month</div>
+                            </div>
+                            <div style={{ background: GEO_WHITE, borderRadius: 24, padding: 24, border: `1px solid #E5E7EB`, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                                    <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>Risk-Adjusted</div>
+                                    <Shield size={20} color={"#FFD100"} />
+                                </div>
+                                <div style={{ fontSize: 36, fontWeight: 800, color: GEO_TEXT_MAIN }}>$178k</div>
+                                <div style={{ fontSize: 14, color: GEO_TEXT_MUTED, fontWeight: 500, marginTop: 4 }}>Factors in predicted 12% drop-off</div>
+                            </div>
+                        </div>
+                        <div style={{ background: GEO_WHITE, borderRadius: 24, padding: 24, border: `1px solid #E5E7EB`, boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
+                            <div style={{ fontSize: 16, fontWeight: 700, color: GEO_TEXT_MAIN, marginBottom: 16 }}>Revenue Trajectory</div>
+                            <div style={{ height: 160 }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={FORECAST_DATA} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                        <defs>
+                                            <linearGradient id="colorProjected" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor={GEO_GREEN} stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor={GEO_GREEN} stopOpacity={0} />
+                                            </linearGradient>
+                                            <linearGradient id="colorRisk" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#FFD100" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#FFD100" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
+                                        <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: GEO_TEXT_MUTED }} dy={10} />
+                                        <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: GEO_TEXT_MUTED }} tickFormatter={(value) => `$${value / 1000}k`} dx={-10} />
+                                        <Tooltip contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", fontWeight: 600 }} formatter={(value) => [`$${value.toLocaleString()}`, ""]} />
+                                        <Area type="monotone" dataKey="projected" stroke={GEO_GREEN} strokeWidth={3} fillOpacity={1} fill="url(#colorProjected)" name="Best Case" />
+                                        <Area type="monotone" dataKey="riskAdjusted" stroke="#FFD100" strokeWidth={3} fillOpacity={1} fill="url(#colorRisk)" name="Risk Adjusted" strokeDasharray="5 5" />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bottom Row: Heatmaps */}
+                <div style={{ background: GEO_WHITE, borderRadius: 24, padding: 32, border: `1px solid #E5E7EB`, boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                        <div>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>Chair Utilization Heatmap</h3>
+                            <p style={{ color: GEO_TEXT_MUTED, margin: "4px 0 0 0", fontSize: 14 }}>Identify systemic scheduling bottlenecks and gaps</p>
+                        </div>
+                        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 12, height: 12, background: "#FECACA", borderRadius: 4 }} /> <span style={{ fontSize: 12, color: GEO_TEXT_MUTED }}>Low</span></div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 12, height: 12, background: "#FEF08A", borderRadius: 4 }} /> <span style={{ fontSize: 12, color: GEO_TEXT_MUTED }}>Medium</span></div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 12, height: 12, background: "#00B67A", borderRadius: 4 }} /> <span style={{ fontSize: 12, color: GEO_TEXT_MUTED }}>Optimal</span></div>
+                        </div>
+                    </div>
+
+                    <div className="table-scroll-mobile" style={{ overflowX: "auto" }}>
+                        <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: "4px", minWidth: 600 }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ padding: "8px", width: "10%", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 12, textTransform: "uppercase", fontWeight: 700 }}>Time</th>
+                                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => (
+                                        <th key={day} style={{ padding: "8px", width: "18%", textAlign: "center", color: GEO_TEXT_MAIN, fontSize: 14, fontWeight: 700 }}>{day}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {CHAIR_UTILIZATION.map((row, idx) => (
+                                    <tr key={idx}>
+                                        <td style={{ padding: "16px 8px", fontSize: 13, fontWeight: 600, color: GEO_TEXT_MUTED }}>{row.time}</td>
+                                        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => (
+                                            <td key={day} style={{ padding: 0 }}>
+                                                <div style={{
+                                                    background: getHeatmapColor(row[day]),
+                                                    borderRadius: 8,
+                                                    padding: "16px",
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                    alignItems: "center",
+                                                    fontSize: 14,
+                                                    fontWeight: 700,
+                                                    color: row[day] >= 90 ? "white" : GEO_TEXT_MAIN,
+                                                    transition: "transform 0.2s",
+                                                    cursor: "pointer"
+                                                }} onMouseOver={e => e.currentTarget.style.transform = "scale(0.98)"} onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}>
+                                                    {row[day]}%
+                                                </div>
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+export function FormBuilderPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+    const [previewMode, setPreviewMode] = React.useState(() => {
+        const path = window.location.pathname.replace(/^\//, '');
+        return path === 'forms/preview';
+    });
+
+    useEffect(() => {
+        const handlePopState = () => {
+            const path = window.location.pathname.replace(/^\//, '');
+            setPreviewMode(path === 'forms/preview');
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    const togglePreviewMode = (preview) => {
+        setPreviewMode(preview);
+        window.history.pushState(null, '', preview ? `/forms/preview` : `/forms`);
+    };
+
+    const [promptText, setPromptText] = useState("");
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [editingFieldId, setEditingFieldId] = useState(null);
+
+    // Drag and Drop Refs
+    const dragItem = React.useRef(null);
+    const dragOverItem = React.useRef(null);
+    const [draggedPaletteItem, setDraggedPaletteItem] = useState(null);
+    const [activeDropIndex, setActiveDropIndex] = useState(null);
+
+    const [fields, setFields] = React.useState([
+        { id: 1, type: "Text", label: "Full Name", icon: Type },
+        { id: 2, type: "Date", label: "Date of Birth", icon: CalendarDays },
+        { id: 3, type: "Phone", label: "Phone Number", icon: Phone },
+        { id: 4, type: "Email", label: "Email Address", icon: Mail },
+        { id: 5, type: "Textarea", label: "Chief Complaint", icon: AlignLeft },
+        { id: 6, type: "Checkbox", label: "Known Allergies", icon: ListChecks },
+    ]);
+
+    const handleAddField = (type, icon) => {
+        setFields([...fields, { id: Date.now(), type, label: `New ${type}`, icon }]);
+    };
+
+    const handleDeleteField = (id) => {
+        setFields(fields.filter(f => f.id !== id));
+    };
+
+    const handleUpdateLabel = (id, newLabel) => {
+        setFields(fields.map(f => f.id === id ? { ...f, label: newLabel } : f));
+    };
+
+    const handleSort = () => {
+        let _fields = [...fields];
+        if (dragItem.current !== null && dragOverItem.current !== null && dragItem.current !== dragOverItem.current) {
+            const draggedItemContent = _fields.splice(dragItem.current, 1)[0];
+
+            let targetIndex = dragOverItem.current;
+            if (dragItem.current < dragOverItem.current) {
+                targetIndex -= 1;
+            }
+
+            _fields.splice(targetIndex, 0, draggedItemContent);
+            setFields(_fields);
+        }
+        dragItem.current = null;
+        dragOverItem.current = null;
+        setActiveDropIndex(null);
+    };
+
+    const handleCanvasDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (draggedPaletteItem) {
+            const newField = { id: Date.now(), type: draggedPaletteItem.type, label: `New ${draggedPaletteItem.type}`, icon: draggedPaletteItem.icon };
+
+            if (dragOverItem.current !== null) {
+                // Insert at specific hovered index
+                let _fields = [...fields];
+                _fields.splice(dragOverItem.current, 0, newField);
+                setFields(_fields);
+            } else {
+                // Append to end if dropped in empty space
+                setFields([...fields, newField]);
+            }
+
+            setDraggedPaletteItem(null);
+            dragOverItem.current = null;
+            setActiveDropIndex(null);
+        }
+    };
+
+    const handleAIGenerate = (e) => {
+        if (e.key === 'Enter' && promptText.trim()) {
+            setIsGenerating(true);
+            setFields([]);
+            setTimeout(() => {
+                const text = promptText.toLowerCase();
+                let newFields = [];
+
+                if (text.includes("medical") || text.includes("history")) {
+                    newFields = [
+                        { id: Date.now() + 1, type: "Text", label: "Patient Full Name", icon: Type },
+                        { id: Date.now() + 2, type: "Date", label: "Date of Birth", icon: CalendarDays },
+                        { id: Date.now() + 3, type: "Text", label: "Primary Care Physician", icon: Type },
+                        { id: Date.now() + 4, type: "Phone", label: "Physician Phone Number", icon: Phone },
+                        { id: Date.now() + 5, type: "Checkbox", label: "Are you currently under the care of a physician?", icon: ListChecks },
+                        { id: Date.now() + 6, type: "Textarea", label: "If yes, please explain:", icon: AlignLeft },
+                        { id: Date.now() + 7, type: "Checkbox", label: "Have you had any serious illness or operations?", icon: ListChecks },
+                        { id: Date.now() + 8, type: "Checkbox", label: "Do you use tobacco products?", icon: ListChecks },
+                        { id: Date.now() + 9, type: "Textarea", label: "Please list all current medications", icon: AlignLeft },
+                        { id: Date.now() + 10, type: "Checkbox", label: "Allergic to Penicillin", icon: ListChecks },
+                        { id: Date.now() + 11, type: "Checkbox", label: "Allergic to Latex", icon: ListChecks },
+                        { id: Date.now() + 12, type: "Signature", label: "Patient Signature", icon: Edit3 }
+                    ];
+                } else {
+                    newFields = [
+                        { id: Date.now() + 1, type: "Text", label: "Patient Full Name", icon: Type },
+                        { id: Date.now() + 2, type: "Date", label: "Date of Birth", icon: CalendarDays },
+                        ...text.includes("emergency") ? [
+                            { id: Date.now() + 3, type: "Text", label: "Emergency Contact Name", icon: Type },
+                            { id: Date.now() + 4, type: "Phone", label: "Emergency Contact Phone", icon: Phone }
+                        ] : [],
+                        ...text.includes("hipaa") || text.includes("consent") ? [
+                            { id: Date.now() + 5, type: "Checkbox", label: "I acknowledge receipt of HIPAA Notice of Privacy Practices", icon: ListChecks },
+                            { id: Date.now() + 6, type: "Signature", label: "Patient Signature", icon: Edit3 }
+                        ] : [
+                            { id: Date.now() + 7, type: "Textarea", label: "Reason for Visit", icon: AlignLeft }
+                        ]
+                    ];
+                }
+
+                setFields(newFields);
+                setIsGenerating(false);
+                setPromptText("");
+            }, 1200);
+        }
+    };
+
+    const templates = [
+        { name: "New Patient Intake (Current)", fields: 24, submissions: 142 },
+        { name: "Medical History Update", fields: 18, submissions: 89 },
+        { name: "HIPAA Privacy Consent", fields: 6, submissions: 210 },
+    ];
+
+    const palette = [
+        { type: "Text", icon: Type }, { type: "Number", icon: Hash }, { type: "Date", icon: CalendarDays },
+        { type: "Email", icon: Mail }, { type: "Phone", icon: Phone }, { type: "Textarea", icon: AlignLeft },
+        { type: "Checkbox", icon: ListChecks }, { type: "Radio", icon: CircleDot }, { type: "Signature", icon: Edit3 }
+    ];
+
+    return (
+        <div style={{ padding: "20px 40px" }}>
+            <TopGreetingUI2 currentUI={currentUI} setUI={setUI} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} subtitle="Build and review patient intake forms." />
+            <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                    <div>
+                        <h2 style={{ fontSize: 24, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0 }}>Patient Forms</h2>
+                        <div style={{ fontSize: 14, color: GEO_TEXT_MUTED, marginTop: 4 }}>Drag and drop builder for digital patient intake</div>
+                    </div>
+                    <div style={{ display: "flex", background: GEO_BG, borderRadius: GEO_PILL, padding: 4, boxShadow: "inset 0 2px 4px rgba(0,0,0,0.02)" }}>
+                        <button onClick={() => togglePreviewMode(false)} style={{ padding: "10px 24px", borderRadius: GEO_PILL, border: "none", background: !previewMode ? GEO_WHITE : "transparent", color: !previewMode ? GEO_BLACK : GEO_TEXT_MUTED, fontSize: 13, fontWeight: 600, cursor: "pointer", boxShadow: !previewMode ? "0 2px 8px rgba(0,0,0,0.05)" : "none", transition: "all 0.2s" }}>Editor</button>
+                        <button onClick={() => togglePreviewMode(true)} style={{ padding: "10px 24px", borderRadius: GEO_PILL, border: "none", background: previewMode ? GEO_BLACK : "transparent", color: previewMode ? GEO_WHITE : GEO_TEXT_MUTED, fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>Preview</button>
+                    </div>
+                </div>
+
+                <div className="stack-on-mobile" style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
+                    {/* Left: Templates */}
+                    <div className="full-width-mobile" style={{ width: 280, display: "flex", flexDirection: "column", gap: 16 }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: GEO_TEXT_MAIN, paddingLeft: 8 }}>Library</div>
+                        {templates.map((t, i) => (
+                            <div key={i} style={{ background: GEO_WHITE, borderRadius: 16, padding: 16, border: `1px solid #E5E7EB`, cursor: "pointer", borderLeft: i === 0 ? `4px solid ${GEO_BLACK}` : `1px solid #E5E7EB`, boxShadow: i === 0 ? "0 4px 12px rgba(0,0,0,0.02)" : "none" }}>
+                                <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN, marginBottom: 8 }}>{t.name}</div>
+                                <div style={{ fontSize: 12, color: GEO_TEXT_MUTED, display: "flex", justifyContent: "space-between", fontWeight: 500 }}>
+                                    <span>{t.fields} fields</span>
+                                    <span>{t.submissions} submissions</span>
+                                </div>
+                            </div>
+                        ))}
+                        <button style={{ padding: "14px", borderRadius: 16, border: `2px dashed #E5E7EB`, background: "transparent", color: GEO_TEXT_MAIN, fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}><Plus size={16} /> New Blank Form</button>
+                    </div>
+
+                    {/* Center: Canvas */}
+                    <div
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={handleCanvasDrop}
+                        onDragLeave={() => setActiveDropIndex(null)}
+                        style={{ flex: 1, background: GEO_WHITE, borderRadius: 16, padding: 40, border: `1px solid #E5E7EB`, minHeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}
+                    >
+                        <div style={{ background: GEO_WHITE, padding: "8px 20px", borderRadius: GEO_PILL, marginBottom: 32, display: "flex", alignItems: "center", gap: 12, border: "2px solid #EA580C", transition: "all 0.2s", opacity: isGenerating ? 0.7 : 1, boxShadow: "0 4px 12px rgba(234, 88, 12, 0.15)" }}>
+                            {isGenerating ? <Loader2 size={20} color="#EA580C" className="spin" /> : <Sparkles size={20} color="#EA580C" />}
+                            <input
+                                type="text"
+                                value={promptText}
+                                onChange={e => setPromptText(e.target.value)}
+                                onKeyDown={handleAIGenerate}
+                                disabled={isGenerating}
+                                placeholder="Describe your form in plain English and AI will auto-build it! (Press Enter)"
+                                style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: 15, color: GEO_TEXT_MAIN, fontWeight: 600, width: "100%", padding: "12px 0" }}
+                            />
+                        </div>
+
+                        <h1 style={{ fontSize: 26, fontWeight: 700, color: GEO_TEXT_MAIN, textAlign: "center", marginBottom: 32 }}>New Patient Intake</h1>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                            {isGenerating && <div style={{ textAlign: "center", padding: 40, color: GEO_TEXT_MUTED }}><Loader2 size={32} className="spin" style={{ marginBottom: 16 }} /><div>AI is generating form fields...</div></div>}
+
+                            {!isGenerating && !previewMode && (
+                                <div
+                                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); dragOverItem.current = 0; setActiveDropIndex(0); }}
+                                    style={{
+                                        height: activeDropIndex === 0 ? 44 : 8,
+                                        width: "100%",
+                                        borderRadius: 12,
+                                        border: activeDropIndex === 0 ? "2px dashed #EA580C" : "1px solid transparent",
+                                        background: activeDropIndex === 0 ? "#FFF5F0" : "transparent",
+                                        transition: "all 0.2s",
+                                        marginBottom: activeDropIndex === 0 ? 8 : 0
+                                    }}
+                                />
+                            )}
+                            {!isGenerating && fields.map((field, index) => (
+                                !previewMode ? (
+                                    <React.Fragment key={field.id}>
+                                        <div
+                                            draggable
+                                            onDragStart={(e) => { dragItem.current = index; e.dataTransfer.effectAllowed = "move"; }}
+                                            onDragEnd={handleSort}
+                                            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); dragOverItem.current = index; setActiveDropIndex(index); }}
+                                            style={{ display: "flex", alignItems: "center", gap: 16, padding: "12px 16px", border: `1px solid #E5E7EB`, borderRadius: 12, background: GEO_BG, cursor: "grab", transition: "transform 0.1s", position: "relative", opacity: dragItem.current === index ? 0.4 : 1 }}
+                                        >
+                                            <GripVertical size={16} color={GEO_TEXT_MUTED} style={{ cursor: "grab" }} />
+                                            <div style={{ width: 40, height: 40, background: GEO_WHITE, borderRadius: 12, border: `1px solid #E5E7EB`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
+                                                <field.icon size={18} color={GEO_TEXT_MAIN} />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                {editingFieldId === field.id ? (
+                                                    <input
+                                                        type="text"
+                                                        value={field.label}
+                                                        onChange={e => handleUpdateLabel(field.id, e.target.value)}
+                                                        onBlur={() => setEditingFieldId(null)}
+                                                        onKeyDown={e => e.key === 'Enter' && setEditingFieldId(null)}
+                                                        autoFocus
+                                                        style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN, marginBottom: 2, width: "100%", padding: "4px 8px", border: `1px solid #E5E7EB`, borderRadius: 6, outline: "none" }}
+                                                    />
+                                                ) : (
+                                                    <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN, marginBottom: 2 }}>{field.label}</div>
+                                                )}
+                                                <div style={{ fontSize: 12, color: GEO_TEXT_MUTED, fontWeight: 500 }}>{field.type} Field</div>
+                                            </div>
+                                            <div className="stack-on-mobile" style={{ display: "flex", gap: 12 }}>
+                                                <button onClick={() => setEditingFieldId(field.id)} style={{ background: "none", border: "none", cursor: "pointer", color: GEO_TEXT_MUTED }}><Edit3 size={18} /></button>
+                                                <button onClick={() => handleDeleteField(field.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "#EF4444" }}><Trash2 size={18} /></button>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); dragOverItem.current = index + 1; setActiveDropIndex(index + 1); }}
+                                            style={{
+                                                height: activeDropIndex === index + 1 ? 44 : 8,
+                                                width: "100%",
+                                                borderRadius: 12,
+                                                border: activeDropIndex === index + 1 ? "2px dashed #EA580C" : "1px solid transparent",
+                                                background: activeDropIndex === index + 1 ? "#FFF5F0" : "transparent",
+                                                transition: "all 0.2s",
+                                                marginTop: activeDropIndex === index + 1 ? 8 : 0,
+                                                marginBottom: activeDropIndex === index + 1 ? 8 : 0
+                                            }}
+                                        />
+                                    </React.Fragment>
+                                ) : (
+                                    <div key={field.id} style={{ marginBottom: 20 }}>
+                                        <label style={{ display: "block", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN, marginBottom: 8 }}>{field.label}</label>
+                                        {field.type === "Textarea" ? (
+                                            <textarea rows={3} style={{ width: "100%", padding: "14px", borderRadius: 12, border: `1px solid #E5E7EB`, boxSizing: "border-box", background: GEO_BG, fontSize: 15, outline: "none" }} />
+                                        ) : field.type === "Checkbox" ? (
+                                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}><input type="checkbox" style={{ width: 18, height: 18 }} /> <span style={{ fontSize: 15, color: GEO_TEXT_MAIN, fontWeight: 500 }}>Yes, I confirm</span></div>
+                                        ) : (
+                                            <input type="text" placeholder={`Enter ${field.label.toLowerCase()}...`} style={{ width: "100%", padding: "14px", borderRadius: 12, border: `1px solid #E5E7EB`, boxSizing: "border-box", background: GEO_BG, fontSize: 15, outline: "none" }} />
+                                        )}
+                                    </div>
+                                )
+                            ))}
+                        </div>
+
+                        {previewMode && (
+                            <button style={{ width: "100%", marginTop: 32, padding: "16px", borderRadius: GEO_PILL, border: "none", background: GEO_BLACK, color: GEO_WHITE, fontSize: 15, fontWeight: 600, cursor: "pointer" }}>Submit Intake Form</button>
+                        )}
+                    </div>
+
+                    {/* Right: Palette */}
+                    {!previewMode && (
+                        <div className="full-width-mobile" style={{ width: 280, background: GEO_WHITE, borderRadius: 16, padding: 24, border: `1px solid #E5E7EB`, boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
+                            <div style={{ fontSize: 14, fontWeight: 700, color: GEO_TEXT_MAIN, marginBottom: 16 }}>Form Elements</div>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                {palette.map(p => (
+                                    <div
+                                        key={p.type}
+                                        draggable
+                                        onDragStart={() => setDraggedPaletteItem(p)}
+                                        onDragEnd={() => { setDraggedPaletteItem(null); dragOverItem.current = null; }}
+                                        onClick={() => handleAddField(p.type, p.icon)}
+                                        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "16px 8px", background: GEO_BG, border: `1px solid transparent`, borderRadius: 12, cursor: "grab", transition: "all 0.2s" }}
+                                        onMouseOver={e => e.currentTarget.style.borderColor = GEO_TEXT_MUTED}
+                                        onMouseOut={e => e.currentTarget.style.borderColor = "transparent"}
+                                    >
+                                        <p.icon size={22} color={GEO_TEXT_MAIN} />
+                                        <span style={{ fontSize: 12, fontWeight: 600, color: GEO_TEXT_MAIN }}>{p.type}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function SettingsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+    const [activeTab, setActiveTab] = useState(() => {
+        const path = window.location.pathname.replace(/^\//, '');
+        const parts = path.split('/');
+        if (parts.length > 1 && parts[0] === 'settings') {
+            const tabsList = ["practice", "users", "audit", "notifications", "billing"];
+            return tabsList.includes(parts[1]) ? parts[1] : "practice";
+        }
+        return "practice";
+    });
+
+    useEffect(() => {
+        const handlePopState = () => {
+            const path = window.location.pathname.replace(/^\//, '');
+            const parts = path.split('/');
+            if (parts.length > 1 && parts[0] === 'settings') {
+                const tabsList = ["practice", "users", "audit", "notifications", "billing"];
+                if (tabsList.includes(parts[1])) setActiveTab(parts[1]);
+            } else if (parts.length === 1 && parts[0] === 'settings') {
+                setActiveTab("practice");
+            }
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    const handleTabClick = (tabId) => {
+        setActiveTab(tabId);
+        window.history.pushState(null, '', `/settings/${tabId}`);
+    };
+
+    const tabs = [
+        { id: "practice", label: "Practice Info", icon: "🏥" },
+        { id: "users", label: "Users & Roles", icon: "👥" },
+        { id: "audit", label: "HIPAA Audit Log", icon: "📋" },
+        { id: "notifications", label: "Notifications", icon: "🔔" },
+        { id: "billing", label: "Billing Prefs", icon: "💳" }
+    ];
+
+    return (
+        <div style={{ padding: "20px 40px", height: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+            <TopGreetingUI2 currentUI={currentUI} setUI={setUI} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} subtitle="Manage practice preferences and configurations." />
+
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24, marginBottom: 32 }}>
+                <h2 style={{ fontSize: 24, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>System Settings</h2>
+            </div>
+
+            <div style={{ display: "flex", gap: 32, flex: 1 }}>
+                <div style={{ width: 240, display: "flex", flexDirection: "column", gap: 8 }}>
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => handleTabClick(tab.id)}
+                            style={{
+                                display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "14px 20px",
+                                borderRadius: 16, border: "none", cursor: "pointer", textAlign: "left",
+                                background: activeTab === tab.id ? GEO_BLACK : "transparent",
+                                color: activeTab === tab.id ? GEO_WHITE : GEO_TEXT_MAIN,
+                                fontWeight: 600, fontSize: 15, transition: "all 0.2s"
+                            }}
+                            onMouseOver={e => { if (activeTab !== tab.id) e.currentTarget.style.background = "#F4F5F7" }}
+                            onMouseOut={e => { if (activeTab !== tab.id) e.currentTarget.style.background = "transparent" }}
+                        >
+                            <span style={{ fontSize: 20 }}>{tab.icon}</span>
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+
+                <div style={{ flex: 1, background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 40, boxShadow: GEO_SHADOW }}>
+                    {activeTab === "practice" && (
+                        <div>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 32px 0" }}>Practice Information</h3>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+                                <div>
+                                    <label style={{ display: "block", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, marginBottom: 8 }}>Practice Name</label>
+                                    <input type="text" defaultValue="Intelident Dental Associates" style={{ width: "100%", padding: 14, borderRadius: 12, border: `1px solid #E5E7EB`, fontSize: 15, color: GEO_TEXT_MAIN, background: "#F9FAFB", outline: "none", boxSizing: "border-box" }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: "block", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, marginBottom: 8 }}>Tax ID (TIN)</label>
+                                    <input type="text" defaultValue="XX-XXXX420" style={{ width: "100%", padding: 14, borderRadius: 12, border: `1px solid #E5E7EB`, fontSize: 15, color: GEO_TEXT_MAIN, background: "#F9FAFB", outline: "none", boxSizing: "border-box" }} />
+                                </div>
+                                <div style={{ gridColumn: "span 2" }}>
+                                    <label style={{ display: "block", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, marginBottom: 8 }}>Primary Address</label>
+                                    <input type="text" defaultValue="420 Smile Avenue, Suite 100, Beverly Hills, CA 90210" style={{ width: "100%", padding: 14, borderRadius: 12, border: `1px solid #E5E7EB`, fontSize: 15, color: GEO_TEXT_MAIN, background: "#F9FAFB", outline: "none", boxSizing: "border-box" }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: "block", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, marginBottom: 8 }}>Phone Number</label>
+                                    <input type="text" defaultValue="(555) 123-4567" style={{ width: "100%", padding: 14, borderRadius: 12, border: `1px solid #E5E7EB`, fontSize: 15, color: GEO_TEXT_MAIN, background: "#F9FAFB", outline: "none", boxSizing: "border-box" }} />
+                                </div>
+                            </div>
+                            <button style={{ marginTop: 32, padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: GEO_GREEN, color: GEO_WHITE, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 4px 12px rgba(0, 182, 122, 0.2)" }}>Save Changes</button>
+                        </div>
+                    )}
+
+                    {activeTab === "users" && (
+                        <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+                                <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>Users & Roles</h3>
+                                <button style={{ padding: "10px 20px", borderRadius: GEO_PILL, border: "none", background: GEO_BLACK, color: GEO_WHITE, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>+ Add User</button>
+                            </div>
+                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                                <thead>
+                                    <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Name</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Role</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Status</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Last Login</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style={{ borderBottom: `1px solid #F4F5F7` }}>
+                                        <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>Dr. Alexandru Cifor</td>
+                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>Administrator</td>
+                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_GREEN, fontWeight: 600 }}>Active</td>
+                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>Just now</td>
+                                    </tr>
+                                    <tr style={{ borderBottom: `1px solid #F4F5F7` }}>
+                                        <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>Sarah Jenkins</td>
+                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>Front Desk Mgr</td>
+                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_GREEN, fontWeight: 600 }}>Active</td>
+                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>2 hours ago</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {activeTab === "audit" && (
+                        <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+                                <div>
+                                    <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>HIPAA Audit Log</h3>
+                                    <div style={{ fontSize: 14, color: GEO_TEXT_MUTED, marginTop: 4 }}>Immutable record of PHI access</div>
+                                </div>
+                                <button style={{ padding: "10px 20px", borderRadius: GEO_PILL, border: `1px solid #E5E7EB`, background: GEO_WHITE, color: GEO_TEXT_MAIN, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Export CSV</button>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                                <div style={{ display: "flex", gap: 16, alignItems: "center", padding: 16, border: `1px solid #E5E7EB`, borderRadius: 12 }}>
+                                    <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, fontFamily: "monospace" }}>Oct 25 10:42:01</div>
+                                    <div style={{ padding: "4px 10px", background: "#E8F5E9", color: GEO_GREEN, borderRadius: 6, fontSize: 12, fontWeight: 700 }}>READ</div>
+                                    <div style={{ fontSize: 14, color: GEO_TEXT_MAIN }}>Dr. Cifor accessed chart for patient <span style={{ fontWeight: 600 }}>Emma Watson</span></div>
+                                </div>
+                                <div style={{ display: "flex", gap: 16, alignItems: "center", padding: 16, border: `1px solid #E5E7EB`, borderRadius: 12 }}>
+                                    <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, fontFamily: "monospace" }}>Oct 25 09:15:33</div>
+                                    <div style={{ padding: "4px 10px", background: "#E3F2FD", color: "#007AFF", borderRadius: 6, fontSize: 12, fontWeight: 700 }}>UPDATE</div>
+                                    <div style={{ fontSize: 14, color: GEO_TEXT_MAIN }}>System processed 835 ERA response for <span style={{ fontWeight: 600 }}>Michael Ross</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === "notifications" && (
+                        <div>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 32px 0" }}>Notification Preferences</h3>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 24, borderBottom: `1px solid #F4F5F7` }}>
+                                    <div>
+                                        <div style={{ fontSize: 16, fontWeight: 600, color: GEO_TEXT_MAIN }}>New End-of-Day Insights</div>
+                                        <div style={{ fontSize: 14, color: GEO_TEXT_MUTED, marginTop: 4 }}>Receive AI summary of daily production when practice closes.</div>
+                                    </div>
+                                    <div style={{ width: 44, height: 24, borderRadius: 12, background: GEO_GREEN, position: "relative", cursor: "pointer" }}>
+                                        <div style={{ width: 20, height: 20, borderRadius: 10, background: GEO_WHITE, position: "absolute", top: 2, right: 2, boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }} />
+                                    </div>
+                                </div>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 24, borderBottom: `1px solid #F4F5F7` }}>
+                                    <div>
+                                        <div style={{ fontSize: 16, fontWeight: 600, color: GEO_TEXT_MAIN }}>Urgent Claim Denials</div>
+                                        <div style={{ fontSize: 14, color: GEO_TEXT_MUTED, marginTop: 4 }}>Instant push notification when high-value ($500+) claim is denied.</div>
+                                    </div>
+                                    <div style={{ width: 44, height: 24, borderRadius: 12, background: GEO_GREEN, position: "relative", cursor: "pointer" }}>
+                                        <div style={{ width: 20, height: 20, borderRadius: 10, background: GEO_WHITE, position: "absolute", top: 2, right: 2, boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === "billing" && (
+                        <div>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 32px 0" }}>Billing Preferences</h3>
+                            <div style={{ background: "#F9FAFB", padding: 24, borderRadius: 16, border: `1px solid #E5E7EB`, marginBottom: 32 }}>
+                                <div style={{ fontSize: 14, fontWeight: 700, color: GEO_TEXT_MAIN, textTransform: "uppercase", marginBottom: 16 }}>Clearinghouse Integration</div>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                                        <div style={{ width: 40, height: 40, borderRadius: 8, background: GEO_WHITE, border: `1px solid #E5E7EB`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>🏥</div>
+                                        <div>
+                                            <div style={{ fontSize: 16, fontWeight: 600, color: GEO_TEXT_MAIN }}>Change Healthcare</div>
+                                            <div style={{ fontSize: 13, color: GEO_GREEN, fontWeight: 600, marginTop: 4 }}>Connected API</div>
+                                        </div>
+                                    </div>
+                                    <button style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: `1px solid #E5E7EB`, background: GEO_WHITE, color: GEO_TEXT_MAIN, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Configure</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function IntegrationsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+    const APPS = [
+        { name: "Dexis Imaging", cat: "Imaging", status: "connected", icon: "🔬", desc: "Intraoral sensors and panoramic imaging" },
+        { name: "Carestream", cat: "Imaging", status: "connected", icon: "📷", desc: "CBCT and 2D imaging systems" },
+    ];
+
+    const AVAIL = [
+        { name: "Google Business", cat: "Marketing", status: "available", icon: "⭐", desc: "Review management and booking" },
+        { name: "Pearl AI", cat: "AI/Imaging", status: "available", icon: "🧠", desc: "Second-opinion pathology detection" },
+    ];
+
+    return (
+        <div style={{ padding: "20px 40px" }}>
+            <TopGreetingUI2 currentUI={currentUI} setUI={setUI} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} subtitle="Connect with third-party dental software." />
+            <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+                    <div>
+                        <h2 style={{ fontSize: 24, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0 }}>Integrations & API</h2>
+                        <p style={{ color: GEO_TEXT_MUTED, margin: "4px 0 0 0", fontSize: 14 }}>Connect Intelident to your existing practice software</p>
+                    </div>
+                </div>
+
+                <div style={{ background: GEO_BG, borderRadius: 16, padding: 24, border: `1px solid #E5E7EB`, marginBottom: 32 }}>
+                    <h3 style={{ fontSize: 18, fontWeight: 600, color: GEO_TEXT_MAIN, margin: "0 0 16px 0" }}>Developer API Key</h3>
+                    <div className="stack-on-mobile" style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                        <div className="full-width-mobile" style={{ flex: 1, background: GEO_WHITE, padding: "16px 20px", borderRadius: 12, border: `1px solid #E5E7EB`, fontFamily: "monospace", fontSize: 15, color: GEO_TEXT_MAIN, letterSpacing: 1, fontWeight: 500, boxShadow: "inset 0 2px 4px rgba(0,0,0,0.02)", wordBreak: "break-all" }}>
+                            sk_live_intl_******************************q9P
+                        </div>
+                        <button style={{ padding: "16px 28px", borderRadius: GEO_PILL, border: `1px solid #E5E7EB`, background: GEO_WHITE, fontWeight: 600, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}><Copy size={18} /> Copy</button>
+                    </div>
+                </div>
+
+                <div className="stack-grid-mobile" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+                    <div style={{ background: GEO_WHITE, borderRadius: 16, padding: 24, border: `1px solid #E5E7EB`, boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 600, color: GEO_TEXT_MAIN, margin: "0 0 20px 0" }}>Connected Integrations</h3>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                            {APPS.map((app, i) => (
+                                <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, paddingBottom: 16, borderBottom: i < APPS.length - 1 ? `1px solid #F3F4F6` : "none" }}>
+                                    <div style={{ width: 48, height: 48, borderRadius: 12, background: GEO_BG, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>
+                                        {app.icon}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                                            <span style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{app.name}</span>
+                                            <span style={{ background: GEO_BG, color: GEO_TEXT_MUTED, fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 6, textTransform: "uppercase" }}>{app.cat}</span>
+                                        </div>
+                                        <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, fontWeight: 500 }}>{app.desc}</div>
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: GEO_GREEN }}>
+                                        <CheckCircle size={16} /> Connected
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div style={{ background: GEO_WHITE, borderRadius: 16, padding: 24, border: `1px solid #E5E7EB`, boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 600, color: GEO_TEXT_MAIN, margin: "0 0 20px 0" }}>Available Add-ons</h3>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                            {AVAIL.map((app, i) => (
+                                <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, paddingBottom: 16, borderBottom: i < AVAIL.length - 1 ? `1px solid #F3F4F6` : "none" }}>
+                                    <div style={{ width: 48, height: 48, borderRadius: 12, background: GEO_BG, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>

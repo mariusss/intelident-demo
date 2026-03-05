@@ -1,0 +1,359 @@
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* =======================================
+   MOBILE RESPONSIVE UTILITIES 
+   ======================================= */
+@media screen and (max-width: 768px) {
+  .show-on-mobile {
+    display: flex !important;
+  }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  .show-on-mobile-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  /* Layout Flow */
+  .stack-on-mobile {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .stack-grid-mobile {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .full-width-mobile {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .grid-stack-on-mobile {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mobile-avatar-wrap {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  /* Global Container Limits */
+  * {
+    max-width: 100vw !important;
+    word-wrap: break-word !important;
+    box-sizing: border-box !important;
+  }
+
+  html,
+  body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    position: relative;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Spacing */
+  .mobile-padding {
+    padding: 20px 16px !important;
+  }
+
+  .mobile-margin-bottom {
+    margin-bottom: 16px !important;
+  }
+
+  .mobile-no-padding-main {
+    padding: 24px 16px !important;
+  }
+
+  /* Ultra-tight Patient Hero Container override */
+  .patient-hero-container {
+    padding: 16px 16px 0px 16px !important;
+  }
+
+  /* Custom Tab Container Scroll Fix */
+  .mobile-tab-scroll-container {
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Make sure the scroll buttons touch the screen edge */
+  .mobile-tab-scroll-container>div {
+    border-radius: 0px !important;
+  }
+
+  .mobile-no-padding-card {
+    padding: 24px !important;
+    border-radius: 20px !important;
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.03) !important;
+  }
+
+  /* Tables & Horizontal Scroll */
+  .table-scroll-mobile {
+    overflow-x: auto !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: calc(100vw - 32px) !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    /* Room for scrollbar */
+  }
+
+  /* Visibility Toggles */
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  .show-on-mobile {
+    display: block !important;
+  }
+
+  /* Typography Adjustments */
+  .title-mobile {
+    font-size: 24px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Sidebar Native Overrides */
+  .sidebar-mobile {
+    position: fixed !important;
+    right: -280px !important;
+    left: auto !important;
+    top: 0 !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    padding: 30px 20px !important;
+    transition: right 0.3s ease-in-out !important;
+    z-index: 1000 !important;
+    width: 280px !important;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .sidebar-mobile.open {
+    right: 0 !important;
+    left: auto !important;
+  }
+
+  /* Main Content Adjustments */
+  .main-content-mobile {
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    padding: 24px 16px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Overrides for specific fixed width elements inside flex/grid */
+  .main-content-mobile>div,
+  .stack-on-mobile>div {
+    min-width: 0 !important;
+    /* Forces flex child to shrink below intrinsic width */
+    max-width: 100% !important;
+    width: 100% !important;
+    flex-basis: 100% !important;
+    /* Viewport minus padding */
+    box-sizing: border-box !important;
+    margin-bottom: 24px !important;
+  }
+
+  /* Disable horizontal flex layouts entirely inside stack containers on mobile */
+  .stack-on-mobile {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+  }
+
+  /* 
+   * Patient Hero Mobile Overrides - "De-Boxed" Ultra-Tight Design 
+   */
+  .hero-contact-row {
+    flex-direction: column !important;
+    gap: 4px !important;
+    margin-top: 12px !important;
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
+  }
+
+  .hero-provider-row {
+    margin-top: 12px !important;
+    gap: 16px !important;
+    /* Force side-by-side on mobile */
+  }
+
+  .hero-provider-card {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    flex: 1;
+    /* ensure columns split evenly */
+  }
+
+  .hero-provider-label {
+    font-size: 10px !important;
+  }
+
+  .hero-provider-value {
+    font-size: 13px !important;
+  }
+
+  .hero-avatar-img {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  .hero-name-row {
+    font-size: 22px !important;
+  }
+
+  .hero-contact-item {
+    font-size: 13px !important;
+  }
+
+  .hero-contact-item svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+}
+
+/* 
+ * Patient Hero Desktop Baseline Styles 
+ */
+.hero-contact-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: #545963 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.hero-avatar-img {
+  width: 80px !important;
+  height: 80px !important;
+  border-radius: 40px !important;
+}
+
+.hero-name-row {
+  font-size: 26px !important;
+}
+
+.hero-contact-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.hero-provider-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.hero-provider-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  border: 1px solid #E5E7EB;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.hero-provider-label {
+  font-size: 12px;
+  color: #8A8D93;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.hero-provider-value {
+  font-size: 15px;
+  color: #1C1E23;
+  font-weight: 700;
+}
+
+/* 
+ * Custom Premium Tooltips 
+ */
+.geo-tooltip-container {
+  position: relative;
+}
+
+.geo-tooltip-container::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: #1C1E23;
+  color: #FFFFFF;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: normal;
+  width: max-content;
+  max-width: 280px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.geo-tooltip-container::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #1C1E23 transparent transparent transparent;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.geo-tooltip-container:hover::after,
+.geo-tooltip-container:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-8px);
+}

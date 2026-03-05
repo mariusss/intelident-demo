@@ -1,0 +1,1000 @@
+                                        {app.icon}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN, marginBottom: 4 }}>{app.name}</div>
+                                        <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, fontWeight: 500 }}>{app.desc}</div>
+                                    </div>
+                                    <button style={{ padding: "8px 20px", borderRadius: GEO_PILL, border: `1px solid #E5E7EB`, background: GEO_WHITE, fontSize: 13, fontWeight: 600, cursor: "pointer", color: GEO_TEXT_MAIN, boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>Connect</button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
+
+export function PatientDetailPageUI2({ patient, onBack, currentUI, setUI, TIMELINE_EVENTS, MEDICAL_HISTORY, isMobileMenuOpen, setIsMobileMenuOpen }) {
+    const tabs = ["Timeline", "Medical History", "Treatment Plan", "Imaging & X-Rays", "Intake Forms", "Documents", "Insurance"];
+
+    const defaultExplanation = `Hi ${patient.name.split(' ')[0]}! Dr. Cifor wanted me to follow up regarding the porcelain crown we discussed for tooth 19. Getting this taken care of soon will prevent further decay and the need for a more painful (and costly!) root canal later on.\n\nWe have automatically verified your Delta Dental PPO benefits. Great news! They cover 50% of major restorative work.\n\nYour estimated out-of-pocket: $675.00\n\nWould you like to break this into 4 easy monthly payments of $168.75 using our financing partner?`;
+
+    const [explanationGenerating, setExplanationGenerating] = React.useState(false);
+    const [explanationText, setExplanationText] = React.useState(defaultExplanation);
+    const [editPromptOpen, setEditPromptOpen] = React.useState(false);
+    const [customPrompt, setCustomPrompt] = React.useState("Make the tone more empathetic and emphasize the clinical urgency to prevent root canal. Include the $168.75 monthly payment option.");
+
+    const handleRegenerateExplanation = () => {
+        setExplanationGenerating(true);
+        setEditPromptOpen(false);
+        const draft = `Hello ${patient.name.split(' ')[0]}, this is Dr. Cifor's AI assistant. Based on your updated clinical notes, taking care of the porcelain crown on tooth 19 is becoming urgent to avoid a root canal.\n\nYour insurance will cover 50%, leaving a $675.00 out-of-pocket estimate.\n\nTo make this easier, we can offer 4 monthly payments of $168.75. Would you like me to send you the secure payment plan link?`;
+
+        let i = 0;
+        setExplanationText("");
+        const interval = setInterval(() => {
+            i++;
+            setExplanationText(draft.substring(0, i));
+            if (i >= draft.length) {
+                clearInterval(interval);
+                setExplanationGenerating(false);
+            }
+        }, 15);
+    };
+
+    const [activeTab, setActiveTab] = React.useState(() => {
+        const path = window.location.pathname.replace(/^\//, '');
+        const parts = path.split('/');
+        if (parts.length > 2 && parts[0] === 'patients') {
+            const decodedTab = decodeURIComponent(parts[2]).replace(/-/g, ' ');
+            const resolvedTab = tabs.find(t => t.toLowerCase() === decodedTab.toLowerCase());
+            return resolvedTab || "Timeline";
+        }
+        return "Timeline";
+    });
+
+    useEffect(() => {
+        const handlePopState = () => {
+            const path = window.location.pathname.replace(/^\//, '');
+            const parts = path.split('/');
+            if (parts.length > 2 && parts[0] === 'patients') {
+                const decodedTab = decodeURIComponent(parts[2]).replace(/-/g, ' ');
+                const resolvedTab = tabs.find(t => t.toLowerCase() === decodedTab.toLowerCase());
+                if (resolvedTab) setActiveTab(resolvedTab);
+            } else if (parts.length === 2 && parts[0] === 'patients') {
+                setActiveTab("Timeline");
+            }
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    const handleTabClick = (tabName) => {
+        setActiveTab(tabName);
+        const nameSlug = patient.name.replace(/\s+/g, '-');
+        const urlSafeTab = encodeURIComponent(tabName.toLowerCase().replace(/\s+/g, '-'));
+        window.history.pushState(null, '', `/patients/${nameSlug}/${urlSafeTab}`);
+    };
+
+    const [xrayFullscreen, setXrayFullscreen] = React.useState(null);
+
+    // Default mock data
+    const safeTimeline = TIMELINE_EVENTS || [
+        { date: "Oct 12, 2025", title: "Prophylaxis & Exam", provider: "Dr. Cifor / RDH Martinez", notes: "Routine cleaning completed. Patient reports mild sensitivity on upper right.", codes: ["D0120", "D1110"] }
+    ];
+
+    const safeMedHistory = MEDICAL_HISTORY || {
+        vitals: { bp: "120/80", pulse: "72 bpm", weight: "165 lbs", height: "5'10\"" },
+        conditions: [{ name: "Mild Hypertension", status: "Active", since: "2021", notes: "Controlled with medication" }],
+        medications: [{ name: "Lisinopril 10mg", frequency: "Daily", purpose: "Blood pressure", prescriber: "PCP" }],
+        family: "Father had cardiovascular disease.", social: "Social drinker, non-smoker.", surgeries: ["Appendectomy (2015)"]
+    };
+
+    const XRAYS = [
+        {
+            id: 1,
+            title: "Panoramic Radiograph (Panorex)",
+            date: "September 12, 2025",
+            type: "2D Imaging",
+            imageUrl: "https://upload.wikimedia.org/wikipedia/commons/9/97/PAN_TEETH.jpg",
+            notes: "Dr. Cifor: Impacted third molars (#1, 16, 17, 32) present. Mesioangular impaction on lower right (#32) approaching the mandibular nerve. Discussed extraction risks vs monitoring with patient. Will re-evaluate at next hygiene visit. Otherwise, bone levels appear stable across both arches."
+        },
+        {
+            id: 2,
+            title: "Bilateral Bitewings (4 Films)",
+            date: "March 04, 2025",
+            type: "Intraoral X-Ray",
+            imageUrl: "https://upload.wikimedia.org/wikipedia/commons/9/95/ZELLFAZE_MN01_MP08_010.JPG",
+            notes: "Dr. Cifor: Slight decalcification on #14 mesial, but does not penetrate the DEJ. No active carious lesions detected interproximally. Recommend fluoride varnish application today and monitor. Margins on existing restorations #3 and #19 remain intact."
+        }
+    ];
+
+    const FORMS = [
+        {
+            id: "f1", title: "New Patient Registration", date: "Jan 10, 2024", status: "Signed",
+            preview: [{ label: "Full Legal Name", value: patient.name }, { label: "Date of Birth", value: patient.dob }, { label: "Phone Number", value: patient.phone }, { label: "Emergency Contact", value: "Spouse - (555) 998-1122" }]
+        },
+        {
+            id: "f2", title: "HIPAA Privacy Notice & Consent", date: "Jan 10, 2024", status: "Signed",
+            preview: [{ label: "Notice Acknowledged", value: "Yes" }, { label: "Authorized Release", value: "Spouse" }, { label: "Contact Preference", value: "Text Message & Email" }, { label: "Signature", value: "[Electronically Signed via iPad]" }]
+        },
+        {
+            id: "f3", title: "Medical History Update 2025", date: "Sep 12, 2025", status: "Signed",
+            preview: [{ label: "Changes to Health?", value: "No" }, { label: "Current Medications", value: safeMedHistory.medications.map(m => m.name).join(", ") }, { label: "Allergies", value: patient.allergies ? patient.allergies.join(", ") : "None reported" }, { label: "Blood Pressure (Self Reported)", value: "Normal / Controlled" }]
+        }
+    ];
+
+    const DOCUMENTS = [
+        { id: 1, name: "New Patient Intake Form", format: "PDF", date: "2025-09-10", size: "245 KB", category: "Forms" },
+        { id: 2, name: "HIPAA Consent Form", format: "PDF", date: "2025-09-10", size: "120 KB", category: "Consent" },
+        { id: 3, name: "Panoramic X-Ray", format: "DICOM", date: "2025-09-10", size: "8.2 MB", category: "Imaging" },
+        { id: 4, name: "BWX Series", format: "DICOM", date: "2026-02-28", size: "12.4 MB", category: "Imaging" },
+    ];
+
+    const MOCK_TREATMENT_PLAN = [
+        { id: "tx1", code: "D2740", description: "Crown - Porcelain/Ceramic (#19)", tooth: "19", fee: "$1,250", insEst: "$625", patEst: "$625", status: "Proposed" },
+        { id: "tx2", code: "D2950", description: "Core Buildup, Including Any Pins", tooth: "19", fee: "$250", insEst: "$200", patEst: "$50", status: "Proposed" },
+        { id: "tx3", code: "D1110", description: "Prophylaxis - Adult", tooth: "All", fee: "$110", insEst: "$110", patEst: "$0", status: "Accepted" }
+    ];
+
+    const MOCK_INSURANCE = {
+        primary: { payer: patient.insurance || "Delta Dental PPO", group: "482093B", subId: "W0938481A", max: "$2,000", used: "$450", remaining: "$1,550", ded: "$50", dedMet: "Yes", renewal: "Jan 1" },
+        dependents: [{ name: "Emma Chen", relation: "Child", dob: "2015-04-12" }]
+    };
+
+    return (
+        <div className="patient-hero-container" style={{ padding: "16px 40px" }}>
+            <div className="hero-back-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                <button className="hero-back-button" onClick={onBack} style={{ background: "none", border: "none", color: "#1C1E23", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, margin: 0, padding: 0 }}>
+                    ← Back to Patients
+                </button>
+            </div>
+
+            {/* Patient Hero Profile */}
+            <div className="hero-profile-container" style={{ marginBottom: 32 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+                    <img
+                        src={patient.photoUrl}
+                        alt={patient.name}
+                        className="hero-avatar-img"
+                        style={{ objectFit: "cover", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", flexShrink: 0 }}
+                    />
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                            <h1 className="hero-name-row" style={{ fontWeight: 700, color: "#1C1E23", margin: 0 }}>{patient.name}</h1>
+                            <span style={{ background: patient.status === "Active" ? "#E8F5E9" : "#FFF3E0", color: patient.status === "Active" ? "#00B67A" : "#E65100", padding: "4px 10px", borderRadius: "9999px", fontSize: 11, fontWeight: 700 }}>{patient.status}</span>
+                        </div>
+                        <div style={{ color: "#8A8D93", fontSize: 14, fontWeight: 500 }}>
+                            {patient.age} yrs · DOB: {patient.dob}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="hero-contact-row">
+                    <div className="hero-contact-item">
+                        <Phone size={16} /> {patient.phone}
+                    </div>
+                    <div className="hero-contact-item">
+                        <Mail size={16} /> {patient.email}
+                    </div>
+                </div>
+
+                <div className="hero-provider-row">
+                    <div className="hero-provider-card">
+                        <span className="hero-provider-label">Primary Provider</span>
+                        <span className="hero-provider-value">{patient.provider}</span>
+                    </div>
+                    <div className="hero-provider-card">
+                        <span className="hero-provider-label">Insurance Payer</span>
+                        <span className="hero-provider-value">{patient.insurance}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Premium Tabs */}
+            <div className="mobile-tab-scroll-container" style={{ width: "100%", overflowX: "auto", marginBottom: 24 }}>
+                <div style={{ display: "flex", gap: 8, padding: "0 20px", width: "max-content" }}>
+                    {tabs.map(t => (
+                        <button key={t} onClick={() => handleTabClick(t)} style={{
+                            padding: "12px 24px", borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: "pointer", border: "none", transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0,
+                            background: activeTab === t ? "#1C1E23" : "transparent", color: activeTab === t ? "white" : "#8A8D93",
+                        }}>{t}</button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Timeline Tab */}
+            {activeTab === "Timeline" && (
+                <div className="mobile-no-padding-card" style={{ background: "#FFFFFF", borderRadius: "28px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB" }}>
+                    <h2 style={{ fontSize: 20, fontWeight: 700, color: "#1C1E23", marginBottom: 32, marginTop: 0 }}>Clinical Timeline</h2>
+
+                    {patient.nextAppt && (
+                        <div style={{ background: "#F0FDF4", border: `1px dashed ${GEO_GREEN}`, borderRadius: GEO_RADIUS, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, marginBottom: 32, boxShadow: "0 4px 12px rgba(0,182,122,0.05)" }}>
+                            <div style={{ background: GEO_GREEN, color: "white", width: 40, height: 40, borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                <Calendar size={18} />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: 12, fontWeight: 700, color: GEO_GREEN, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Upcoming Appointment Confirmed</div>
+                                <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{new Date(patient.nextAppt).toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "long", day: "numeric" })} {patient.nextApptTime && `at ${patient.nextApptTime}`} <span style={{ color: GEO_TEXT_MUTED, fontWeight: 500, marginLeft: 6 }}>• with {patient.provider}</span></div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                        {safeTimeline.map((ev, i) => (
+                            <div key={i} style={{ display: "flex", gap: 24, position: "relative" }}>
+                                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                    <div style={{ width: 44, height: 44, borderRadius: 22, background: "#E8F5E9", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2 }}>
+                                        <Stethoscope size={20} color="#00B67A" />
+                                    </div>
+                                </div>
+                                <div style={{ flex: 1, paddingBottom: 40 }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
+                                        <div>
+                                            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1C1E23", margin: "0 0 4px 0" }}>{ev.title}</h3>
+                                            <div style={{ fontSize: 13, fontWeight: 600, color: GEO_GREEN }}>{ev.provider}</div>
+                                        </div>
+                                        <div style={{ fontSize: 13, fontWeight: 600, color: "#8A8D93", textAlign: "right" }}>
+                                            {ev.date}
+                                            {ev.time && <div style={{ fontSize: 12, marginTop: 2 }}>{ev.time}</div>}
+                                        </div>
+                                    </div>
+                                    <p style={{ fontSize: 14, color: "#4B5563", margin: "0 0 16px 0", lineHeight: 1.5 }}>{ev.notes}</p>
+                                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                        {ev.codes.map(c => <span key={c} style={{ border: "1px solid #E5E7EB", padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 600, color: "#8A8D93" }}>{c}</span>)}
+                                    </div>
+
+                                    {/* Nested AI SOAP Note */}
+                                    {ev.aiNote && (
+                                        <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px dashed #E5E7EB" }}>
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
+                                                <div>
+                                                    <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1C1E23", margin: "0 0 4px 0" }}>{ev.aiNote.title}</h3>
+                                                    <div style={{ fontSize: 13, fontWeight: 600, color: GEO_GREEN }}>{ev.aiNote.provider}</div>
+                                                </div>
+                                                <button style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", color: GEO_GREEN, fontWeight: 700, fontSize: 13, cursor: "pointer", padding: "6px 12px", borderRadius: GEO_RADIUS, border: `1px solid ${GEO_GREEN}` }}>
+                                                    <ExternalLink size={14} /> View Note
+                                                </button>
+                                            </div>
+                                            <p style={{ fontSize: 14, color: "#4B5563", margin: "0", lineHeight: 1.5 }}>{ev.aiNote.notes}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Medical History Tab */}
+            {activeTab === "Medical History" && (
+                <div className="grid-stack-on-mobile" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+                    <div className="mobile-no-padding-card" style={{ background: "#FFFFFF", borderRadius: "28px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                            <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1C1E23", margin: 0 }}>Patient Vitals</h3>
+                            <button style={{ color: "#00B67A", background: "none", border: "none", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}><Edit3 size={16} /> Edit</button>
+                        </div>
+                        <div className="grid-stack-on-mobile" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                            <div style={{ background: "#F4F5F7", padding: "20px", borderRadius: 16 }}>
+                                <div style={{ fontSize: 13, color: "#8A8D93", fontWeight: 600, marginBottom: 4 }}>Blood Pressure</div>
+                                <div style={{ fontSize: 22, fontWeight: 700, color: "#1C1E23" }}>{safeMedHistory.vitals.bp}</div>
+                            </div>
+                            <div style={{ background: "#F4F5F7", padding: "20px", borderRadius: 16 }}>
+                                <div style={{ fontSize: 13, color: "#8A8D93", fontWeight: 600, marginBottom: 4 }}>Pulse</div>
+                                <div style={{ fontSize: 22, fontWeight: 700, color: "#1C1E23" }}>{safeMedHistory.vitals.pulse}</div>
+                            </div>
+                            <div style={{ background: "#F4F5F7", padding: "20px", borderRadius: 16 }}>
+                                <div style={{ fontSize: 13, color: "#8A8D93", fontWeight: 600, marginBottom: 4 }}>Weight</div>
+                                <div style={{ fontSize: 22, fontWeight: 700, color: "#1C1E23" }}>{safeMedHistory.vitals.weight}</div>
+                            </div>
+                            <div style={{ background: "#F4F5F7", padding: "20px", borderRadius: 16 }}>
+                                <div style={{ fontSize: 13, color: "#8A8D93", fontWeight: 600, marginBottom: 4 }}>Height</div>
+                                <div style={{ fontSize: 22, fontWeight: 700, color: "#1C1E23" }}>{safeMedHistory.vitals.height}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                        <div className="mobile-no-padding-card" style={{ background: "#FFFFFF", borderRadius: "28px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB" }}>
+                            <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1C1E23", margin: "0 0 24px 0" }}>Active Conditions</h3>
+                            {safeMedHistory.conditions.map((c, i) => (
+                                <div key={i} style={{ paddingBottom: 16, marginBottom: 16, borderBottom: i < safeMedHistory.conditions.length - 1 ? "1px solid #E5E7EB" : "none" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                                        <span style={{ fontWeight: 700, fontSize: 16, color: "#1C1E23" }}>{c.name}</span>
+                                        <span style={{ background: c.status === "Active" ? "#FFF3E0" : "#E8F5E9", color: c.status === "Active" ? "#E65100" : "#00B67A", padding: "4px 12px", borderRadius: "9999px", fontSize: 12, fontWeight: 700 }}>{c.status}</span>
+                                    </div>
+                                    <div style={{ fontSize: 14, color: "#545963", lineHeight: 1.5 }}>Since {c.since} — {c.notes}</div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mobile-no-padding-card" style={{ background: "#FFFFFF", borderRadius: "28px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB" }}>
+                            <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1C1E23", margin: "0 0 24px 0" }}>Current Medications</h3>
+                            {safeMedHistory.medications.map((m, i) => (
+                                <div key={i} style={{ paddingBottom: 16, marginBottom: 16, borderBottom: i < safeMedHistory.medications.length - 1 ? "1px solid #E5E7EB" : "none" }}>
+                                    <div style={{ fontWeight: 700, fontSize: 16, color: "#1C1E23", marginBottom: 4 }}>{m.name}</div>
+                                    <div style={{ fontSize: 14, color: "#545963", lineHeight: 1.5 }}>{m.frequency} · For {m.purpose} ({m.prescriber})</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="mobile-no-padding-card" style={{ gridColumn: "1 / -1", background: "#FFFFFF", borderRadius: "28px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB" }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1C1E23", margin: "0 0 24px 0" }}>Family & Social Baseline</h3>
+                        <div className="stack-on-mobile" style={{ display: "flex", gap: 24 }}>
+                            <div style={{ background: "#F4F5F7", padding: 24, borderRadius: 16 }}>
+                                <div style={{ fontSize: 13, color: "#8A8D93", fontWeight: 700, marginBottom: 8, textTransform: "uppercase" }}>Family History</div>
+                                <div style={{ fontSize: 15, color: "#1C1E23", lineHeight: 1.6 }}>{safeMedHistory.family}</div>
+                            </div>
+                            <div style={{ background: "#F4F5F7", padding: 24, borderRadius: 16 }}>
+                                <div style={{ fontSize: 13, color: "#8A8D93", fontWeight: 700, marginBottom: 8, textTransform: "uppercase" }}>Social History</div>
+                                <div style={{ fontSize: 15, color: "#1C1E23", lineHeight: 1.6 }}>{safeMedHistory.social}</div>
+                            </div>
+                            <div style={{ background: "#F4F5F7", padding: 24, borderRadius: 16 }}>
+                                <div style={{ fontSize: 13, color: "#8A8D93", fontWeight: 700, marginBottom: 8, textTransform: "uppercase" }}>Surgical History</div>
+                                <div style={{ fontSize: 15, color: "#1C1E23", lineHeight: 1.6 }}>{safeMedHistory.surgeries.join(", ")}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Imaging & X-Rays Tab */}
+            {activeTab === "Imaging & X-Rays" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+                    {XRAYS.map(xray => (
+                        <div key={xray.id} className="stack-on-mobile mobile-no-padding-card" style={{ background: "#FFFFFF", borderRadius: "28px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB", display: "flex", gap: 40 }}>
+                            <div style={{ width: "100%", maxWidth: 500, flexShrink: 0 }}>
+                                <div onClick={() => setXrayFullscreen(xray.imageUrl)} style={{ width: "100%", height: 260, borderRadius: 16, overflow: "hidden", background: "#111", position: "relative", border: "4px solid #F4F5F7", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", cursor: "pointer" }}>
+                                    <img src={xray.imageUrl} alt={xray.title} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9, transition: "opacity 0.2s" }} onMouseOver={e => e.target.style.opacity = 1} onMouseOut={e => e.target.style.opacity = 0.9} />
+                                    <div style={{ position: "absolute", bottom: 12, right: 12, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", padding: "6px 12px", borderRadius: 8, color: "white", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 6, pointerEvents: "none" }}>
+                                        <Camera size={12} /> {xray.type}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                                    <div>
+                                        <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1C1E23", margin: "0 0 6px 0" }}>{xray.title}</h3>
+                                        <div style={{ fontSize: 14, color: "#8A8D93", fontWeight: 500 }}>Captured on {xray.date}</div>
+                                    </div>
+                                    <button style={{ padding: "10px", borderRadius: 12, border: "1px solid #E5E7EB", background: "#F4F5F7", color: "#1C1E23", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <Download size={18} />
+                                    </button>
+                                </div>
+                                <div style={{ flex: 1, background: "#FFF5F0", borderRadius: 16, padding: 24, border: "1px solid #FFEDD5" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                                        <div style={{ width: 24, height: 24, borderRadius: 12, background: "#EA580C", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                            <FileText size={12} color="white" />
+                                        </div>
+                                        <span style={{ fontSize: 14, fontWeight: 700, color: "#EA580C" }}>Clinical Analysis</span>
+                                    </div>
+                                    <p style={{ fontSize: 15, color: "#1C1E23", lineHeight: 1.6, margin: 0, fontWeight: 500 }}>
+                                        {xray.notes}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Intake Forms Tab */}
+            {activeTab === "Intake Forms" && (
+                <div className="stack-on-mobile" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 24 }}>
+                    {FORMS.map(form => (
+                        <div key={form.id} style={{ background: "#FFFFFF", borderRadius: "24px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB", display: "flex", flexDirection: "column" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+                                <div style={{ width: 48, height: 48, borderRadius: 16, background: "#E8F5E9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <FileText size={24} color="#00B67A" />
+                                </div>
+                                <span style={{ background: "#F4F5F7", color: "#1C1E23", padding: "6px 12px", borderRadius: 8, fontSize: 12, fontWeight: 700 }}>{form.status}</span>
+                            </div>
+                            <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1C1E23", margin: "0 0 6px 0" }}>{form.title}</h3>
+                            <div style={{ fontSize: 13, color: "#8A8D93", fontWeight: 500, marginBottom: 24 }}>Completed {form.date}</div>
+
+                            <div style={{ flex: 1, background: "#F4F5F7", borderRadius: 12, padding: 16, marginBottom: 24, display: "flex", flexDirection: "column", gap: 12 }}>
+                                {form.preview.map((row, i) => (
+                                    <div key={i} style={{ display: "flex", justifyContent: "space-between", borderBottom: i < form.preview.length - 1 ? "1px solid #E5E7EB" : "none", paddingBottom: i < form.preview.length - 1 ? 8 : 0 }}>
+                                        <span style={{ fontSize: 12, color: "#8A8D93", fontWeight: 600 }}>{row.label}</span>
+                                        <span style={{ fontSize: 12, color: "#1C1E23", fontWeight: 700, textAlign: "right", maxWidth: "60%" }}>{row.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <button style={{ width: "100%", padding: "12px", borderRadius: "9999px", border: "1px solid #E5E7EB", background: "white", color: "#1C1E23", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}>
+                                <File size={16} /> View Full PDF
+                            </button>
+                        </div>
+                    ))}
+
+                    {/* Add New Form Card */}
+                    <div style={{ background: "transparent", borderRadius: "24px", padding: 32, border: "2px dashed #D1D5DB", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "border 0.2s" }}>
+                        <div style={{ width: 56, height: 56, borderRadius: 28, background: "#F4F5F7", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                            <Plus size={24} color="#8A8D93" />
+                        </div>
+                        <h3 style={{ fontSize: 16, fontWeight: 700, color: "#8A8D93", margin: "0" }}>Assign New Form</h3>
+                    </div>
+                </div>
+            )}
+
+            {/* Documents Tab */}
+            {activeTab === "Documents" && (
+                <div className="mobile-no-padding-card" style={{ background: "#FFFFFF", borderRadius: "28px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                        <h2 style={{ fontSize: 20, fontWeight: 700, color: "#1C1E23", margin: 0 }}>Document Library</h2>
+                        <button style={{ background: "#1C1E23", color: "white", border: "none", padding: "10px 20px", borderRadius: 12, fontSize: 14, fontWeight: 700, display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}><Plus size={16} /> Upload Document</button>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+                        {["All", "Forms", "Imaging", "Consent"].map(cat => (
+                            <button key={cat} style={{ padding: "8px 16px", borderRadius: "9999px", border: "1px solid #E5E7EB", background: cat === "All" ? "#F4F5F7" : "white", color: "#1C1E23", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>{cat}</button>
+                        ))}
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                        {DOCUMENTS.map((doc, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: i < DOCUMENTS.length - 1 ? "1px solid #E5E7EB" : "none", transition: "background 0.2s", borderRadius: 12, cursor: "pointer" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                                    <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E8F5E9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <FileText size={20} color="#00B67A" />
+                                    </div>
+                                    <div>
+                                        <div style={{ fontSize: 15, fontWeight: 700, color: "#1C1E23", marginBottom: 4 }}>{doc.name}</div>
+                                        <div style={{ fontSize: 13, color: "#8A8D93", fontWeight: 500 }}>{doc.format} • {doc.size} • Added {doc.date}</div>
+                                    </div>
+                                </div>
+                                <div style={{ display: "flex", gap: 12 }}>
+                                    <div style={{ background: "#F4F5F7", padding: "6px 12px", borderRadius: 8, fontSize: 12, fontWeight: 600, color: "#8A8D93" }}>{doc.category}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Treatment Plan Tab */}
+            {activeTab === "Treatment Plan" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                    <div className="mobile-no-padding-card" style={{ background: "#FFFFFF", borderRadius: "28px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                                <h2 style={{ fontSize: 20, fontWeight: 700, color: "#1C1E23", margin: 0 }}>Proposed Treatment</h2>
+                                <span className="geo-tooltip-container" data-tooltip="Based on past history, remaining insurance maximum, and current out-of-pocket costs, this patient is highly likely to accept treatment if financing is offered." style={{ padding: "4px 12px", background: "#F0FDF4", color: "#00B67A", borderRadius: "9999px", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 6, cursor: "help", border: "1px solid #bbf7d0" }}>
+                                    <Sparkles size={14} /> 78% Likelihood - Needs Financing
+                                </span>
+                            </div>
+                            <div style={{ padding: "8px 16px", borderRadius: "9999px", background: "#FFF5F0", color: "#EA580C", fontSize: 13, fontWeight: 700 }}>Patient Portion: $675.00</div>
+                        </div>
+
+                        <div style={{ borderRadius: 16, border: "1px solid #E5E7EB", overflow: "hidden", marginBottom: 32 }}>
+                            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                                <thead>
+                                    <tr style={{ background: "#F4F5F7" }}>
+                                        <th style={{ padding: "16px", fontSize: 13, color: "#8A8D93", fontWeight: 700, textTransform: "uppercase" }}>Code</th>
+                                        <th style={{ padding: "16px", fontSize: 13, color: "#8A8D93", fontWeight: 700, textTransform: "uppercase" }}>Description</th>
+                                        <th style={{ padding: "16px", fontSize: 13, color: "#8A8D93", fontWeight: 700, textTransform: "uppercase" }}>Tooth</th>
+                                        <th style={{ padding: "16px", fontSize: 13, color: "#8A8D93", fontWeight: 700, textTransform: "uppercase" }}>Fee</th>
+                                        <th style={{ padding: "16px", fontSize: 13, color: "#8A8D93", fontWeight: 700, textTransform: "uppercase" }}>Ins Est</th>
+                                        <th style={{ padding: "16px", fontSize: 13, color: "#8A8D93", fontWeight: 700, textTransform: "uppercase" }}>Pat Est</th>
+                                        <th style={{ padding: "16px", fontSize: 13, color: "#8A8D93", fontWeight: 700, textTransform: "uppercase" }}>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {MOCK_TREATMENT_PLAN.map((tx, i) => (
+                                        <tr key={tx.id} style={{ borderTop: "1px solid #E5E7EB", background: i % 2 === 0 ? "white" : "#F9FAFB" }}>
+                                            <td style={{ padding: "16px", fontSize: 14, color: "#1C1E23", fontWeight: 600 }}>{tx.code}</td>
+                                            <td style={{ padding: "16px", fontSize: 14, color: "#545963", fontWeight: 500 }}>{tx.description}</td>
+                                            <td style={{ padding: "16px", fontSize: 14, color: "#1C1E23", fontWeight: 600 }}>{tx.tooth}</td>
+                                            <td style={{ padding: "16px", fontSize: 14, color: "#1C1E23", fontWeight: 500 }}>{tx.fee}</td>
+                                            <td style={{ padding: "16px", fontSize: 14, color: "#00B67A", fontWeight: 600 }}>{tx.insEst}</td>
+                                            <td style={{ padding: "16px", fontSize: 14, color: "#EA580C", fontWeight: 700 }}>{tx.patEst}</td>
+                                            <td style={{ padding: "16px" }}>
+                                                <span style={{ padding: "4px 10px", borderRadius: "9999px", fontSize: 12, fontWeight: 700, background: tx.status === "Accepted" ? "#E8F5E9" : "#F4F5F7", color: tx.status === "Accepted" ? "#00B67A" : "#8A8D93" }}>{tx.status}</span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Acceptance Automation Grid */}
+                        <div className="stack-grid-mobile" style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 24 }}>
+
+                            {/* AI Financial Presentation */}
+                            <div style={{ background: "#F8FAFC", borderRadius: 20, padding: 24, border: "1px solid #E2E8F0" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                                    <div style={{ width: 28, height: 28, borderRadius: 14, background: "#0ea5e9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <MessageSquare size={14} color="white" />
+                                    </div>
+                                    <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "#0f172a" }}>AI Explanation Preview (Patient Facing)</h3>
+                                </div>
+                                <div style={{ background: "white", borderRadius: 12, padding: 20, fontSize: 14, color: "#334155", lineHeight: 1.6, border: "1px solid #E2E8F0", boxShadow: "0 2px 4px rgba(0,0,0,0.02)", whiteSpace: "pre-wrap", minHeight: 180 }}>
+                                    {explanationText}
+                                    {explanationGenerating && <span style={{ display: "inline-block", width: 4, height: 14, background: "#0ea5e9", marginLeft: 2, verticalAlign: "middle", animation: "blink 1s step-end infinite" }} />}
+                                </div>
+                                <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+                                    <button onClick={handleRegenerateExplanation} disabled={explanationGenerating} style={{ flex: 1, padding: "10px", borderRadius: 8, border: "none", background: explanationGenerating ? "#e2e8f0" : "#0ea5e9", color: explanationGenerating ? "#94a3b8" : "white", fontWeight: 600, cursor: explanationGenerating ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}><Play size={14} /> {explanationGenerating ? "Generating..." : "Generate New Explanation"}</button>
+                                    <button onClick={() => setEditPromptOpen(true)} disabled={explanationGenerating} style={{ flex: 1, padding: "10px", borderRadius: 8, border: "1px solid #cbd5e1", background: "white", color: explanationGenerating ? "#94a3b8" : "#475569", fontWeight: 600, cursor: explanationGenerating ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "background 0.2s" }}><Edit3 size={14} /> Edit Prompt</button>
+                                </div>
+                            </div>
+
+                            {/* Automation Timeline */}
+                            <div style={{ background: "white", borderRadius: 20, padding: 24, border: "1px solid #E2E8F0", display: "flex", flexDirection: "column" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                                    <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "#0f172a" }}>Automation Sequence</h3>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <span style={{ fontSize: 13, fontWeight: 600, color: "#475569" }}>Auto-Follow-Up Enabled</span>
+                                        <div style={{ width: 44, height: 24, borderRadius: 12, background: "#10b981", position: "relative", cursor: "pointer", display: "flex", alignItems: "center", padding: "0 2px" }}>
+                                            <div style={{ width: 20, height: 20, borderRadius: 10, background: "white", position: "absolute", right: 2, boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ position: "relative", paddingLeft: 24, flex: 1, display: "flex", flexDirection: "column", gap: 20 }}>
+                                    <div style={{ position: "absolute", left: 7, top: 4, bottom: 4, width: 2, background: "#e2e8f0" }} />
+
+                                    <div style={{ position: "relative" }}>
+                                        <div style={{ position: "absolute", left: -24, top: 2, width: 16, height: 16, borderRadius: 8, background: "#10b981", border: "3px solid white", boxShadow: "0 0 0 1px #10b981" }} />
+                                        <div style={{ fontSize: 14, fontWeight: 600, color: "#0f172a" }}>Day 1: Send Educational Video</div>
+                                        <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>Sent via SMS (Today, 10:45 AM)</div>
+                                    </div>
+
+                                    <div style={{ position: "relative" }}>
+                                        <div style={{ position: "absolute", left: -24, top: 2, width: 16, height: 16, borderRadius: 8, background: "white", border: "2px solid #cbd5e1" }} />
+                                        <div style={{ fontSize: 14, fontWeight: 600, color: "#475569" }}>Day 3: Financing Options</div>
+                                        <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>System will auto-send text with 4-month payment link.</div>
+                                    </div>
+
+                                    <div style={{ position: "relative" }}>
+                                        <div style={{ position: "absolute", left: -24, top: 2, width: 16, height: 16, borderRadius: 8, background: "white", border: "2px solid #cbd5e1" }} />
+                                        <div style={{ fontSize: 14, fontWeight: 600, color: "#475569" }}>Day 7: Task Front Desk</div>
+                                        <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>Agent will task front desk to call patient if link unopened.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Insurance Tab */}
+            {activeTab === "Insurance" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                    <div style={{ background: "#FFFFFF", borderRadius: "28px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                                <h2 style={{ fontSize: 24, fontWeight: 700, color: "#1C1E23", margin: 0 }}>{MOCK_INSURANCE.primary.payer}</h2>
+                                <span style={{ background: "#E8F5E9", color: "#00B67A", padding: "4px 12px", borderRadius: "9999px", fontSize: 12, fontWeight: 700 }}>Primary Active</span>
+                            </div>
+                            <div style={{ fontSize: 14, color: "#8A8D93", fontWeight: 500 }}>Group: {MOCK_INSURANCE.primary.group} • Subscriber ID: {MOCK_INSURANCE.primary.subId}</div>
+                        </div>
+                        <button style={{ background: "#F4F5F7", color: "#1C1E23", border: "none", padding: "10px 20px", borderRadius: 12, fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}><Edit3 size={16} /> Update Policy</button>
+                    </div>
+                    <div className="stack-on-mobile" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 24 }}>
+                        <div style={{ background: "#FFFFFF", borderRadius: "24px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB" }}>
+                            <div style={{ fontSize: 14, color: "#8A8D93", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>Annual Maximum</div>
+                            <div style={{ fontSize: 32, fontWeight: 700, color: "#1C1E23", marginBottom: 16 }}>{MOCK_INSURANCE.primary.max}</div>
+                            <div style={{ width: "100%", height: 8, background: "#F4F5F7", borderRadius: 4, overflow: "hidden", marginBottom: 16 }}>
+                                <div style={{ width: "22%", height: "100%", background: "#00B67A", borderRadius: 4 }}></div>
+                            </div>
+                        </div>
+
+                        <div style={{ background: "#FFFFFF", borderRadius: "24px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB" }}>
+                            <div style={{ fontSize: 14, color: "#8A8D93", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>Deductible</div>
+                            <div style={{ fontSize: 32, fontWeight: 700, color: "#1C1E23", marginBottom: 16 }}>{MOCK_INSURANCE.primary.ded}</div>
+                            <div style={{ background: "#E8F5E9", color: "#00B67A", padding: "8px 16px", borderRadius: 12, fontSize: 13, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 6 }}><CheckCircle size={16} /> Met for year</div>
+                        </div>
+
+                        <div style={{ background: "#FFFFFF", borderRadius: "24px", padding: 32, boxShadow: "0px 8px 30px rgba(0,0,0,0.04)", border: "1px solid #E5E7EB" }}>
+                            <div style={{ fontSize: 14, color: "#8A8D93", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>Renewal Plan</div>
+                            <div style={{ fontSize: 32, fontWeight: 700, color: "#1C1E23", marginBottom: 16 }}>{MOCK_INSURANCE.primary.renewal}</div>
+                            <div style={{ fontSize: 13, color: "#8A8D93", fontWeight: 500, lineHeight: 1.5 }}>Benefits reset annually on January 1st. Standard waiting periods may apply to major restorative.</div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Fullscreen X-Ray Modal */}
+            {xrayFullscreen && (
+                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.95)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }} onClick={() => setXrayFullscreen(null)}>
+                    <img src={xrayFullscreen} alt="X-Ray Fullscreen" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: 12, boxShadow: "0 24px 48px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()} />
+                    <button onClick={() => setXrayFullscreen(null)} style={{ position: "absolute", top: 32, right: 32, background: "white", color: "#1C1E23", border: "none", width: 48, height: 48, borderRadius: 24, fontSize: 24, fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>✕</button>
+                </div>
+            )}
+
+            {/* Edit Prompt Modal */}
+            {editPromptOpen && (
+                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }} onClick={() => setEditPromptOpen(false)}>
+                    <div style={{ background: "#FFFFFF", borderRadius: 32, padding: 40, width: "100%", maxWidth: 600, boxShadow: "0 24px 48px rgba(0,0,0,0.2)", position: "relative" }} onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setEditPromptOpen(false)} style={{ position: "absolute", top: 24, right: 24, background: "#F4F5F7", border: "none", width: 36, height: 36, borderRadius: 18, fontSize: 18, color: "#1C1E23", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+                            <div style={{ width: 44, height: 44, borderRadius: 12, background: "#0ea5e920", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <Edit3 size={22} color="#0ea5e9" />
+                            </div>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#1C1E23" }}>Edit AI Prompt</h3>
+                                <div style={{ fontSize: 14, color: "#8A8D93", marginTop: 4 }}>Customize instructions for the financial explainer.</div>
+                            </div>
+                        </div>
+
+                        <textarea value={customPrompt} onChange={(e) => setCustomPrompt(e.target.value)} style={{ width: "100%", height: 120, padding: 16, borderRadius: 12, border: "1px solid #E2E8F0", background: "#F8FAFC", fontSize: 14, fontFamily: "inherit", color: "#334155", lineHeight: 1.5, resize: "none", boxSizing: "border-box", marginBottom: 24, outline: "none", transition: "border 0.2s" }} onFocus={e => e.currentTarget.style.border = "1px solid #0ea5e9"} onBlur={e => e.currentTarget.style.border = "1px solid #E2E8F0"} />
+
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
+                            <button onClick={() => setEditPromptOpen(false)} style={{ padding: "14px 28px", borderRadius: 9999, border: "1px solid #E5E7EB", background: "#FFFFFF", fontWeight: 600, fontSize: 15, color: "#1C1E23", cursor: "pointer" }}>Cancel</button>
+                            <button onClick={handleRegenerateExplanation} style={{ padding: "14px 28px", borderRadius: 9999, border: "none", background: "#0ea5e9", fontWeight: 600, fontSize: 15, color: "white", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, boxShadow: "0 4px 12px rgba(14, 165, 233, 0.2)" }}>
+                                <Sparkles size={16} /> Apply & Regenerate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ==========================================
+// UI2: BILLING & CLAIMS MODULE
+// ==========================================
+export function BillingPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+    const [mockClaims, setMockClaims] = useState([
+        { id: "CLM-9021", patient: "Sarah Chen", provider: "Dr. Cifor", date: "Oct 24, 2023", codes: "D1110, D0274", billed: "$210.00", insEst: "$180.00", status: "Denied", statusColor: "#FF3B30", aiNote: "Missing Tooth number on D2740 (Crown). Add tooth number to the claim and resubmit." },
+        { id: "CLM-9022", patient: "Michael Ross", provider: "Dr. Vargas", date: "Oct 24, 2023", codes: "D2740", billed: "$1,200.00", insEst: "$600.00", status: "Needs Attention", statusColor: "#FFD100" },
+        { id: "CLM-9023", patient: "Emma Watson", provider: "Dr. Mayeda", date: "Oct 23, 2023", codes: "D0120, D1110", billed: "$150.00", insEst: "$150.00", status: "Paid", statusColor: "#00B67A" },
+        { id: "CLM-9024", patient: "James Smith", provider: "Dr. Cifor", date: "Oct 23, 2023", codes: "D2391", billed: "$250.00", insEst: "$200.00", status: "Submitted", statusColor: "#007AFF" },
+        { id: "CLM-9025", patient: "Olivia Jones", provider: "Dr. Vargas", date: "Oct 22, 2023", codes: "D4341 x2", billed: "$500.00", insEst: "$400.00", status: "Pending", statusColor: "#8A8D93" },
+    ]);
+
+    const [view, setView] = useState(() => {
+        const path = window.location.pathname.replace(/^\//, '');
+        if (path.startsWith('billing/aging')) return "aging";
+        if (path.startsWith('billing/claims/') && path.split('/').length > 2) return "claim-detail";
+        return "claims"; // default
+    });
+
+    const [isScrubbing, setIsScrubbing] = useState(false);
+    const [hasScrubbed, setHasScrubbed] = useState(false);
+    const [isAutoBuilding, setIsAutoBuilding] = useState(false);
+    const [isCorrecting, setIsCorrecting] = useState(false);
+
+    const handleScrubClaim = () => {
+        setIsScrubbing(true);
+        setTimeout(() => {
+            setIsScrubbing(false);
+            setHasScrubbed(true);
+        }, 2000); // Simulate 2 second AI scan
+    };
+
+    const handleAutoCorrect = (claimId) => {
+        setIsCorrecting(true);
+        setTimeout(() => {
+            setIsCorrecting(false);
+            setMockClaims(prev => prev.map(c =>
+                c.id === claimId
+                    ? { ...c, status: "Resubmitted", statusColor: GEO_GREEN, aiNote: "Auto-corrected tooth number added. Resubmitted to payer via clearinghouse." }
+                    : c
+            ));
+            if (selectedClaim && selectedClaim.id === claimId) {
+                setSelectedClaim(prev => ({ ...prev, status: "Resubmitted", statusColor: GEO_GREEN, aiNote: "Auto-corrected tooth number added. Resubmitted to payer via clearinghouse." }));
+            }
+        }, 2000);
+    };
+
+    const handleAutoBuild = () => {
+        setIsAutoBuilding(true);
+        setTimeout(() => {
+            setIsAutoBuilding(false);
+            const newClaims = [
+                { id: "CLM-9026", patient: "David Kim", provider: "Dr. Cifor", date: "Today", codes: "D0150, D0210, D1110", billed: "$350.00", insEst: "$350.00", status: "Ready for Review", statusColor: "#8B5CF6" },
+                { id: "CLM-9027", patient: "Jackson White", provider: "Dr. Mayeda", date: "Today", codes: "D2392", billed: "$300.00", insEst: "$240.00", status: "Ready for Review", statusColor: "#8B5CF6" }
+            ];
+            setMockClaims(prev => [...newClaims, ...prev]);
+        }, 2500); // Simulate 2.5 second auto-build
+    };
+
+    const [selectedClaim, setSelectedClaim] = useState(() => {
+        const path = window.location.pathname.replace(/^\//, '');
+        if (path.startsWith('billing/claims/') && path.split('/').length > 2) {
+            const claimId = path.split('/')[2];
+            return mockClaims.find(c => c.id === claimId) || null;
+        }
+        return null;
+    });
+
+    useEffect(() => {
+        const handlePopState = () => {
+            const path = window.location.pathname.replace(/^\//, '');
+            if (path.startsWith('billing/aging')) {
+                setView("aging");
+            } else if (path.startsWith('billing/claims/') && path.split('/').length > 2) {
+                const claimId = path.split('/')[2];
+                setSelectedClaim(mockClaims.find(c => c.id === claimId) || null);
+                setView("claim-detail");
+            } else {
+                setView("claims");
+            }
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    const MOCK_AGING = [
+        { patient: "John Doe", current: "$0.00", over30: "$150.00", over60: "$0.00", over90: "$0.00", total: "$150.00" },
+        { patient: "Jane Smith", current: "$45.00", over30: "$0.00", over60: "$200.00", over90: "$0.00", total: "$245.00" },
+        { patient: "Bob Brown", current: "$0.00", over30: "$0.00", over60: "$0.00", over90: "$850.00", total: "$850.00" }
+    ];
+
+    return (
+        <div className="mobile-no-padding-main" style={{ padding: "20px 40px", height: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+            <TopGreetingUI2 currentUI={currentUI} setUI={setUI} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} subtitle="Track claims, aging, and patient balances." />
+
+            <div className="stack-on-mobile" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24, marginBottom: 32 }}>
+                <div className="stack-on-mobile" style={{ display: "flex", gap: 16, width: "100%", marginBottom: 16 }}>
+                    <button onClick={() => { setView("claims"); window.history.pushState(null, '', `/billing`); }} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: view === "claims" || view === "claim-detail" ? GEO_BLACK : GEO_WHITE, color: view === "claims" || view === "claim-detail" ? GEO_WHITE : GEO_TEXT_MAIN, fontWeight: 600, fontSize: 15, cursor: "pointer", transition: "all 0.2s", boxShadow: view === "claims" || view === "claim-detail" ? "0 8px 16px rgba(0,0,0,0.15)" : GEO_SHADOW }}>Claims Tracker</button>
+                    <button onClick={() => { setView("aging"); window.history.pushState(null, '', `/billing/aging`); }} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: view === "aging" ? GEO_BLACK : GEO_WHITE, color: view === "aging" ? GEO_WHITE : GEO_TEXT_MAIN, fontWeight: 600, fontSize: 15, cursor: "pointer", transition: "all 0.2s", boxShadow: view === "aging" ? "0 8px 16px rgba(0,0,0,0.15)" : GEO_SHADOW }}>Aging Report</button>
+                </div>
+                {view === "claims" && (
+                    <div className="stack-on-mobile" style={{ display: "flex", gap: 12, width: "100%" }}>
+                        <div style={{ background: GEO_WHITE, borderRadius: GEO_PILL, padding: "10px 16px", display: "flex", alignItems: "center", gap: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.03)", border: `1px solid #E5E7EB` }}>
+                            <Filter size={16} color={GEO_TEXT_MUTED} />
+                            <span style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN }}>Filter</span>
+                        </div>
+                        <button onClick={handleAutoBuild} disabled={isAutoBuilding} style={{ padding: "10px 24px", borderRadius: GEO_PILL, border: `1px solid ${GEO_BLACK}`, background: isAutoBuilding ? "#E5E7EB" : "transparent", color: isAutoBuilding ? GEO_TEXT_MUTED : GEO_BLACK, fontWeight: 600, fontSize: 14, cursor: isAutoBuilding ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                            {isAutoBuilding ? (
+                                <>
+                                    <div style={{ width: 14, height: 14, borderRadius: 7, border: "2px solid currentColor", borderRightColor: "transparent", animation: "spin 1s linear infinite" }} />
+                                    Parsing Clinical Notes...
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles size={16} /> Auto-Build Claims
+                                </>
+                            )}
+                        </button>
+                        <button style={{ padding: "10px 24px", borderRadius: GEO_PILL, border: "none", background: GEO_GREEN, color: GEO_WHITE, fontWeight: 600, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, boxShadow: "0 4px 12px rgba(0, 182, 122, 0.2)" }}>
+                            <CheckCircle size={16} /> Auto-Submit Clean Claims
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {view === "claims" && (
+                <div className="mobile-no-padding-card" style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW, flex: 1 }}>
+                    <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Recent Claims</h3>
+                    <div className="table-scroll-mobile">
+                        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
+                            <thead>
+                                <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>ID</th>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Patient</th>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Provider</th>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Date</th>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>CDT Codes</th>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Billed Amount</th>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Ins Est</th>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Status</th>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {mockClaims.map((claim, idx) => (
+                                    <tr key={idx} style={{ borderBottom: `1px solid #F4F5F7`, cursor: "pointer", transition: "background 0.2s", background: claim.status === "Ready for Review" ? "#8B5CF608" : "transparent" }} onMouseOver={e => e.currentTarget.style.background = "#F9FAFB"} onMouseOut={e => e.currentTarget.style.background = claim.status === "Ready for Review" ? "#8B5CF608" : "transparent"} onClick={() => { setSelectedClaim(claim); setView("claim-detail"); window.history.pushState(null, '', `/billing/claims/${claim.id}`); }}>
+                                        <td style={{ padding: "20px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.id}</td>
+                                        <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.patient}</td>
+                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{claim.provider}</td>
+                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{claim.date}</td>
+                                        <td style={{ padding: "20px 0", fontSize: 14, fontFamily: "monospace", color: GEO_TEXT_MAIN }}>{claim.codes}</td>
+                                        <td style={{ padding: "20px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.billed}</td>
+                                        <td style={{ padding: "20px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.insEst}</td>
+                                        <td style={{ padding: "20px 0" }}>
+                                            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: GEO_PILL, fontSize: 12, fontWeight: 600, color: claim.statusColor, background: `${claim.statusColor}15` }}>
+                                                <CircleDot size={12} fill={claim.statusColor} /> {claim.status}
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: "20px 0", textAlign: "right" }}>
+                                            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: GEO_TEXT_MUTED }}><MoreHorizontal size={20} /></button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {view === "claim-detail" && selectedClaim && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 24, flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                        <button onClick={() => { setView("claims"); window.history.pushState(null, '', `/billing`); }} style={{ width: 44, height: 44, borderRadius: 22, border: `1px solid #E5E7EB`, background: GEO_WHITE, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "transform 0.1s" }} onMouseDown={e => e.currentTarget.style.transform = "scale(0.95)"} onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}>
+                            <ArrowDownToLine size={20} color={GEO_TEXT_MAIN} style={{ transform: "rotate(90deg)" }} />
+                        </button>
+                        <div>
+                            <h2 style={{ fontSize: 24, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>Claim {selectedClaim.id}</h2>
+                            <div style={{ fontSize: 14, color: GEO_TEXT_MUTED, marginTop: 4 }}>{selectedClaim.patient} • {selectedClaim.date}</div>
+                        </div>
+                        <div style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: GEO_PILL, fontSize: 14, fontWeight: 700, color: selectedClaim.statusColor, background: `${selectedClaim.statusColor}15` }}>
+                            <CircleDot size={14} fill={selectedClaim.statusColor} /> {selectedClaim.status}
+                        </div>
+                    </div>
+
+                    <div className="stack-on-mobile" style={{ display: "flex", gap: 30 }}>
+                        <div className="mobile-no-padding-card" style={{ flex: 2, background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
+                            <h3 style={{ fontSize: 18, fontWeight: 600, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Procedure Line Items</h3>
+                            <div className="table-scroll-mobile">
+                                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 500 }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
+                                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Code</th>
+                                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Description</th>
+                                            <th style={{ padding: "0 0 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Fee</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr style={{ borderBottom: `1px solid #F4F5F7` }}>
+                                            <td style={{ padding: "16px 0", fontSize: 14, fontFamily: "monospace", color: GEO_TEXT_MAIN }}>D2740</td>
+                                            <td style={{ padding: "16px 0", fontSize: 14, color: GEO_TEXT_MAIN }}>Crown - porcelain/ceramic</td>
+                                            <td style={{ padding: "16px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN, textAlign: "right" }}>{selectedClaim.billed}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="mobile-padding" style={{ flex: 1, display: "flex", flexDirection: "column", gap: 24 }}>
+                            {selectedClaim.status === "Needs Attention" && !hasScrubbed && (
+                                <div style={{ background: GEO_WHITE, border: `1px solid #E5E7EB`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+                                    <div style={{ background: "#FACC1515", width: 64, height: 64, borderRadius: 32, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                                        <Shield size={32} color="#EAB308" />
+                                    </div>
+                                    <h4 style={{ fontSize: 18, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 8px 0" }}>Ready for AI Pre-Submission Scrub</h4>
+                                    <p style={{ fontSize: 14, color: GEO_TEXT_MUTED, margin: "0 0 24px 0", maxWidth: 300, lineHeight: 1.5 }}>
+                                        Run this claim through the Intelident AI rules engine to catch rejections before submission.
+                                    </p>
+                                    <button onClick={handleScrubClaim} disabled={isScrubbing} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: isScrubbing ? "#E5E7EB" : GEO_BLACK, color: isScrubbing ? GEO_TEXT_MUTED : GEO_WHITE, fontWeight: 600, fontSize: 14, cursor: isScrubbing ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 8, transition: "background 0.2s" }}>
+                                        {isScrubbing ? (
+                                            <>
+                                                <div style={{ width: 14, height: 14, borderRadius: 7, border: "2px solid currentColor", borderRightColor: "transparent", animation: "spin 1s linear infinite" }} />
+                                                Scanning claim for errors...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Sparkles size={16} /> Scrub Claim with AI
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+
+                            {selectedClaim.status === "Needs Attention" && hasScrubbed && (
+                                <div style={{ background: "#FEF9C3", border: `1px solid #FACC15`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden" }}>
+                                    <div style={{ position: "absolute", top: -20, right: -20, opacity: 0.1 }}><Shield size={120} color="#EAB308" /></div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                                        <Sparkles size={20} color="#EAB308" />
+                                        <span style={{ fontSize: 18, fontWeight: 700, color: "#CA8A04" }}>Pre-Submission Scrubber Result</span>
+                                    </div>
+                                    <div style={{ fontSize: 15, color: "#854D0E", lineHeight: 1.6, fontWeight: 500 }}>
+                                        AI detected a potential rejection: <strong>Missing Narrative</strong> for D2740 (Crown) indicating why an existing crown is being replaced.
+                                    </div>
+                                    <div style={{ background: "rgba(255,255,255,0.6)", borderRadius: 12, padding: 16, marginTop: 16, border: "1px dashed #FACC15", fontSize: 14, color: "#A16207" }}>
+                                        <div style={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Auto-Drafted Narrative:</div>
+                                        "Tooth 14 existing crown has recurrent decay on margins and open contacts causing food impaction. Original placement &gt; 5 years ago."
+                                    </div>
+                                    <button style={{ marginTop: 24, padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: "#EAB308", color: "#FFFFFF", fontWeight: 700, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, width: "100%", justifyContent: "center", boxShadow: "0 4px 12px rgba(234, 179, 8, 0.3)" }}>
+                                        <CheckCircle size={16} /> Attach Auto-Narrative & Submit
+                                    </button>
+                                </div>
+                            )}
+
+                            {selectedClaim.status === "Denied" && (
+                                <div style={{ background: "#FFF0F0", border: `1px solid #FF3B30`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden" }}>
+                                    <div style={{ position: "absolute", top: -20, right: -20, opacity: 0.1 }}><Shield size={120} color="#FF3B30" /></div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                                        <div style={{ background: "#FF3B30", color: "white", padding: "4px 8px", borderRadius: 8, fontSize: 12, fontWeight: 800 }}>DENIAL EOB Scanned</div>
+                                    </div>
+                                    <div style={{ fontSize: 15, color: "#1C1E23", lineHeight: 1.6, fontWeight: 500 }}>
+                                        {selectedClaim.aiNote}
+                                    </div>
+                                    <button onClick={() => handleAutoCorrect(selectedClaim.id)} disabled={isCorrecting} style={{ marginTop: 24, padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: isCorrecting ? "#E5E7EB" : "#111827", color: isCorrecting ? GEO_TEXT_MUTED : "#FFFFFF", fontWeight: 600, fontSize: 14, cursor: isCorrecting ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 8, width: "100%", justifyContent: "center", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)", transition: "background 0.2s" }}>
+                                        {isCorrecting ? (
+                                            <>
+                                                <div style={{ width: 14, height: 14, borderRadius: 7, border: "2px solid currentColor", borderRightColor: "transparent", animation: "spin 1s linear infinite" }} />
+                                                Regenerating claim...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Sparkles size={16} color="#00B67A" /> Execute Auto-Correction
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+
+                            {selectedClaim.status === "Resubmitted" && (
+                                <div style={{ background: "#F0FDF4", border: `1px solid #22C55E`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden" }}>
+                                    <div style={{ position: "absolute", top: -20, right: -20, opacity: 0.1 }}><Shield size={120} color="#22C55E" /></div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                                        <Sparkles size={20} color="#16A34A" />
+                                        <span style={{ fontSize: 18, fontWeight: 700, color: "#16A34A" }}>Auto-Correction Successful</span>
+                                    </div>
+                                    <div style={{ fontSize: 15, color: "#166534", lineHeight: 1.6, fontWeight: 500 }}>
+                                        {selectedClaim.aiNote}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
+                                <h3 style={{ fontSize: 18, fontWeight: 600, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Status Timeline</h3>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                                    <div style={{ display: "flex", gap: 16 }}>
+                                        <div style={{ width: 12, height: 12, borderRadius: 6, background: selectedClaim.statusColor, marginTop: 4, outline: `4px solid ${selectedClaim.statusColor}20` }} />
+                                        <div>
+                                            <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{selectedClaim.status}</div>
+                                            <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, marginTop: 4 }}>Oct 25, 2023 10:45 AM</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: "flex", gap: 16 }}>
+                                        <div style={{ width: 12, height: 12, borderRadius: 6, background: GEO_BG, marginTop: 4 }} />
+                                        <div>
+                                            <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>Submitted via Clearinghouse</div>
+                                            <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, marginTop: 4 }}>Oct 24, 2023 5:30 PM</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: "flex", gap: 16 }}>
+                                        <div style={{ width: 12, height: 12, borderRadius: 6, background: GEO_BG, marginTop: 4 }} />
+                                        <div>
+                                            <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>Claim Created</div>
+                                            <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, marginTop: 4 }}>Oct 24, 2023 4:15 PM</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {view === "aging" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 32, flex: 1 }}>
+                    {/* AR Intelligence Panel */}
+                    <div className="mobile-no-padding-card" style={{ background: GEO_BLACK, borderRadius: GEO_RADIUS, padding: 32, boxShadow: "0 12px 24px rgba(0,0,0,0.2)", position: "relative", overflow: "hidden", display: "flex", gap: 32, alignItems: "center" }}>
+                        <div style={{ position: "absolute", top: -40, right: -40, opacity: 0.05 }}><Sparkles size={240} color={GEO_WHITE} /></div>
+
+                        <div style={{ flex: 1 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                                <Sparkles size={18} color="#00B67A" />
+                                <span style={{ color: GEO_WHITE, fontWeight: 700, fontSize: 14, letterSpacing: 1, textTransform: "uppercase" }}>AR Intelligence Insights</span>
+                            </div>
+                            <h3 style={{ color: GEO_WHITE, fontSize: 24, fontWeight: 600, margin: "0 0 16px 0", lineHeight: 1.3 }}>
+                                "I identified two major bottlenecks in your Revenue Cycle today."
+                            </h3>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                <div style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "rgba(255,255,255,0.1)", padding: 16, borderRadius: 12, border: "1px solid rgba(255,255,255,0.05)" }}>
+                                    <Shield size={20} color="#FFD100" style={{ marginTop: 2 }} />
+                                    <div>
+                                        <div style={{ color: GEO_WHITE, fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Payer Alert: Delta Dental</div>
+                                        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.5 }}>Delta Dental processing times are currently delayed by 5 days system-wide. 12 of your claims are affected but do not require action yet.</div>
+                                    </div>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "rgba(255,255,255,0.1)", padding: 16, borderRadius: 12, border: "1px solid rgba(255,255,255,0.05)" }}>
+                                    <Activity size={20} color="#00B67A" style={{ marginTop: 2 }} />
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ color: GEO_WHITE, fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Collection Opportunity: 31-60 Day Balances</div>
+                                        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.5 }}>You have $1,250 in 31-60 day aging. Historic data shows an 85% collection likelihood if SMS statements are sent today.</div>
+                                    </div>
+                                    <button style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: "none", background: "#00B67A", color: GEO_WHITE, fontWeight: 700, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+                                        Send SMS Statements
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid-stack-on-mobile mobile-padding" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 24 }}>
+                        <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", border: `1px solid #E5E7EB` }}>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>Current (0-30 days)</div>
+                            <div style={{ fontSize: 32, fontWeight: 800, color: GEO_TEXT_MAIN, marginTop: 12 }}>$4,500</div>
+                        </div>
+                        <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", border: `1px solid #E5E7EB` }}>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>31-60 Days</div>
+                            <div style={{ fontSize: 32, fontWeight: 800, color: GEO_TEXT_MAIN, marginTop: 12 }}>$1,250</div>
