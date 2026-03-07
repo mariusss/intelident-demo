@@ -1,4 +1,21 @@
 {
     "buildCommand": "vite build",
-    "ignoreCommand": "git diff HEAD^ HEAD --quiet ./"
+    "ignoreCommand": "git diff HEAD^ HEAD --quiet ./",
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "no-store, no-cache, must-revalidate, proxy-revalidate"
+                }
+            ]
+        }
+    ]
 }
