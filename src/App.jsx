@@ -1389,11 +1389,8 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
         const matrix = heatmapView === "practice" ? practiceData : roomData;
 
         const getColor = (val) => {
-            if (val < 20) return '#FEF2F2'; // red-50
-            if (val < 40) return '#FECACA'; // red-200
-            if (val < 60) return '#FEF08A'; // yellow-200
-            if (val < 80) return '#A7F3D0'; // emerald-200
-            return '#10B981'; // emerald-500
+            if (val < 50) return '#FECACA'; // red-200 (Unoccupied)
+            return '#10B981'; // emerald-500 (Occupied)
         };
 
         return (
@@ -1426,11 +1423,14 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
                 ))}
                 {/* Legend */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, marginTop: 16, fontSize: 12, color: '#6B7280', fontWeight: 700 }}>
-                    <span>Low Utilization</span>
-                    <div style={{ display: 'flex', gap: 4 }}>
-                        {['#FEF2F2', '#FECACA', '#FEF08A', '#A7F3D0', '#10B981'].map(c => <div key={c} style={{ width: 16, height: 16, borderRadius: 4, background: c }} />)}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ width: 16, height: 16, borderRadius: 4, background: '#FECACA' }} />
+                        <span>Unoccupied</span>
                     </div>
-                    <span>High Utilization</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ width: 16, height: 16, borderRadius: 4, background: '#10B981' }} />
+                        <span>Occupied</span>
+                    </div>
                 </div>
             </div>
         );
