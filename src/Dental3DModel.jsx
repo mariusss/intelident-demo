@@ -51,7 +51,7 @@ const computeArchPositions = (archArray, isUpper) => {
     });
 };
 
-const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected }) => {
+const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange, getToothColor }) => {
     const meshRef = useRef();
     const [hovered, setHovered] = useState(false);
 
@@ -62,16 +62,17 @@ const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected }) => {
     const rotationY = -angle + Math.PI / 2;
 
     // Advanced Enamel Material optimized to prevent overlapping flickers
+    // Reduced transmission to 0.1 to give it a solid "creamy" organic tooth look instead of pure glass
     const enamelMaterialProps = {
-        transmission: 0.8,
+        transmission: 0.1,
         opacity: 1,
-        metalness: 0.1,
-        roughness: 0.1,
+        metalness: 0.05,
+        roughness: 0.25,
         ior: 1.5,
-        thickness: 2.0,
-        color: '#ffffff',
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.05,
+        thickness: 1.0,
+        color: '#fffff8',
+        clearcoat: 0.8,
+        clearcoatRoughness: 0.1,
         transparent: true,
         side: THREE.FrontSide,
         depthWrite: true // crucial to prevent internal z-fighting between adjacent teeth
@@ -130,12 +131,46 @@ const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected }) => {
                 <PulsatingSphere isUpper={isUpper} tHeight={tHeight} tDepth={tDepth} />
             )}
 
-            {/* Number Label */}
+            {/* Number Label & Interactive Popup Overlay */}
             {(hovered || isSelected) && (
-                <Html position={[0, isUpper ? tHeight / 2 + 0.5 : -tHeight / 2 - 0.5, 0]} center>
-                    <div style={{ background: '#111827', color: 'white', padding: '4px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700, pointerEvents: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-                        #{num}
-                    </div>
+                <Html position={[0, isUpper ? tHeight / 2 + 0.5 : -tHeight / 2 - 0.5, 0]} center zIndexRange={[100, 0]}>
+                    {!isSelected ? (
+                        <div style={{ background: '#111827', color: 'white', padding: '4px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700, pointerEvents: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+                            #{num}
+                        </div>
+                    ) : (
+                        <div style={{ background: '#ffffff', borderRadius: 12, padding: 12, boxShadow: '0 10px 25px rgba(0,0,0,0.15)', zIndex: 100, width: 160, border: '1px solid #E5E7EB', pointerEvents: 'auto' }}>
+                            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8, color: '#1f2937', textAlign: 'center' }}>Tooth #{num}</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                {["Healthy", "Existing", "Proposed", "Watch", "Missing"].map(status => (
+                                    <button
+                                        key={status}
+                                        onClick={(e) => { e.stopPropagation(); onStatusChange(num, status); }}
+                                        style={{
+                                            background: data.status === status ? `${getToothColor(status)}15` : 'transparent',
+                                            border: 'none',
+                                            padding: '6px 8px',
+                                            borderRadius: 6,
+                                            fontSize: 13,
+                                            fontWeight: 600,
+                                            color: data.status === status ? getToothColor(status) : '#1f2937',
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 6,
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseOver={e => { if (data.status !== status) e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
+                                        onMouseOut={e => { if (data.status !== status) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                    >
+                                        <div style={{ width: 8, height: 8, borderRadius: 4, background: getToothColor(status) }} />
+                                        {status}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </Html>
             )}
         </group>
@@ -177,7 +212,7 @@ const DentalArchGums = ({ isUpper }) => {
     );
 };
 
-export function Dental3DModel({ teethData, selectedTooth, onSelectTooth }) {
+export function Dental3DModel({ teethData, selectedTooth, onSelectTooth, onStatusChange, getToothColor }) {
     const upperArch = Array.from({ length: 16 }, (_, i) => i + 1);
     const lowerArch = Array.from({ length: 16 }, (_, i) => 32 - i);
 
@@ -203,6 +238,8 @@ export function Dental3DModel({ teethData, selectedTooth, onSelectTooth }) {
                             data={teethData[pos.num]}
                             isSelected={selectedTooth === pos.num}
                             onSelect={onSelectTooth}
+                            onStatusChange={onStatusChange}
+                            getToothColor={getToothColor}
                         />
                     ))}
                     {lowerPositions.map((pos) => (
@@ -214,6 +251,8 @@ export function Dental3DModel({ teethData, selectedTooth, onSelectTooth }) {
                             data={teethData[pos.num]}
                             isSelected={selectedTooth === pos.num}
                             onSelect={onSelectTooth}
+                            onStatusChange={onStatusChange}
+                            getToothColor={getToothColor}
                         />
                     ))}
 

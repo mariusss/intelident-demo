@@ -3088,7 +3088,13 @@ AI Confidence: 96% match with standard of care protocols.`;
                         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
                             {activeTab === "tooth" ? (
                                 viewMode === "3D" ? (
-                                    <Dental3DModel teethData={teeth} selectedTooth={selectedTooth} onSelectTooth={handleToothClick} />
+                                    <Dental3DModel
+                                        teethData={teeth}
+                                        selectedTooth={selectedTooth}
+                                        onSelectTooth={handleToothClick}
+                                        onStatusChange={handleStatusChange}
+                                        getToothColor={getToothColor}
+                                    />
                                 ) : (
                                     renderToothChart()
                                 )
