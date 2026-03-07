@@ -3,63 +3,78 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, RoundedBox, Sphere, Html } from '@react-three/drei';
 import * as THREE from 'three';
 
-// Tooth configuration logic mirroring the 2D version
-const getToothConfig = (num, isUpper) => {
+// Procedural gapless layout based on accumulated widths
+const getToothConfig = (num) => {
     let tWidth = 0.5;
     let tDepth = 0.5;
-    let tHeight = 0.8;
+    let tHeight = 1.2; // Taller teeth
     let tRadius = 0.15;
 
     if ([1, 2, 3, 14, 15, 16, 17, 18, 19, 30, 31, 32].includes(num)) {
-        tWidth = 0.75; tDepth = 0.75; tHeight = 0.6; tRadius = 0.15; // Molars
+        tWidth = 0.8; tDepth = 0.75; tHeight = 1.0; tRadius = 0.15; // Molars
     } else if ([4, 5, 12, 13, 20, 21, 28, 29].includes(num)) {
-        tWidth = 0.55; tDepth = 0.6; tHeight = 0.7; tRadius = 0.2; // Premolars
+        tWidth = 0.55; tDepth = 0.6; tHeight = 1.2; tRadius = 0.2; // Premolars
     } else if ([6, 11, 22, 27].includes(num)) {
-        tWidth = 0.5; tDepth = 0.55; tHeight = 0.85; tRadius = 0.2; // Canines
+        tWidth = 0.5; tDepth = 0.55; tHeight = 1.35; tRadius = 0.2; // Canines
     } else {
-        tWidth = 0.45; tDepth = 0.4; tHeight = 0.8; tRadius = 0.1; // Incisors
+        tWidth = 0.45; tDepth = 0.4; tHeight = 1.25; tRadius = 0.1; // Incisors
     }
 
-    return { tWidth, tHeight, tDepth, tRadius };
+    // We add a tiny micro-gap to the rendered width to prevent pure Z-fighting but they will look perfectly gapless.
+    return { tWidth: tWidth - 0.015, tHeight, tDepth, tRadius, actualWidth: tWidth };
 };
 
-const Tooth3D = ({ num, index, isUpper, data, onSelect, isSelected }) => {
+const archRadiusX = 2.4;
+const archRadiusZ = 2.8;
+
+const computeArchPositions = (archArray, isUpper) => {
+    let totalWidth = 0;
+    const configs = archArray.map(num => {
+        const config = getToothConfig(num);
+        totalWidth += config.actualWidth;
+        return { num, config };
+    });
+
+    let currentArc = 0;
+    return configs.map(({ num, config }) => {
+        // Find center point along arc for this tooth
+        const t = (currentArc + config.actualWidth / 2) / totalWidth;
+        const angle = Math.PI * (1 - t);
+
+        currentArc += config.actualWidth;
+
+        const x = Math.cos(angle) * archRadiusX;
+        const z = Math.sin(angle) * archRadiusZ - (archRadiusZ * 0.5);
+        const y = isUpper ? 0.6 : -0.6; // Bringing them together
+
+        return { num, config, x, y, z, angle };
+    });
+};
+
+const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected }) => {
     const meshRef = useRef();
     const [hovered, setHovered] = useState(false);
 
-    // Arch positioning Math - creating a semi-ellipse / parabola
-    const archRadiusX = 3.6;
-    const archRadiusZ = 3.8;
-
-    // Map index 0-15 to an angle representing the U-shape
-    // index 0 is left posterior, index 15 is right posterior
-    const t = index / 15;
-    const angle = Math.PI * (1 - t);
-
-    const x = Math.cos(angle) * archRadiusX;
-    // Front teeth (angle ~ PI/2) should be forward. Posterior teeth further back.
-    const z = Math.sin(angle) * archRadiusZ - (archRadiusZ * 0.5);
-    // Upper arch sits above lower arch
-    const y = isUpper ? 0.4 : -0.4;
-
-    const { tWidth, tHeight, tDepth, tRadius } = useMemo(() => getToothConfig(num, isUpper), [num, isUpper]);
+    const { x, y, z, angle, config } = pos;
+    const { tWidth, tHeight, tDepth, tRadius } = config;
 
     // Rotation so it faces the arch curve normal
     const rotationY = -angle + Math.PI / 2;
 
-    // Enamel Material
+    // Advanced Enamel Material optimized to prevent overlapping flickers
     const enamelMaterialProps = {
-        transmission: 0.6,
+        transmission: 0.8,
         opacity: 1,
         metalness: 0.1,
-        roughness: 0.15,
+        roughness: 0.1,
         ior: 1.5,
-        thickness: 1.5,
+        thickness: 2.0,
         color: '#ffffff',
         clearcoat: 1.0,
         clearcoatRoughness: 0.05,
         transparent: true,
-        side: THREE.FrontSide
+        side: THREE.FrontSide,
+        depthWrite: true // crucial to prevent internal z-fighting between adjacent teeth
     };
 
     const isMissing = data?.status === 'Missing';
@@ -106,7 +121,7 @@ const Tooth3D = ({ num, index, isUpper, data, onSelect, isSelected }) => {
             )}
 
             {isProposed && (
-                <RoundedBox args={[tWidth * 1.08, tHeight * 1.08, tDepth * 1.08]} radius={tRadius} smoothness={4}>
+                <RoundedBox args={[tWidth * 1.05, tHeight * 1.05, tDepth * 1.05]} radius={tRadius} smoothness={4}>
                     <meshStandardMaterial color="#ef4444" transparent opacity={0.35} depthWrite={false} side={THREE.FrontSide} />
                 </RoundedBox>
             )}
@@ -117,7 +132,7 @@ const Tooth3D = ({ num, index, isUpper, data, onSelect, isSelected }) => {
 
             {/* Number Label */}
             {(hovered || isSelected) && (
-                <Html position={[0, isUpper ? tHeight / 2 + 0.4 : -tHeight / 2 - 0.4, 0]} center>
+                <Html position={[0, isUpper ? tHeight / 2 + 0.5 : -tHeight / 2 - 0.5, 0]} center>
                     <div style={{ background: '#111827', color: 'white', padding: '4px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700, pointerEvents: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
                         #{num}
                     </div>
@@ -146,9 +161,9 @@ const DentalArchGums = ({ isUpper }) => {
         for (let i = 0; i <= 30; i++) {
             const t = i / 30;
             const angle = Math.PI * (1 - t);
-            const x = Math.cos(angle) * 3.6;
-            const z = Math.sin(angle) * 3.8 - (3.8 * 0.5);
-            const y = isUpper ? 0.75 : -0.75;
+            const x = Math.cos(angle) * archRadiusX;
+            const z = Math.sin(angle) * archRadiusZ - (archRadiusZ * 0.5);
+            const y = isUpper ? 1.0 : -1.0;
             points.push(new THREE.Vector3(x, y, z));
         }
         return new THREE.CatmullRomCurve3(points);
@@ -156,7 +171,7 @@ const DentalArchGums = ({ isUpper }) => {
 
     return (
         <mesh>
-            <tubeGeometry args={[curve, 64, 0.4, 16, false]} />
+            <tubeGeometry args={[curve, 64, 0.45, 16, false]} />
             <meshStandardMaterial color="#fca5a5" roughness={0.2} metalness={0.05} />
         </mesh>
     );
@@ -166,9 +181,12 @@ export function Dental3DModel({ teethData, selectedTooth, onSelectTooth }) {
     const upperArch = Array.from({ length: 16 }, (_, i) => i + 1);
     const lowerArch = Array.from({ length: 16 }, (_, i) => 32 - i);
 
+    const upperPositions = useMemo(() => computeArchPositions(upperArch, true), []);
+    const lowerPositions = useMemo(() => computeArchPositions(lowerArch, false), []);
+
     return (
         <div style={{ width: '100%', height: '100%', minHeight: '500px', background: 'linear-gradient(to bottom, #f0fdf4 0%, #e0f2fe 100%)', borderRadius: 24, overflow: 'hidden', position: 'relative', border: '1px solid #E5E7EB', boxShadow: '0 10px 30px rgba(0,182,122,0.05)' }}>
-            <Canvas camera={{ position: [0, 3, 10], fov: 45 }}>
+            <Canvas camera={{ position: [0, 1, 8], fov: 45 }}>
                 <ambientLight intensity={0.5} />
                 <hemisphereLight skyColor={"#ffffff"} groundColor={"#a7f3d0"} intensity={0.8} />
                 <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
@@ -176,30 +194,29 @@ export function Dental3DModel({ teethData, selectedTooth, onSelectTooth }) {
                 <pointLight position={[0, 0, 5]} intensity={1.0} decay={2} distance={10} />
 
                 <group position={[0, 0, 0]} rotation={[0.1, 0, 0]}>
-                    {upperArch.map((num, i) => (
+                    {upperPositions.map((pos) => (
                         <Tooth3D
-                            key={`upper-${num}`}
-                            num={num}
-                            index={i}
+                            key={`upper-${pos.num}`}
+                            num={pos.num}
                             isUpper={true}
-                            data={teethData[num]}
-                            isSelected={selectedTooth === num}
+                            pos={pos}
+                            data={teethData[pos.num]}
+                            isSelected={selectedTooth === pos.num}
                             onSelect={onSelectTooth}
                         />
                     ))}
-                    {lowerArch.map((num, i) => (
+                    {lowerPositions.map((pos) => (
                         <Tooth3D
-                            key={`lower-${num}`}
-                            num={num}
-                            index={i}
+                            key={`lower-${pos.num}`}
+                            num={pos.num}
                             isUpper={false}
-                            data={teethData[num]}
-                            isSelected={selectedTooth === num}
+                            pos={pos}
+                            data={teethData[pos.num]}
+                            isSelected={selectedTooth === pos.num}
                             onSelect={onSelectTooth}
                         />
                     ))}
 
-                    {/* Simulated Gingiva Extrusions matching the elliptical math precisely */}
                     <DentalArchGums isUpper={true} />
                     <DentalArchGums isUpper={false} />
                 </group>
