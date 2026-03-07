@@ -2919,7 +2919,7 @@ AI Confidence: 96% match with standard of care protocols.`;
             }
 
             return (
-                <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, transform: `translateY(${translateY}px)` }}>
+                <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, transform: `translateY(${translateY}px)`, zIndex: isSelected ? 50 : 1 }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED }}>{num}</div>
                     <div
                         onClick={() => handleToothClick(num)}
