@@ -1471,7 +1471,7 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
                                             onMouseOver={(e) => { e.currentTarget.style.opacity = 0.8; e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.zIndex = 10; e.currentTarget.style.position = 'relative'; }}
                                             onMouseOut={(e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.zIndex = 1; }}
                                         >
-                                            {chunk.span > 1 && (typeof chunk.val === 'object' ? chunk.val.utilized : chunk.val >= 50) ? (
+                                            {(typeof chunk.val === 'object' ? chunk.val.utilized : chunk.val >= 50) ? (
                                                 <span style={{ fontSize: 11, fontWeight: 700, color: '#FFFFFF', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', padding: '0 8px' }}>
                                                     {typeof chunk.val === 'object' ? chunk.val.patient : 'Occupied'}
                                                 </span>
