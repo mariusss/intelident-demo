@@ -3027,7 +3027,6 @@ AI Confidence: 96% match with standard of care protocols.`;
                         <div style={{ width: "100%", height: 180, background: "#1a1a1a", borderRadius: 12, position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16, border: `2px solid ${GEO_BG}` }}>
                             {/* Panorex Background */}
                             <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundImage: "url('/panorex-demo.png')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.8 }} />
-                            <div style={{ width: "80%", height: "60%", border: "2px solid #555", borderRadius: "100px / 50px", opacity: 0.5 }} />
 
                             {/* Analysis Overlay */}
                             {xrayAnalyzed && (
@@ -3045,13 +3044,13 @@ AI Confidence: 96% match with standard of care protocols.`;
                             )}
 
                             {!xrayAnalyzed && !analyzingXray && (
-                                <button onClick={handleAnalyzeXray} style={{ zIndex: 10, padding: "10px 20px", borderRadius: GEO_PILL, border: `1px solid rgba(255,255,255,0.2)`, background: "rgba(0,0,0,0.6)", color: "white", fontSize: 14, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", gap: 8 }}>
-                                    <ImageIcon size={16} /> Analyze Panorex
+                                <button onClick={handleAnalyzeXray} style={{ position: "absolute", bottom: 16, right: 16, zIndex: 10, padding: "8px 16px", borderRadius: GEO_PILL, border: `1px solid rgba(255,255,255,0.2)`, background: "rgba(0,0,0,0.6)", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", gap: 8 }}>
+                                    <ImageIcon size={14} /> Analyze Panorex
                                 </button>
                             )}
                             {analyzingXray && (
-                                <div style={{ zIndex: 10, padding: "10px 20px", borderRadius: GEO_PILL, border: `1px solid rgba(0, 182, 122, 0.4)`, background: "rgba(0, 182, 122, 0.1)", color: GEO_GREEN, fontSize: 14, fontWeight: 600, backdropFilter: "blur(4px)", display: "flex", alignItems: "center", gap: 8 }}>
-                                    <Loader2 size={16} className="lucide-spin" style={{ animation: "spin 2s linear infinite" }} /> Running AI Models...
+                                <div style={{ position: "absolute", bottom: 16, right: 16, zIndex: 10, padding: "8px 16px", borderRadius: GEO_PILL, border: `1px solid rgba(0, 182, 122, 0.4)`, background: "rgba(0, 182, 122, 0.1)", color: GEO_GREEN, fontSize: 13, fontWeight: 600, backdropFilter: "blur(4px)", display: "flex", alignItems: "center", gap: 8 }}>
+                                    <Loader2 size={14} className="lucide-spin" style={{ animation: "spin 2s linear infinite" }} /> Running AI Models...
                                 </div>
                             )}
                         </div>
