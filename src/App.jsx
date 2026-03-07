@@ -2619,7 +2619,15 @@ export function BillingPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobile
 
                     {showAppeal && (
                         <div style={{ position: "absolute", top: 120, right: 40, width: 400, background: "white", padding: 24, borderRadius: 16, boxShadow: "0 10px 40px rgba(0,0,0,0.2)", zIndex: 10 }}>
-                            <h4 style={{ margin: "0 0 12px 0" }}>AI Generated Appeal Letter</h4>
+                            <button
+                                onClick={() => setShowAppeal(false)}
+                                style={{ position: "absolute", top: 16, right: 16, background: "transparent", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 4, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}
+                                onMouseOver={e => e.currentTarget.style.background = "#F3F4F6"}
+                                onMouseOut={e => e.currentTarget.style.background = "transparent"}
+                            >
+                                <X size={20} />
+                            </button>
+                            <h4 style={{ margin: "0 0 12px 0", paddingRight: 24 }}>AI Generated Appeal Letter</h4>
                             <div style={{ fontSize: 12, background: "#F9FAFB", padding: 12, borderRadius: 8, marginBottom: 16, fontFamily: "monospace" }}>
                                 "To Whom It May Concern: We are appealing the denial for claim CLM-9021. AI Charting identified Tooth #19 in original clinical notes..."
                             </div>
