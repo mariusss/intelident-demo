@@ -3,6 +3,12 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, RoundedBox, Sphere, Html } from '@react-three/drei';
 import * as THREE from 'three';
 
+const GEO_BG = "#F4F5F7";
+const GEO_WHITE = "#FFFFFF";
+const GEO_BLUE = "#2563EB";
+const GEO_TEXT_MAIN = "#1C1E23";
+const GEO_TEXT_MUTED = "#8A8D93";
+
 // Procedural gapless layout based on accumulated widths
 const getToothConfig = (num) => {
     let tWidth = 0.5;
@@ -51,7 +57,7 @@ const computeArchPositions = (archArray, isUpper) => {
     });
 };
 
-const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange, getToothColor }) => {
+const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange, getToothColor, handleProcedureClick, selectedSurfaces, paletteTab, setPaletteTab }) => {
     const meshRef = useRef();
     const [hovered, setHovered] = useState(false);
 
@@ -120,36 +126,80 @@ const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange
                             #{num}
                         </div>
                     ) : (
-                        <div style={{ background: '#ffffff', borderRadius: 12, padding: 12, boxShadow: '0 10px 25px rgba(0,0,0,0.15)', zIndex: 100, width: 160, border: '1px solid #E5E7EB', pointerEvents: 'auto' }}>
-                            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8, color: '#1f2937', textAlign: 'center' }}>Tooth #{num}</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                {["Healthy", "Existing", "Proposed", "Watch", "Missing"].map(status => (
+                        <div style={{ background: GEO_WHITE, borderRadius: 16, padding: "16px", boxShadow: "0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)", zIndex: 100, width: 320, pointerEvents: 'auto' }}>
+                            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: GEO_TEXT_MAIN, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span>Tooth #{num}</span>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: GEO_BLUE }}>
+                                    {Object.keys(selectedSurfaces || {}).filter(k => k.startsWith(`${num}-`) && selectedSurfaces[k]).map(k => k.split('-')[1]).join('') || 'Entire Tooth'}
+                                </div>
+                            </div>
+
+                            {/* Tabs */}
+                            <div style={{ display: "flex", gap: 8, marginBottom: 16, borderBottom: `1px solid ${GEO_BG}`, paddingBottom: 8 }}>
+                                {["Procedures", "Conditions"].map(tab => (
                                     <button
-                                        key={status}
-                                        onClick={(e) => { e.stopPropagation(); onStatusChange(num, status); }}
+                                        key={tab}
+                                        onClick={(e) => { e.stopPropagation(); setPaletteTab(tab); }}
                                         style={{
-                                            background: data?.status === status ? `${getToothColor(status)}15` : 'transparent',
-                                            border: 'none',
-                                            padding: '6px 8px',
-                                            borderRadius: 6,
-                                            fontSize: 13,
-                                            fontWeight: 600,
-                                            color: data?.status === status ? getToothColor(status) : '#1f2937',
-                                            cursor: 'pointer',
-                                            textAlign: 'left',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 6,
-                                            transition: 'all 0.2s'
+                                            background: "transparent", border: "none", padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+                                            color: paletteTab === tab ? GEO_BLUE : GEO_TEXT_MUTED,
+                                            backgroundColor: paletteTab === tab ? "#EFF6FF" : "transparent",
+                                            cursor: "pointer", transition: "all 0.2s"
                                         }}
-                                        onMouseOver={e => { if (data?.status !== status) e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
-                                        onMouseOut={e => { if (data?.status !== status) e.currentTarget.style.backgroundColor = 'transparent'; }}
                                     >
-                                        <div style={{ width: 8, height: 8, borderRadius: 4, background: getToothColor(status) }} />
-                                        {status}
+                                        {tab}
                                     </button>
                                 ))}
                             </div>
+
+                            {paletteTab === "Procedures" && (
+                                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                                        {["Composite", "Amalgam", "Crown", "Root Canal", "Implant", "Extraction", "Sealant"].map(proc => (
+                                            <button
+                                                key={proc}
+                                                onClick={(e) => { e.stopPropagation(); handleProcedureClick(proc); }}
+                                                style={{
+                                                    background: "#F8FAFC", border: `1px solid #E2E8F0`, padding: "10px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+                                                    color: GEO_TEXT_MAIN, cursor: "pointer", textAlign: "center", transition: "all 0.2s"
+                                                }}
+                                                onMouseOver={e => { e.currentTarget.style.borderColor = GEO_BLUE; e.currentTarget.style.backgroundColor = "#EFF6FF"; }}
+                                                onMouseOut={e => { e.currentTarget.style.borderColor = "#E2E8F0"; e.currentTarget.style.backgroundColor = "#F8FAFC"; }}
+                                            >
+                                                {proc}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Search CDT Code or Description..."
+                                        onClick={(e) => e.stopPropagation()}
+                                        style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: `1px solid ${GEO_BG}`, fontSize: 13, outline: "none", background: "#F8FAFC" }}
+                                    />
+                                </div>
+                            )}
+
+                            {paletteTab === "Conditions" && (
+                                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                    {["Healthy", "Existing", "Proposed", "Watch", "Missing"].map(status => (
+                                        <button
+                                            key={status}
+                                            onClick={(e) => { e.stopPropagation(); onStatusChange(num, status); }}
+                                            style={{
+                                                background: "transparent", border: "none", padding: "8px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+                                                color: data?.status === status ? getToothColor(status) : GEO_TEXT_MAIN,
+                                                backgroundColor: data?.status === status ? `${getToothColor(status)}10` : "transparent",
+                                                cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 8, transition: "background 0.2s"
+                                            }}
+                                            onMouseOver={e => e.currentTarget.style.backgroundColor = GEO_BG}
+                                            onMouseOut={e => e.currentTarget.style.backgroundColor = data?.status === status ? `${getToothColor(status)}10` : "transparent"}
+                                        >
+                                            <div style={{ width: 10, height: 10, borderRadius: 5, background: getToothColor(status) }} />
+                                            {status}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </Html>
@@ -182,7 +232,7 @@ const DentalArchGums = ({ isUpper }) => {
     );
 };
 
-export function Dental3DModel({ teethData, selectedTooth, onSelectTooth, onStatusChange, getToothColor }) {
+export function Dental3DModel({ teethData, selectedTooth, onSelectTooth, onStatusChange, getToothColor, handleProcedureClick, selectedSurfaces, paletteTab, setPaletteTab }) {
     const upperArch = Array.from({ length: 16 }, (_, i) => i + 1);
     const lowerArch = Array.from({ length: 16 }, (_, i) => 32 - i);
 

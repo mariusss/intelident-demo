@@ -120,6 +120,7 @@ const DOCUMENTS = [
 export const GEO_BG = "#F4F5F7";
 export const GEO_WHITE = "#FFFFFF";
 export const GEO_GREEN = "#00B67A";
+export const GEO_BLUE = "#2563EB";
 export const GEO_YELLOW = "#FFD100";
 export const GEO_BLACK = "#1C1E23";
 export const GEO_TEXT_MAIN = "#1C1E23";
@@ -3547,6 +3548,10 @@ AI Confidence: 96% match with standard of care protocols.`;
                                         onSelectTooth={handleToothClick}
                                         onStatusChange={handleStatusChange}
                                         getToothColor={getToothColor}
+                                        handleProcedureClick={handleProcedureClick}
+                                        selectedSurfaces={selectedSurfaces}
+                                        paletteTab={paletteTab}
+                                        setPaletteTab={setPaletteTab}
                                     />
                                 ) : (
                                     <div style={{ width: "100%" }}>
