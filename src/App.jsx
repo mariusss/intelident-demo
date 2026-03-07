@@ -2975,7 +2975,7 @@ AI Confidence: 96% match with standard of care protocols.`;
                                     <Clock size={14} /> History
                                 </button>
                                 <button style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: `1px solid ${GEO_BG}`, background: GEO_WHITE, fontSize: 13, fontWeight: 600, color: GEO_TEXT_MAIN, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
-                                    <Image size={14} /> Layout
+                                    <ImageIcon size={14} /> Layout
                                 </button>
                             </div>
                         </div>
@@ -3021,7 +3021,7 @@ AI Confidence: 96% match with standard of care protocols.`;
 
                             {!xrayAnalyzed && !analyzingXray && (
                                 <button onClick={handleAnalyzeXray} style={{ zIndex: 10, padding: "10px 20px", borderRadius: GEO_PILL, border: `1px solid rgba(255,255,255,0.2)`, background: "rgba(0,0,0,0.6)", color: "white", fontSize: 14, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", gap: 8 }}>
-                                    <Image size={16} /> Analyze Panorex
+                                    <ImageIcon size={16} /> Analyze Panorex
                                 </button>
                             )}
                             {analyzingXray && (
@@ -3104,7 +3104,7 @@ AI Confidence: 96% match with standard of care protocols.`;
 // ==========================================
 // UI2: COMMUNICATIONS HUB PAGE
 // ==========================================
-export function CommunicationsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export function CommunicationsHubPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
     const [activeTab, setActiveTab] = useState("inbox");
     const [selectedChat, setSelectedChat] = useState(1);
 
