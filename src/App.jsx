@@ -2320,7 +2320,7 @@ export function PatientDetailPageUI2({ patient, onBack, currentUI, setUI, TIMELI
                                                     <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1C1E23", margin: "0 0 4px 0" }}>{ev.aiNote.title}</h3>
                                                     <div style={{ fontSize: 13, fontWeight: 600, color: GEO_GREEN }}>{ev.aiNote.provider}</div>
                                                 </div>
-                                                <button style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", color: GEO_GREEN, fontWeight: 700, fontSize: 13, cursor: "pointer", padding: "6px 12px", borderRadius: GEO_RADIUS, border: `1px solid ${GEO_GREEN}` }}>
+                                                <button style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", color: GEO_GREEN, fontWeight: 700, fontSize: 13, cursor: "pointer", padding: "6px 12px", borderRadius: GEO_RADIUS, border: `1px solid ${GEO_GREEN}` }}>
                                                     <ExternalLink size={14} /> View Note
                                                 </button>
                                             </div>
