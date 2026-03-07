@@ -1253,8 +1253,65 @@ export function VoiceAgentPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMob
 }
 
 export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
-    // We will just return the whole Analytics page body, keeping the original heatmap, but adding our custom AI cards at the bottom.
-    // However, recreating everything is safe as long as we keep the structure.
+    const renderHeatmap = () => {
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        const times = ['8am', '9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm'];
+        const data = [
+            [85, 90, 95, 80, 40, 75, 85, 90, 60, 40], // Mon
+            [90, 95, 100, 85, 30, 80, 90, 95, 65, 45], // Tue
+            [40, 30, 20, 10, 5, 20, 30, 40, 25, 10],  // Wed (Low util detected)
+            [80, 85, 90, 75, 45, 80, 85, 90, 55, 35], // Thu
+            [75, 80, 85, 60, 20, 65, 75, 80, 40, 25], // Fri
+        ];
+
+        const getColor = (val) => {
+            if (val < 20) return '#FEF2F2'; // red-50
+            if (val < 40) return '#FECACA'; // red-200
+            if (val < 60) return '#FEF08A'; // yellow-200
+            if (val < 80) return '#A7F3D0'; // emerald-200
+            return '#10B981'; // emerald-500
+        };
+
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', overflowX: 'auto', paddingBottom: 8 }}>
+                <div style={{ display: 'flex', gap: 8, paddingLeft: 48 }}>
+                    {times.map(t => <div key={t} style={{ flex: 1, minWidth: 40, textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#9CA3AF' }}>{t}</div>)}
+                </div>
+                {days.map((day, dIdx) => (
+                    <div key={day} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <div style={{ width: 40, fontSize: 13, fontWeight: 700, color: '#6B7280', textAlign: 'right' }}>{day}</div>
+                        {data[dIdx].map((val, tIdx) => (
+                            <div
+                                key={`${day}-${times[tIdx]}`}
+                                title={`${day} ${times[tIdx]}: ${val}% Utilized`}
+                                style={{
+                                    flex: 1,
+                                    minWidth: 40,
+                                    height: 48,
+                                    background: getColor(val),
+                                    borderRadius: 6,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    border: '1px solid rgba(0,0,0,0.02)'
+                                }}
+                                onMouseOver={(e) => { e.currentTarget.style.opacity = 0.8; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.transform = 'scale(1)'; }}
+                            />
+                        ))}
+                    </div>
+                ))}
+                {/* Legend */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, marginTop: 16, fontSize: 12, color: '#6B7280', fontWeight: 700 }}>
+                    <span>Low Utilization</span>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                        {['#FEF2F2', '#FECACA', '#FEF08A', '#A7F3D0', '#10B981'].map(c => <div key={c} style={{ width: 16, height: 16, borderRadius: 4, background: c }} />)}
+                    </div>
+                    <span>High Utilization</span>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="mobile-no-padding-main" style={{ padding: "20px 40px", height: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
             {typeof window !== 'undefined' && window.TopGreetingUI2 && <window.TopGreetingUI2 currentUI={currentUI} setUI={setUI} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} subtitle="Performance insights and growth." />}
@@ -1283,7 +1340,9 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
                 <div style={{ background: "#FFFFFF", borderRadius: 24, padding: 32, border: "1px solid #E5E7EB" }}>
                     <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Chair Utilization Heatmap</h3>
                     <p style={{ color: "#6B7280", margin: "4px 0 24px 0", fontSize: 14 }}>Low utilization detected on Wednesdays heavily impacting revenue.</p>
-                    <div style={{ height: 200, background: "#F9FAFB", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>[Heatmap Visualization (Preserved)]</div>
+                    <div style={{ background: "#F9FAFB", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280", padding: 32 }}>
+                        {renderHeatmap()}
+                    </div>
                 </div>
 
                 {/* NEW: AI Growth Recommendations Panel */}
