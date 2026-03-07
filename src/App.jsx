@@ -1254,16 +1254,31 @@ export function VoiceAgentPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMob
 }
 
 export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+    const [heatmapView, setHeatmapView] = React.useState("practice");
+
     const renderHeatmap = () => {
-        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
         const times = ['8am', '9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm'];
-        const data = [
+
+        const practiceDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        const practiceData = [
             [85, 90, 95, 80, 40, 75, 85, 90, 60, 40], // Mon
             [90, 95, 100, 85, 30, 80, 90, 95, 65, 45], // Tue
             [40, 30, 20, 10, 5, 20, 30, 40, 25, 10],  // Wed (Low util detected)
             [80, 85, 90, 75, 45, 80, 85, 90, 55, 35], // Thu
             [75, 80, 85, 60, 20, 65, 75, 80, 40, 25], // Fri
         ];
+
+        const roomLabels = ['Room 1', 'Room 2', 'Room 3', 'Room 4', 'Room 5'];
+        const roomData = [
+            [95, 95, 100, 90, 40, 85, 95, 100, 70, 50], // Room 1 (High util)
+            [85, 90, 90, 80, 35, 75, 85, 90, 60, 45],   // Room 2
+            [30, 20, 10, 5, 0, 15, 20, 25, 10, 5],      // Room 3 (Empty / under utilized)
+            [80, 85, 85, 75, 30, 80, 85, 80, 50, 40],   // Room 4
+            [70, 75, 80, 60, 25, 65, 70, 75, 40, 30],   // Room 5
+        ];
+
+        const yLabels = heatmapView === "practice" ? practiceDays : roomLabels;
+        const matrix = heatmapView === "practice" ? practiceData : roomData;
 
         const getColor = (val) => {
             if (val < 20) return '#FEF2F2'; // red-50
@@ -1278,13 +1293,13 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
                 <div style={{ display: 'flex', gap: 8, paddingLeft: 48 }}>
                     {times.map(t => <div key={t} style={{ flex: 1, minWidth: 40, textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#9CA3AF' }}>{t}</div>)}
                 </div>
-                {days.map((day, dIdx) => (
-                    <div key={day} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                        <div style={{ width: 40, fontSize: 13, fontWeight: 700, color: '#6B7280', textAlign: 'right' }}>{day}</div>
-                        {data[dIdx].map((val, tIdx) => (
+                {yLabels.map((rowLabel, dIdx) => (
+                    <div key={rowLabel} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <div style={{ width: 50, fontSize: 13, fontWeight: 700, color: '#6B7280', textAlign: 'right' }}>{rowLabel}</div>
+                        {matrix[dIdx].map((val, tIdx) => (
                             <div
-                                key={`${day}-${times[tIdx]}`}
-                                title={`${day} ${times[tIdx]}: ${val}% Utilized`}
+                                key={`${rowLabel}-${times[tIdx]}`}
+                                title={`${rowLabel} ${times[tIdx]}: ${val}% Utilized`}
                                 style={{
                                     flex: 1,
                                     minWidth: 40,
@@ -1339,8 +1354,18 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
 
                 {/* Heatmap placeholder to match original */}
                 <div style={{ background: "#FFFFFF", borderRadius: 24, padding: 32, border: "1px solid #E5E7EB" }}>
-                    <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Chair Utilization Heatmap</h3>
-                    <p style={{ color: "#6B7280", margin: "4px 0 24px 0", fontSize: 14 }}>Low utilization detected on Wednesdays heavily impacting revenue.</p>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 16 }}>
+                        <div>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Chair Utilization Heatmap</h3>
+                            <p style={{ color: "#6B7280", margin: "4px 0 0 0", fontSize: 14 }}>
+                                {heatmapView === "practice" ? "Low utilization detected on Wednesdays heavily impacting revenue." : "Individual operatory occupancy breakdown for today."}
+                            </p>
+                        </div>
+                        <div style={{ display: 'flex', background: '#F3F4F6', borderRadius: 8, padding: 4 }}>
+                            <button onClick={() => setHeatmapView("practice")} style={{ padding: '6px 16px', borderRadius: 6, border: 'none', background: heatmapView === "practice" ? '#FFFFFF' : 'transparent', color: heatmapView === "practice" ? '#111827' : '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: heatmapView === "practice" ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}>Practice View</button>
+                            <button onClick={() => setHeatmapView("rooms")} style={{ padding: '6px 16px', borderRadius: 6, border: 'none', background: heatmapView === "rooms" ? '#FFFFFF' : 'transparent', color: heatmapView === "rooms" ? '#111827' : '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: heatmapView === "rooms" ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}>Individual Rooms</button>
+                        </div>
+                    </div>
                     <div style={{ background: "#F9FAFB", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280", padding: 32 }}>
                         {renderHeatmap()}
                     </div>
