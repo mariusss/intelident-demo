@@ -2823,11 +2823,18 @@ AI Confidence: 96% match with standard of care protocols.`;
         const upperArch = Array.from({ length: 16 }, (_, i) => i + 1);
         const lowerArch = Array.from({ length: 16 }, (_, i) => 32 - i);
 
-        const ToothNode = ({ num }) => {
+        const ToothNode = ({ num, index, isUpper }) => {
             const data = teeth[num];
             const isSelected = selectedTooth === num;
+
+            // Calculate parabolic arch offset (U-shape)
+            // Center is at index 7.5 (between indices 7 and 8)
+            const distanceFromCenter = Math.abs(index - 7.5);
+            const verticalOffset = Math.pow(distanceFromCenter, 2) * 1.8;
+            const translateY = isUpper ? -verticalOffset : verticalOffset;
+
             return (
-                <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, transform: `translateY(${translateY}px)` }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED }}>{num}</div>
                     <div
                         onClick={() => handleToothClick(num)}
@@ -2876,12 +2883,12 @@ AI Confidence: 96% match with standard of care protocols.`;
         return (
             <div style={{ display: "flex", flexDirection: "column", gap: 32, alignItems: "center", width: "100%", padding: "20px 0" }}>
                 {/* Upper Arch */}
-                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", width: "100%" }}>
-                    {upperArch.map(num => <ToothNode key={num} num={num} />)}
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", width: "100%", marginTop: 60, marginBottom: 20 }}>
+                    {upperArch.map((num, i) => <ToothNode key={num} num={num} index={i} isUpper={true} />)}
                 </div>
                 {/* Lower Arch */}
-                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", width: "100%" }}>
-                    {lowerArch.map(num => <ToothNode key={num} num={num} />)}
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", width: "100%", marginTop: 20, marginBottom: 60 }}>
+                    {lowerArch.map((num, i) => <ToothNode key={num} num={num} index={i} isUpper={false} />)}
                 </div>
 
                 {/* Legend */}
