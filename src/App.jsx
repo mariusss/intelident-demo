@@ -654,10 +654,10 @@ export function AiNotesPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobile
         setGenerating(true);
         setNote("");
         const draft = "SOAP NOTE:\n\nS: Patient presents for routine hygiene exam. Reports no pain or sensitivity.\nO: Visual exam reveals generalized mild plaque. Gums pink and healthy. No visible caries.\nA: Generalized gingivitis, mild.\nP: Prophylaxis completed. Patient instructed on proper flossing technique. Recare set for 6 months.";
-        let i = 0;
+        let i = -1;
         const interval = setInterval(() => {
-            setNote(prev => prev + draft.charAt(i));
             i++;
+            setNote(prev => prev + draft.charAt(i));
             if (i > draft.length - 1) {
                 clearInterval(interval);
                 setGenerating(false);
@@ -2866,10 +2866,10 @@ Recommended Treatment Plan:
 
 AI Confidence: 96% match with standard of care protocols.`;
 
-        let i = 0;
+        let i = -1;
         const interval = setInterval(() => {
-            setNote(prev => prev + draft.charAt(i));
             i++;
+            setNote(prev => prev + draft.charAt(i));
             if (i > draft.length - 1) {
                 clearInterval(interval);
                 setGenerating(false);
