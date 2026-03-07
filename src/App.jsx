@@ -288,12 +288,19 @@ export function MobileHeaderUI2({ isMobileMenuOpen, setIsMobileMenuOpen, onNavig
     );
 }
 
-export function TopGreetingUI2({ isMobileMenuOpen, setIsMobileMenuOpen, subtitle }) {
+export function TopGreetingUI2({ isMobileMenuOpen, setIsMobileMenuOpen, subtitle, onSimulateVoice }) {
     return (
         <div className="hide-on-mobile mobile-margin-bottom" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                 <div>
-                    <h1 className="title-mobile" style={{ fontSize: 28, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0 }}>Good Morning, Dr. Cifor!</h1>
+                    <h1 className="title-mobile" style={{ fontSize: 28, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0, display: "flex", alignItems: "center", gap: 12 }}>
+                        Good Morning, Dr. Cifor!
+                        {onSimulateVoice && (
+                            <button onClick={onSimulateVoice} style={{ background: `${GEO_GREEN}15`, border: `1px solid rgba(0, 182, 122, 0.3)`, padding: "6px 12px", borderRadius: GEO_PILL, display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, color: GEO_GREEN, cursor: "pointer", transition: "all 0.2s" }} onMouseOver={e => e.currentTarget.style.transform = "translateY(-1px)"} onMouseOut={e => e.currentTarget.style.transform = "translateY(0)"}>
+                                <Mic size={14} /> Simulate AI Voice
+                            </button>
+                        )}
+                    </h1>
                     <p style={{ color: GEO_TEXT_MUTED, margin: "8px 0 0 0", fontSize: 16 }}>{subtitle || "Here is your schedule for today."}</p>
                 </div>
             </div>
@@ -3034,6 +3041,9 @@ export function RecallPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileM
 export function ClinicalChartPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
     const [activeTab, setActiveTab] = useState("tooth");
     const [selectedTooth, setSelectedTooth] = useState(null);
+    const [selectedSurfaces, setSelectedSurfaces] = useState({}); // Track { "14-O": true, "14-M": true }
+    const [paletteTab, setPaletteTab] = useState("Procedures");
+    const [progressNotes, setProgressNotes] = useState([]);
     const [teeth, setTeeth] = useState(() => {
         const initial = {};
         for (let i = 1; i <= 32; i++) initial[i] = { status: "Healthy", condition: "" };
@@ -3068,12 +3078,130 @@ export function ClinicalChartPageUI2({ currentUI, setUI, isMobileMenuOpen, setIs
     const [viewMode, setViewMode] = useState("3D"); // Default to the new 3D view
 
     const handleToothClick = (num) => {
-        setSelectedTooth(selectedTooth === num ? null : num);
+        if (selectedTooth !== num) {
+            setSelectedTooth(num);
+            setPaletteTab("Procedures");
+            // Clear surface selections when switching teeth
+            const newSurfaces = { ...selectedSurfaces };
+            Object.keys(newSurfaces).forEach(k => {
+                if (!k.startsWith(`${num}-`)) delete newSurfaces[k];
+            });
+            setSelectedSurfaces(newSurfaces);
+        } else {
+            setSelectedTooth(null);
+            setSelectedSurfaces({});
+        }
     };
 
     const handleStatusChange = (num, status) => {
         setTeeth(prev => ({ ...prev, [num]: { ...prev[num], status } }));
         setSelectedTooth(null);
+        setSelectedSurfaces({});
+    };
+
+    const handleProcedureClick = (procName) => {
+        if (!selectedTooth) return;
+
+        // Get currently selected surfaces for this tooth (e.g. ['M', 'O', 'D'])
+        const activeSurfaces = Object.keys(selectedSurfaces)
+            .filter(k => k.startsWith(`${selectedTooth}-`) && selectedSurfaces[k])
+            .map(k => k.split('-')[1]);
+
+        const surfaceString = activeSurfaces.length > 0 ? activeSurfaces.join('') : 'ALL';
+
+        // Dummy CDT generator
+        const CDTS = {
+            "Composite": "D239" + (activeSurfaces.length > 0 ? activeSurfaces.length : 1),
+            "Amalgam": "D216" + (activeSurfaces.length > 0 ? activeSurfaces.length : 1),
+            "Crown": "D2740",
+            "Root Canal": "D3330",
+            "Implant": "D6010",
+            "Extraction": "D7140",
+            "Sealant": "D1351"
+        };
+        const cdt = CDTS[procName] || "D0000";
+
+        // Push new note
+        const newNote = {
+            id: Date.now(),
+            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            tooth: selectedTooth,
+            surface: surfaceString,
+            cdt: cdt,
+            provider: "Dr. Cifor", // AI demo context localized
+            desc: procName,
+            status: "Proposed",
+            amount: procName === "Crown" || procName === "Implant" ? "$1,250.00" : (procName === "Extraction" ? "$250.00" : "$195.00")
+        };
+
+        setProgressNotes(prev => [newNote, ...prev]);
+
+        // Visual State Update
+        let newStatus = "Proposed";
+        if (procName === "Extraction") newStatus = "Missing";
+
+        setTeeth(prev => ({
+            ...prev,
+            [selectedTooth]: {
+                ...prev[selectedTooth],
+                status: newStatus,
+                condition: `${procName} ${surfaceString !== 'ALL' ? surfaceString : ''}`.trim()
+            }
+        }));
+
+        // Reset
+        setSelectedTooth(null);
+        setSelectedSurfaces({});
+
+        // Optional: Trigger AI dictation sync if we had the other panel open
+        if (note) setNote(prev => prev + `\n- Added ${procName} to tooth #${selectedTooth} (${surfaceString}).`);
+    };
+
+    const handleSimulateVoice = () => {
+        // Macro: "Chart an existing MOD amalgam on tooth number 14"
+        const targetTooth = 14;
+        const targetSurfaces = ['M', 'O', 'D'];
+
+        // 1. Visually select the surfaces briefly to show the macro running
+        const surfacesObj = {};
+        targetSurfaces.forEach(s => surfacesObj[`${targetTooth}-${s}`] = true);
+        setSelectedSurfaces(surfacesObj);
+        setSelectedTooth(targetTooth);
+
+        setTimeout(() => {
+            // 2. Execute the procedure logic (simulate clicking 'Amalgam')
+            const CDTS = { "Amalgam": "D2163" }; // Explicitly set for MOD
+
+            const newNote = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                tooth: targetTooth,
+                surface: "MOD",
+                cdt: CDTS["Amalgam"],
+                provider: "Dr. Cifor",
+                desc: "Amalgam",
+                status: "Existing", // The macro specifically asked for an Existing amalgam
+                amount: "$195.00"
+            };
+
+            setProgressNotes(prev => [newNote, ...prev]);
+
+            setTeeth(prev => ({
+                ...prev,
+                [targetTooth]: {
+                    ...prev[targetTooth],
+                    status: "Existing",
+                    condition: "Amalgam MOD"
+                }
+            }));
+
+            // Generate the Dictation Text
+            setNote(`AI Context Processor Activated...\nTranscription: "Chart an existing MOD amalgam on tooth number 14."\nAction: Success. Row added to Progress Notes. Map updated to Existing.`);
+
+            // Reset selection
+            setSelectedTooth(null);
+            setSelectedSurfaces({});
+        }, 800);
     };
 
     const getToothColor = (status) => {
@@ -3133,75 +3261,159 @@ AI Confidence: 96% match with standard of care protocols.`;
         const upperArch = Array.from({ length: 16 }, (_, i) => i + 1);
         const lowerArch = Array.from({ length: 16 }, (_, i) => 32 - i);
 
+        const SVG_PATHS = {
+            O: "M 30 30 L 70 30 L 70 70 L 30 70 Z", // Center Occlusal
+            B: "M 0 0 L 100 0 L 70 30 L 30 30 Z",   // Top Buccal
+            L: "M 30 70 L 70 70 L 100 100 L 0 100 Z",// Bottom Lingual
+            M: "M 0 0 L 30 30 L 30 70 L 0 100 Z",   // Left Mesial
+            D: "M 100 0 L 70 30 L 70 70 L 100 100 Z" // Right Distal
+        };
+
         const ToothNode = ({ num, index, isUpper }) => {
             const data = teeth[num];
             const isSelected = selectedTooth === num;
 
-            // Calculate parabolic arch offset (Oval-shape)
-            // Center is at index 7.5 (between indices 7 and 8)
+            // Arch curvature logic
             const distanceFromCenter = Math.abs(index - 7.5);
-            const verticalOffset = Math.pow(distanceFromCenter, 2) * 0.8;
+            const verticalOffset = Math.pow(distanceFromCenter, 2) * 1.5;
             const translateY = isUpper ? verticalOffset : -verticalOffset;
 
-            // Anatomical Shapes based on Universal Numbering System
-            let tWidth = 32;
-            let tRadius = isUpper ? "6px 6px 16px 16px" : "16px 16px 6px 6px";
-
-            if ([1, 2, 3, 14, 15, 16, 17, 18, 19, 30, 31, 32].includes(num)) {
-                tWidth = 38; // Molars - blocky and wide
-                tRadius = isUpper ? "8px 8px 12px 12px" : "12px 12px 8px 8px";
-            } else if ([4, 5, 12, 13, 20, 21, 28, 29].includes(num)) {
-                tWidth = 28; // Premolars - narrow but somewhat rounded
-                tRadius = isUpper ? "8px 8px 16px 16px" : "16px 16px 8px 8px";
-            } else if ([6, 11, 22, 27].includes(num)) {
-                tWidth = 26; // Canines - pointy (high biting edge radius)
-                tRadius = isUpper ? "6px 6px 24px 24px" : "24px 24px 6px 6px";
-            } else {
-                tWidth = 28; // Incisors - flat cutting edge (low radius)
-                tRadius = isUpper ? "12px 12px 4px 4px" : "4px 4px 12px 12px";
-            }
+            // Is Anterior? (To swap O for I on the labels internally eventually)
+            const isAnterior = (num >= 6 && num <= 11) || (num >= 22 && num <= 27);
 
             return (
-                <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, transform: `translateY(${translateY}px)`, zIndex: isSelected ? 50 : 1 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED }}>{num}</div>
+                <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, transform: `translateY(${translateY}px)`, zIndex: isSelected ? 50 : 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: isSelected ? GEO_BLUE : GEO_TEXT_MAIN, transition: "color 0.2s" }}>
+                        {num}
+                    </div>
+
+                    {/* The 2D Interactive Odontogram Represention */}
                     <div
                         onClick={() => handleToothClick(num)}
                         style={{
-                            width: tWidth, height: 40, borderRadius: tRadius,
-                            background: data.status === "Healthy" ? GEO_WHITE : `${getToothColor(data.status)}15`,
-                            border: `2px solid ${isSelected ? GEO_BLACK : getToothColor(data.status)}`,
-                            cursor: "pointer", transition: "all 0.2s",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            boxShadow: isSelected ? "0 4px 12px rgba(0,0,0,0.15)" : "none",
-                            transform: isSelected ? "scale(1.1)" : "scale(1)"
+                            width: 38,
+                            height: 38,
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                            position: "relative",
+                            transform: isSelected ? "scale(1.15)" : "scale(1)",
+                            filter: isSelected ? "drop-shadow(0 4px 12px rgba(37,99,235,0.3))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.05))"
                         }}
                     >
-                        {data.status === "Missing" ? <X size={16} color={getToothColor(data.status)} /> : null}
+                        <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                            {data.status === "Missing" ? (
+                                <g opacity="0.4">
+                                    <path d="M 10 10 L 90 90 M 90 10 L 10 90" stroke="#94A3B8" strokeWidth="4" strokeLinecap="round" />
+                                    <circle cx="50" cy="50" r="45" fill="transparent" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="4 4" />
+                                </g>
+                            ) : (
+                                <g stroke={isSelected ? GEO_BLUE : "#E5E7EB"} strokeWidth="3" strokeLinejoin="round">
+                                    {['B', 'L', 'M', 'D', 'O'].map((surface) => {
+                                        const key = `${num}-${surface}`;
+                                        const isSurfaceSelected = !!selectedSurfaces[key];
+                                        return (
+                                            <path
+                                                key={surface}
+                                                d={SVG_PATHS[surface]}
+                                                fill={isSurfaceSelected ? '#DBEAFE' : '#FFFFFF'}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleToothClick(num); // Ensure the tooth is the active one
+                                                    setSelectedSurfaces(prev => ({
+                                                        ...prev,
+                                                        [key]: !prev[key]
+                                                    }));
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (!isSurfaceSelected) e.currentTarget.style.fill = '#EFF6FF';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (!isSurfaceSelected) e.currentTarget.style.fill = '#FFFFFF';
+                                                }}
+                                                style={{ transition: 'fill 0.1s', cursor: 'pointer' }}
+                                            />
+                                        );
+                                    })}
+                                </g>
+                            )}
+                        </svg>
                     </div>
 
-                    {/* Popup */}
+                    {/* Premium Floating Contextual Palette */}
                     {isSelected && (
-                        <div style={{ position: "absolute", top: 60, left: "50%", transform: "translateX(-50%)", background: GEO_WHITE, borderRadius: 12, padding: 12, boxShadow: "0 10px 25px rgba(0,0,0,0.1)", zIndex: 100, width: 160, border: `1px solid ${GEO_BG}` }}>
-                            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8, color: GEO_TEXT_MAIN, textAlign: "center" }}>Tooth #{num}</div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                {["Healthy", "Existing", "Proposed", "Watch", "Missing"].map(status => (
+                        <div style={{ position: "absolute", top: 60, left: "50%", transform: "translateX(-50%)", background: GEO_WHITE, borderRadius: 16, padding: "16px", boxShadow: "0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)", zIndex: 100, width: 320 }}>
+                            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: GEO_TEXT_MAIN, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span>Tooth #{num}</span>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: GEO_BLUE }}>
+                                    {Object.keys(selectedSurfaces).filter(k => k.startsWith(`${num}-`) && selectedSurfaces[k]).map(k => k.split('-')[1]).join('') || 'Entire Tooth'}
+                                </div>
+                            </div>
+
+                            {/* Tabs */}
+                            <div style={{ display: "flex", gap: 8, marginBottom: 16, borderBottom: `1px solid ${GEO_BG}`, paddingBottom: 8 }}>
+                                {["Procedures", "Conditions"].map(tab => (
                                     <button
-                                        key={status}
-                                        onClick={() => handleStatusChange(num, status)}
+                                        key={tab}
+                                        onClick={() => setPaletteTab(tab)}
                                         style={{
-                                            background: "transparent", border: "none", padding: "6px 8px", borderRadius: 6, fontSize: 13, fontWeight: 600,
-                                            color: data.status === status ? getToothColor(status) : GEO_TEXT_MAIN,
-                                            backgroundColor: data.status === status ? `${getToothColor(status)}10` : "transparent",
-                                            cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 6
+                                            background: "transparent", border: "none", padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+                                            color: paletteTab === tab ? GEO_BLUE : GEO_TEXT_MUTED,
+                                            backgroundColor: paletteTab === tab ? "#EFF6FF" : "transparent",
+                                            cursor: "pointer", transition: "all 0.2s"
                                         }}
-                                        onMouseOver={e => e.currentTarget.style.backgroundColor = GEO_BG}
-                                        onMouseOut={e => e.currentTarget.style.backgroundColor = data.status === status ? `${getToothColor(status)}10` : "transparent"}
                                     >
-                                        <div style={{ width: 8, height: 8, borderRadius: 4, background: getToothColor(status) }} />
-                                        {status}
+                                        {tab}
                                     </button>
                                 ))}
                             </div>
+
+                            {paletteTab === "Procedures" && (
+                                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                                        {["Composite", "Amalgam", "Crown", "Root Canal", "Implant", "Extraction", "Sealant"].map(proc => (
+                                            <button
+                                                key={proc}
+                                                onClick={() => handleProcedureClick(proc)}
+                                                style={{
+                                                    background: "#F8FAFC", border: `1px solid #E2E8F0`, padding: "10px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+                                                    color: GEO_TEXT_MAIN, cursor: "pointer", textAlign: "center", transition: "all 0.2s"
+                                                }}
+                                                onMouseOver={e => { e.currentTarget.style.borderColor = GEO_BLUE; e.currentTarget.style.backgroundColor = "#EFF6FF"; }}
+                                                onMouseOut={e => { e.currentTarget.style.borderColor = "#E2E8F0"; e.currentTarget.style.backgroundColor = "#F8FAFC"; }}
+                                            >
+                                                {proc}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Search CDT Code or Description..."
+                                        style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: `1px solid ${GEO_BG}`, fontSize: 13, outline: "none", background: "#F8FAFC" }}
+                                    />
+                                </div>
+                            )}
+
+                            {paletteTab === "Conditions" && (
+                                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                    {["Healthy", "Existing", "Proposed", "Watch", "Missing"].map(status => (
+                                        <button
+                                            key={status}
+                                            onClick={() => handleStatusChange(num, status)}
+                                            style={{
+                                                background: "transparent", border: "none", padding: "8px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+                                                color: data.status === status ? getToothColor(status) : GEO_TEXT_MAIN,
+                                                backgroundColor: data.status === status ? `${getToothColor(status)}10` : "transparent",
+                                                cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 8, transition: "background 0.2s"
+                                            }}
+                                            onMouseOver={e => e.currentTarget.style.backgroundColor = GEO_BG}
+                                            onMouseOut={e => e.currentTarget.style.backgroundColor = data.status === status ? `${getToothColor(status)}10` : "transparent"}
+                                        >
+                                            <div style={{ width: 10, height: 10, borderRadius: 5, background: getToothColor(status) }} />
+                                            {status}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -3287,7 +3499,7 @@ AI Confidence: 96% match with standard of care protocols.`;
 
     return (
         <div className="mobile-no-padding-main" style={{ padding: "20px 40px", flex: 1, display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
-            <TopGreetingUI2 currentUI={currentUI} setUI={setUI} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} subtitle="Examining Sarah Chen (ID: 00192)" />
+            <TopGreetingUI2 currentUI={currentUI} setUI={setUI} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} subtitle="Examining Sarah Chen (ID: 00192)" onSimulateVoice={handleSimulateVoice} />
 
             <div className="stack-on-mobile" style={{ display: "flex", gap: 24, flex: 1 }}>
 
@@ -3308,11 +3520,11 @@ AI Confidence: 96% match with standard of care protocols.`;
                             <div style={{ display: "flex", gap: 12 }}>
                                 {activeTab === "tooth" && (
                                     <div style={{ display: "flex", background: GEO_BG, borderRadius: GEO_PILL, padding: 4 }}>
-                                        <button onClick={() => setViewMode("2D")} style={{ padding: "6px 16px", borderRadius: GEO_PILL, border: "none", background: viewMode === "2D" ? GEO_WHITE : "transparent", fontSize: 13, fontWeight: 700, color: GEO_TEXT_MAIN, cursor: "pointer", boxShadow: viewMode === "2D" ? "0 2px 8px rgba(0,0,0,0.1)" : "none", transition: "all 0.2s" }}>
+                                        <button onClick={() => setViewMode("2D")} style={{ padding: "6px 16px", borderRadius: GEO_PILL, border: "none", background: viewMode === "2D" ? GEO_WHITE : "transparent", fontSize: 13, fontWeight: 700, color: GEO_TEXT_MAIN, cursor: "pointer", boxShadow: viewMode === "2D" ? "0 2px 8px rgba(0,0,0,0.1)" : "none", transition: "all 0.2s" }} onMouseOver={e => e.currentTarget.style.color = viewMode !== "2D" ? GEO_GREEN : GEO_TEXT_MAIN} onMouseOut={e => e.currentTarget.style.color = GEO_TEXT_MAIN}>
                                             2D
                                         </button>
-                                        <button onClick={() => setViewMode("3D")} style={{ padding: "6px 16px", borderRadius: GEO_PILL, border: "none", background: viewMode === "3D" ? GEO_WHITE : "transparent", fontSize: 13, fontWeight: 700, color: GEO_TEXT_MAIN, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: viewMode === "3D" ? "0 2px 8px rgba(0,0,0,0.1)" : "none", transition: "all 0.2s" }}>
-                                            <span style={{ width: 6, height: 6, borderRadius: 3, background: GEO_GREEN }}></span> 3D
+                                        <button onClick={() => setViewMode("3D")} style={{ padding: "6px 16px", borderRadius: GEO_PILL, border: "none", background: viewMode === "3D" ? GEO_GREEN : "transparent", fontSize: 13, fontWeight: 700, color: viewMode === "3D" ? GEO_WHITE : GEO_TEXT_MAIN, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: viewMode === "3D" ? "0 4px 12px rgba(0, 182, 122, 0.2)" : "none", transition: "all 0.2s" }} onMouseOver={e => e.currentTarget.style.color = viewMode !== "3D" ? GEO_GREEN : GEO_WHITE} onMouseOut={e => e.currentTarget.style.color = viewMode === "3D" ? GEO_WHITE : GEO_TEXT_MAIN}>
+                                            <span style={{ width: 6, height: 6, borderRadius: 3, background: viewMode === "3D" ? GEO_WHITE : GEO_GREEN }}></span> 3D
                                         </button>
                                     </div>
                                 )}
@@ -3337,7 +3549,68 @@ AI Confidence: 96% match with standard of care protocols.`;
                                         getToothColor={getToothColor}
                                     />
                                 ) : (
-                                    renderToothChart()
+                                    <div style={{ width: "100%" }}>
+                                        {/* 1. Odontogram */}
+                                        {renderToothChart()}
+
+                                        {/* 2. Automated Progress Notes Table */}
+                                        <div style={{ marginTop: 40, width: "100%", background: GEO_WHITE, borderRadius: 16, border: `1px solid ${GEO_BG}`, overflow: "hidden", alignSelf: "flex-start" }}>
+                                            <div style={{ padding: "16px 24px", borderBottom: `1px solid ${GEO_BG}`, display: "flex", justifyContent: "space-between", alignItems: "center", background: "#F8FAFC" }}>
+                                                <div style={{ fontSize: 16, fontWeight: 700, color: GEO_TEXT_MAIN }}>Automated Progress Notes</div>
+                                                <div style={{ fontSize: 13, fontWeight: 600, color: GEO_TEXT_MUTED }}>Logged securely via AI Context</div>
+                                            </div>
+                                            <div style={{ overflowX: "auto" }}>
+                                                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                                                    <thead>
+                                                        <tr style={{ background: GEO_WHITE, borderBottom: `1px solid ${GEO_BG}` }}>
+                                                            <th style={{ padding: "12px 24px", fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", letterSpacing: "0.5px" }}>Date</th>
+                                                            <th style={{ padding: "12px 16px", fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", letterSpacing: "0.5px" }}>Tooth</th>
+                                                            <th style={{ padding: "12px 16px", fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", letterSpacing: "0.5px" }}>Surface</th>
+                                                            <th style={{ padding: "12px 16px", fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", letterSpacing: "0.5px" }}>CDT Code</th>
+                                                            <th style={{ padding: "12px 16px", fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", letterSpacing: "0.5px" }}>Provider</th>
+                                                            <th style={{ padding: "12px 16px", fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", letterSpacing: "0.5px" }}>Description</th>
+                                                            <th style={{ padding: "12px 16px", fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", letterSpacing: "0.5px" }}>Status</th>
+                                                            <th style={{ padding: "12px 24px", fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", letterSpacing: "0.5px", textAlign: "right" }}>Amount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {progressNotes.length === 0 ? (
+                                                            <tr>
+                                                                <td colSpan={8} style={{ padding: "32px", textAlign: "center", fontSize: 14, color: "#9CA3AF" }}>
+                                                                    No treatments charted this session. Interact with the Odontogram above to generate notes.
+                                                                </td>
+                                                            </tr>
+                                                        ) : (
+                                                            progressNotes.map((note) => (
+                                                                <tr key={note.id} style={{ borderBottom: `1px solid ${GEO_BG}` }}>
+                                                                    <td style={{ padding: "16px 24px", fontSize: 13, color: GEO_TEXT_MAIN, whiteSpace: "nowrap" }}>{note.date}</td>
+                                                                    <td style={{ padding: "16px 16px", fontSize: 14, fontWeight: 700, color: GEO_BLUE }}>#{note.tooth}</td>
+                                                                    <td style={{ padding: "16px 16px", fontSize: 13, fontWeight: 600, color: GEO_TEXT_MAIN }}>{note.surface}</td>
+                                                                    <td style={{ padding: "16px 16px" }}>
+                                                                        <span style={{ padding: "4px 8px", background: "#F1F5F9", borderRadius: 4, fontSize: 12, fontWeight: 600, color: GEO_TEXT_MAIN, fontFamily: "monospace" }}>
+                                                                            {note.cdt}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td style={{ padding: "16px 16px", fontSize: 13, color: GEO_TEXT_MUTED }}>{note.provider}</td>
+                                                                    <td style={{ padding: "16px 16px", fontSize: 14, color: GEO_TEXT_MAIN }}>
+                                                                        {note.desc} {note.surface !== 'ALL' ? `(${note.surface})` : ''}
+                                                                    </td>
+                                                                    <td style={{ padding: "16px 16px" }}>
+                                                                        <span style={{ padding: "4px 10px", borderRadius: GEO_PILL, fontSize: 12, fontWeight: 600, color: getToothColor(note.status), background: `${getToothColor(note.status)}15` }}>
+                                                                            {note.status}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td style={{ padding: "16px 24px", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN, textAlign: "right" }}>
+                                                                        {note.amount}
+                                                                    </td>
+                                                                </tr>
+                                                            ))
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
                                 )
                             ) : renderPerioChart()}
                         </div>
