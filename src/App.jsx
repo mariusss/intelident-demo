@@ -1368,6 +1368,9 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
         const times = ['8:00', '8:30', '9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '1:00', '1:30', '2:00', '2:30', '3:00', '3:30', '4:00', '4:30', '5:00', '5:30'];
 
         const practiceDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        const apt = (patient, provider, proc) => ({ utilized: true, patient, provider, proc });
+        const empty = () => ({ utilized: false });
+
         const practiceData = [
             [apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Tom R.', 'Dr. Jensen', 'Exam'), empty(), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), empty(), empty(), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), empty(), apt('Anna W.', 'Dr. Jensen', 'Exam'), apt('Anna W.', 'Dr. Jensen', 'Exam'), empty(), empty(), empty(), empty()], // Mon
             [apt('Tim L.', 'Hyg. Sarah', 'Prophy'), apt('Tim L.', 'Hyg. Sarah', 'Prophy'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), apt('Jon N.', 'Hyg. Sarah', 'SRP'), apt('Jon N.', 'Hyg. Sarah', 'SRP'), apt('Emergency', 'Dr. Smith', 'Ext'), apt('Emergency', 'Dr. Smith', 'Ext'), apt('Consult', 'Dr. Smith', 'Implant'), empty(), apt('Dan F.', 'Dr. Lee', 'Invisalign'), apt('Dan F.', 'Dr. Lee', 'Invisalign'), empty(), empty(), empty()], // Tue (Very full)
@@ -1377,9 +1380,6 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
         ];
 
         const roomLabels = ['Room 1', 'Room 2', 'Room 3', 'Room 4', 'Room 5'];
-        const apt = (patient, provider, proc) => ({ utilized: true, patient, provider, proc });
-        const empty = () => ({ utilized: false });
-
         const roomData = [
             [apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Tom R.', 'Dr. Jensen', 'Exam'), empty(), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), empty(), empty(), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), empty(), apt('Anna W.', 'Dr. Jensen', 'Exam'), apt('Anna W.', 'Dr. Jensen', 'Exam'), empty(), empty(), empty(), empty()], // Room 1
             [apt('Tim L.', 'Hyg. Sarah', 'Prophy'), apt('Tim L.', 'Hyg. Sarah', 'Prophy'), empty(), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), empty(), empty(), empty(), empty(), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), empty(), apt('Jon N.', 'Hyg. Sarah', 'SRP'), apt('Jon N.', 'Hyg. Sarah', 'SRP'), empty(), empty(), empty()],   // Room 2
