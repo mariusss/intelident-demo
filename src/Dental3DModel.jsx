@@ -5,19 +5,19 @@ import * as THREE from 'three';
 
 // Tooth configuration logic mirroring the 2D version
 const getToothConfig = (num, isUpper) => {
-    let tWidth = 0.8;
-    let tDepth = 0.8;
-    let tHeight = 1.0;
-    let tRadius = 0.2;
+    let tWidth = 0.5;
+    let tDepth = 0.5;
+    let tHeight = 0.8;
+    let tRadius = 0.15;
 
     if ([1, 2, 3, 14, 15, 16, 17, 18, 19, 30, 31, 32].includes(num)) {
-        tWidth = 1.0; tDepth = 0.9; tHeight = 0.7; tRadius = 0.15; // Molars
+        tWidth = 0.75; tDepth = 0.75; tHeight = 0.6; tRadius = 0.15; // Molars
     } else if ([4, 5, 12, 13, 20, 21, 28, 29].includes(num)) {
-        tWidth = 0.7; tDepth = 0.7; tHeight = 0.8; tRadius = 0.2; // Premolars
+        tWidth = 0.55; tDepth = 0.6; tHeight = 0.7; tRadius = 0.2; // Premolars
     } else if ([6, 11, 22, 27].includes(num)) {
-        tWidth = 0.6; tDepth = 0.6; tHeight = 1.0; tRadius = 0.25; // Canines
+        tWidth = 0.5; tDepth = 0.55; tHeight = 0.85; tRadius = 0.2; // Canines
     } else {
-        tWidth = 0.6; tDepth = 0.4; tHeight = 0.9; tRadius = 0.1; // Incisors
+        tWidth = 0.45; tDepth = 0.4; tHeight = 0.8; tRadius = 0.1; // Incisors
     }
 
     return { tWidth, tHeight, tDepth, tRadius };
@@ -28,8 +28,8 @@ const Tooth3D = ({ num, index, isUpper, data, onSelect, isSelected }) => {
     const [hovered, setHovered] = useState(false);
 
     // Arch positioning Math - creating a semi-ellipse / parabola
-    const archRadiusX = 3.2;
-    const archRadiusZ = 3.5;
+    const archRadiusX = 3.6;
+    const archRadiusZ = 3.8;
 
     // Map index 0-15 to an angle representing the U-shape
     // index 0 is left posterior, index 15 is right posterior
@@ -40,7 +40,7 @@ const Tooth3D = ({ num, index, isUpper, data, onSelect, isSelected }) => {
     // Front teeth (angle ~ PI/2) should be forward. Posterior teeth further back.
     const z = Math.sin(angle) * archRadiusZ - (archRadiusZ * 0.5);
     // Upper arch sits above lower arch
-    const y = isUpper ? 0.6 : -0.6;
+    const y = isUpper ? 0.4 : -0.4;
 
     const { tWidth, tHeight, tDepth, tRadius } = useMemo(() => getToothConfig(num, isUpper), [num, isUpper]);
 
@@ -49,15 +49,17 @@ const Tooth3D = ({ num, index, isUpper, data, onSelect, isSelected }) => {
 
     // Enamel Material
     const enamelMaterialProps = {
-        transmission: 0.5,
+        transmission: 0.6,
         opacity: 1,
-        metalness: 0,
+        metalness: 0.1,
         roughness: 0.15,
         ior: 1.5,
-        thickness: 0.5,
-        color: '#fffff8',
+        thickness: 1.5,
+        color: '#ffffff',
         clearcoat: 1.0,
-        clearcoatRoughness: 0.1
+        clearcoatRoughness: 0.05,
+        transparent: true,
+        side: THREE.FrontSide
     };
 
     const isMissing = data?.status === 'Missing';
@@ -98,14 +100,14 @@ const Tooth3D = ({ num, index, isUpper, data, onSelect, isSelected }) => {
             {/* Condition Overlays */}
             {isExisting && (
                 <mesh position={[0, isUpper ? -tHeight / 2 + 0.15 : tHeight / 2 - 0.15, 0]}>
-                    <boxGeometry args={[tWidth * 0.5, 0.3, tDepth * 0.5]} />
-                    <meshStandardMaterial color="#3b82f6" metalness={0.7} roughness={0.3} />
+                    <boxGeometry args={[tWidth * 0.4, 0.35, tDepth * 0.4]} />
+                    <meshStandardMaterial color="#3b82f6" metalness={0.5} roughness={0.3} depthWrite={true} />
                 </mesh>
             )}
 
             {isProposed && (
-                <RoundedBox args={[tWidth * 1.1, tHeight * 1.1, tDepth * 1.1]} radius={tRadius} smoothness={4}>
-                    <meshStandardMaterial color="#ef4444" transparent opacity={0.35} depthWrite={false} />
+                <RoundedBox args={[tWidth * 1.08, tHeight * 1.08, tDepth * 1.08]} radius={tRadius} smoothness={4}>
+                    <meshStandardMaterial color="#ef4444" transparent opacity={0.35} depthWrite={false} side={THREE.FrontSide} />
                 </RoundedBox>
             )}
 
@@ -132,11 +134,33 @@ const PulsatingSphere = ({ isUpper, tHeight, tDepth }) => {
         meshRef.current.scale.setScalar(1 + Math.sin(time * 5) * 0.2);
     });
     return (
-        <Sphere ref={meshRef} args={[0.12, 16, 16]} position={[0, isUpper ? -tHeight / 2 : tHeight / 2, tDepth / 2 + 0.1]}>
-            <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={0.8} />
+        <Sphere ref={meshRef} args={[0.1, 16, 16]} position={[0, isUpper ? -tHeight / 2 - 0.1 : tHeight / 2 + 0.1, 0]}>
+            <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={0.8} depthWrite={false} />
         </Sphere>
     );
-}
+};
+
+const DentalArchGums = ({ isUpper }) => {
+    const curve = useMemo(() => {
+        const points = [];
+        for (let i = 0; i <= 30; i++) {
+            const t = i / 30;
+            const angle = Math.PI * (1 - t);
+            const x = Math.cos(angle) * 3.6;
+            const z = Math.sin(angle) * 3.8 - (3.8 * 0.5);
+            const y = isUpper ? 0.75 : -0.75;
+            points.push(new THREE.Vector3(x, y, z));
+        }
+        return new THREE.CatmullRomCurve3(points);
+    }, [isUpper]);
+
+    return (
+        <mesh>
+            <tubeGeometry args={[curve, 64, 0.4, 16, false]} />
+            <meshStandardMaterial color="#fca5a5" roughness={0.2} metalness={0.05} />
+        </mesh>
+    );
+};
 
 export function Dental3DModel({ teethData, selectedTooth, onSelectTooth }) {
     const upperArch = Array.from({ length: 16 }, (_, i) => i + 1);
@@ -175,15 +199,9 @@ export function Dental3DModel({ teethData, selectedTooth, onSelectTooth }) {
                         />
                     ))}
 
-                    {/* Simulated Gingiva Extrusions */}
-                    <mesh position={[0, 1.0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                        <torusGeometry args={[3.2, 0.5, 32, 64, Math.PI]} />
-                        <meshStandardMaterial color="#fca5a5" roughness={0.3} metalness={0.05} />
-                    </mesh>
-                    <mesh position={[0, -1.0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-                        <torusGeometry args={[3.2, 0.5, 32, 64, Math.PI]} />
-                        <meshStandardMaterial color="#fca5a5" roughness={0.3} metalness={0.05} />
-                    </mesh>
+                    {/* Simulated Gingiva Extrusions matching the elliptical math precisely */}
+                    <DentalArchGums isUpper={true} />
+                    <DentalArchGums isUpper={false} />
                 </group>
 
                 <OrbitControls
