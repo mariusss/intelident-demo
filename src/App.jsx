@@ -3007,8 +3007,8 @@ AI Confidence: 96% match with standard of care protocols.`;
                         </div>
 
                         <div style={{ width: "100%", height: 180, background: "#1a1a1a", borderRadius: 12, position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16, border: `2px solid ${GEO_BG}` }}>
-                            {/* Fake X-Ray Background */}
-                            <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, opacity: 0.6, backgroundImage: "linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222), linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222)", backgroundSize: "10px 10px", backgroundPosition: "0 0, 5px 5px" }} />
+                            {/* Panorex Background */}
+                            <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundImage: "url('/panorex-demo.png')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.8 }} />
                             <div style={{ width: "80%", height: "60%", border: "2px solid #555", borderRadius: "100px / 50px", opacity: 0.5 }} />
 
                             {/* Analysis Overlay */}
