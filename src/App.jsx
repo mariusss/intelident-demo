@@ -1255,6 +1255,7 @@ export function VoiceAgentPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMob
 
 export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
     const [heatmapView, setHeatmapView] = React.useState("practice");
+    const [selectedDate, setSelectedDate] = React.useState(new Date().toLocaleDateString('en-CA')); // YYYY-MM-DD local
 
     const renderHeatmap = () => {
         const times = ['8am', '9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm'];
@@ -1358,12 +1359,35 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
                         <div>
                             <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Chair Utilization Heatmap</h3>
                             <p style={{ color: "#6B7280", margin: "4px 0 0 0", fontSize: 14 }}>
-                                {heatmapView === "practice" ? "Low utilization detected on Wednesdays heavily impacting revenue." : "Individual operatory occupancy breakdown for today."}
+                                {heatmapView === "practice"
+                                    ? "Low utilization detected on Wednesdays heavily impacting revenue."
+                                    : `Individual operatory occupancy breakdown for ${new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' })}.`}
                             </p>
                         </div>
-                        <div style={{ display: 'flex', background: '#F3F4F6', borderRadius: 8, padding: 4 }}>
-                            <button onClick={() => setHeatmapView("practice")} style={{ padding: '6px 16px', borderRadius: 6, border: 'none', background: heatmapView === "practice" ? '#FFFFFF' : 'transparent', color: heatmapView === "practice" ? '#111827' : '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: heatmapView === "practice" ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}>Practice View</button>
-                            <button onClick={() => setHeatmapView("rooms")} style={{ padding: '6px 16px', borderRadius: 6, border: 'none', background: heatmapView === "rooms" ? '#FFFFFF' : 'transparent', color: heatmapView === "rooms" ? '#111827' : '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: heatmapView === "rooms" ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}>Individual Rooms</button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                            {heatmapView === "rooms" && (
+                                <input
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                    style={{
+                                        padding: '6px 12px',
+                                        borderRadius: 8,
+                                        border: '1px solid #D1D5DB',
+                                        background: '#FFFFFF',
+                                        color: '#374151',
+                                        fontSize: 13,
+                                        fontWeight: 500,
+                                        fontFamily: 'inherit',
+                                        cursor: 'pointer',
+                                        outline: 'none',
+                                    }}
+                                />
+                            )}
+                            <div style={{ display: 'flex', background: '#F3F4F6', borderRadius: 8, padding: 4 }}>
+                                <button onClick={() => setHeatmapView("practice")} style={{ padding: '6px 16px', borderRadius: 6, border: 'none', background: heatmapView === "practice" ? '#FFFFFF' : 'transparent', color: heatmapView === "practice" ? '#111827' : '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: heatmapView === "practice" ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}>Practice View</button>
+                                <button onClick={() => setHeatmapView("rooms")} style={{ padding: '6px 16px', borderRadius: 6, border: 'none', background: heatmapView === "rooms" ? '#FFFFFF' : 'transparent', color: heatmapView === "rooms" ? '#111827' : '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: heatmapView === "rooms" ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}>Individual Rooms</button>
+                            </div>
                         </div>
                     </div>
                     <div style={{ background: "#F9FAFB", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280", padding: 32 }}>
