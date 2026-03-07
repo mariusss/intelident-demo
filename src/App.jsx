@@ -1365,58 +1365,83 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
     const [selectedDate, setSelectedDate] = React.useState(new Date().toLocaleDateString('en-CA')); // YYYY-MM-DD local
 
     const renderHeatmap = () => {
-        const times = ['8am', '9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm'];
+        const times = ['8:00', '8:30', '9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '1:00', '1:30', '2:00', '2:30', '3:00', '3:30', '4:00', '4:30', '5:00', '5:30'];
 
         const practiceDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        const genPData = (pattern) => {
+            const row = [];
+            for (let i = 0; i < 20; i++) {
+                row.push(pattern[i] ? 100 : 0);
+            }
+            return row;
+        };
+
         const practiceData = [
-            [85, 90, 95, 80, 40, 75, 85, 90, 60, 40], // Mon
-            [90, 95, 100, 85, 30, 80, 90, 95, 65, 45], // Tue
-            [40, 30, 20, 10, 5, 20, 30, 40, 25, 10],  // Wed (Low util detected)
-            [80, 85, 90, 75, 45, 80, 85, 90, 55, 35], // Thu
-            [75, 80, 85, 60, 20, 65, 75, 80, 40, 25], // Fri
+            genPData([1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]), // Mon
+            genPData([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0]), // Tue
+            genPData([0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0]), // Wed (Low util detected)
+            genPData([1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0]), // Thu
+            genPData([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]), // Fri
         ];
 
         const roomLabels = ['Room 1', 'Room 2', 'Room 3', 'Room 4', 'Room 5'];
+        const apt = (patient, provider, proc) => ({ utilized: true, patient, provider, proc });
+        const empty = () => ({ utilized: false });
+
         const roomData = [
-            [95, 95, 100, 90, 40, 85, 95, 100, 70, 50], // Room 1 (High util)
-            [85, 90, 90, 80, 35, 75, 85, 90, 60, 45],   // Room 2
-            [30, 20, 10, 5, 0, 15, 20, 25, 10, 5],      // Room 3 (Empty / under utilized)
-            [80, 85, 85, 75, 30, 80, 85, 80, 50, 40],   // Room 4
-            [70, 75, 80, 60, 25, 65, 70, 75, 40, 30],   // Room 5
+            [apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Tom R.', 'Dr. Jensen', 'Exam'), empty(), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), empty(), empty(), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), empty(), apt('Anna W.', 'Dr. Jensen', 'Exam'), apt('Anna W.', 'Dr. Jensen', 'Exam'), empty(), empty(), empty(), empty()], // Room 1
+            [apt('Tim L.', 'Hyg. Sarah', 'Prophy'), apt('Tim L.', 'Hyg. Sarah', 'Prophy'), empty(), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), empty(), empty(), empty(), empty(), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), empty(), apt('Jon N.', 'Hyg. Sarah', 'SRP'), apt('Jon N.', 'Hyg. Sarah', 'SRP'), empty(), empty(), empty()],   // Room 2
+            [empty(), empty(), apt('Emergency', 'Dr. Smith', 'Ext'), apt('Emergency', 'Dr. Smith', 'Ext'), empty(), empty(), empty(), empty(), empty(), empty(), empty(), empty(), apt('Consult', 'Dr. Smith', 'Implant'), empty(), empty(), empty(), empty(), empty(), empty(), empty()],      // Room 3 (Low Util)
+            [apt('Dan F.', 'Dr. Lee', 'Invisalign'), apt('Dan F.', 'Dr. Lee', 'Invisalign'), empty(), empty(), apt('Pam H.', 'Dr. Lee', 'Filling'), apt('Pam H.', 'Dr. Lee', 'Filling'), apt('Pam H.', 'Dr. Lee', 'Filling'), empty(), empty(), empty(), apt('Ed C.', 'Dr. Lee', 'Crown'), apt('Ed C.', 'Dr. Lee', 'Crown'), apt('Ed C.', 'Dr. Lee', 'Crown'), empty(), empty(), empty(), apt('Rob P.', 'Dr. Lee', 'Exam'), empty(), empty(), empty()],   // Room 4
+            [apt('Sue B.', 'Hyg. Mike', 'Prophy'), apt('Sue B.', 'Hyg. Mike', 'Prophy'), apt('Jay Z.', 'Hyg. Mike', 'Prophy'), apt('Jay Z.', 'Hyg. Mike', 'Prophy'), empty(), empty(), apt('Ron M.', 'Hyg. Mike', 'SRP'), apt('Ron M.', 'Hyg. Mike', 'SRP'), empty(), empty(), apt('Bea A.', 'Hyg. Mike', 'Prophy'), apt('Bea A.', 'Hyg. Mike', 'Prophy'), empty(), apt('Lin T.', 'Hyg. Mike', 'Prophy'), apt('Lin T.', 'Hyg. Mike', 'Prophy'), empty(), empty(), empty(), empty(), empty()],   // Room 5
         ];
 
         const yLabels = heatmapView === "practice" ? practiceDays : roomLabels;
         const matrix = heatmapView === "practice" ? practiceData : roomData;
 
         const getColor = (val) => {
-            if (val < 50) return '#FECACA'; // red-200 (Unoccupied)
-            return '#10B981'; // emerald-500 (Occupied)
+            const isUtilized = typeof val === 'object' ? val.utilized : val >= 50;
+            return isUtilized ? '#10B981' : '#FECACA'; // Emerald vs Red
+        };
+
+        const getTooltip = (val, rowLabel, time) => {
+            if (typeof val === 'object' && val.utilized) {
+                return `${rowLabel} @ ${time}\n${val.patient} | ${val.provider}\n[${val.proc}]`;
+            }
+            if (typeof val === 'object' && !val.utilized) {
+                return `${rowLabel} @ ${time}\nEmpty Slot`;
+            }
+            return `${rowLabel} @ ${time}: ${val >= 50 ? 'Occupied' : 'Empty'}`;
         };
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', overflowX: 'auto', paddingBottom: 8 }}>
-                <div style={{ display: 'flex', gap: 8, paddingLeft: 48 }}>
-                    {times.map(t => <div key={t} style={{ flex: 1, minWidth: 40, textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#9CA3AF' }}>{t}</div>)}
+                <div style={{ display: 'flex', gap: 2, paddingLeft: 60 }}>
+                    {times.map((t, i) => (
+                        <div key={t} style={{ flex: 1, minWidth: 24, textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#9CA3AF', opacity: i % 2 !== 0 ? 0 : 1 }}>
+                            {t}
+                        </div>
+                    ))}
                 </div>
                 {yLabels.map((rowLabel, dIdx) => (
-                    <div key={rowLabel} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                        <div style={{ width: 50, fontSize: 13, fontWeight: 700, color: '#6B7280', textAlign: 'right' }}>{rowLabel}</div>
+                    <div key={rowLabel} style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <div style={{ width: 60, fontSize: 13, fontWeight: 700, color: '#6B7280', textAlign: 'right', paddingRight: 8 }}>{rowLabel}</div>
                         {matrix[dIdx].map((val, tIdx) => (
                             <div
                                 key={`${rowLabel}-${times[tIdx]}`}
-                                title={`${rowLabel} ${times[tIdx]}: ${val}% Utilized`}
+                                title={getTooltip(val, rowLabel, times[tIdx])}
                                 style={{
                                     flex: 1,
-                                    minWidth: 40,
+                                    minWidth: 24,
                                     height: 48,
                                     background: getColor(val),
-                                    borderRadius: 6,
+                                    borderRadius: 4,
                                     cursor: 'pointer',
                                     transition: 'all 0.2s',
-                                    border: '1px solid rgba(0,0,0,0.02)'
+                                    border: '1px solid rgba(0,0,0,0.04)'
                                 }}
-                                onMouseOver={(e) => { e.currentTarget.style.opacity = 0.8; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                                onMouseOut={(e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.transform = 'scale(1)'; }}
+                                onMouseOver={(e) => { e.currentTarget.style.opacity = 0.8; e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.zIndex = 10; e.currentTarget.style.position = 'relative'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.zIndex = 1; }}
                             />
                         ))}
                     </div>
