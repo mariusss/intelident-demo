@@ -2830,7 +2830,7 @@ AI Confidence: 96% match with standard of care protocols.`;
             // Calculate parabolic arch offset (Oval-shape)
             // Center is at index 7.5 (between indices 7 and 8)
             const distanceFromCenter = Math.abs(index - 7.5);
-            const verticalOffset = Math.pow(distanceFromCenter, 2) * 1.8;
+            const verticalOffset = Math.pow(distanceFromCenter, 2) * 0.8;
             const translateY = isUpper ? verticalOffset : -verticalOffset;
 
             return (
@@ -2883,11 +2883,11 @@ AI Confidence: 96% match with standard of care protocols.`;
         return (
             <div style={{ display: "flex", flexDirection: "column", gap: 32, alignItems: "center", width: "100%", padding: "20px 0" }}>
                 {/* Upper Arch */}
-                <div style={{ display: "flex", gap: 10, justifyContent: "center", width: "100%", marginTop: 60, marginBottom: 20 }}>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", width: "100%", marginTop: 40, marginBottom: 40 }}>
                     {upperArch.map((num, i) => <ToothNode key={num} num={num} index={i} isUpper={true} />)}
                 </div>
                 {/* Lower Arch */}
-                <div style={{ display: "flex", gap: 10, justifyContent: "center", width: "100%", marginTop: 20, marginBottom: 60 }}>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", width: "100%", marginTop: 40, marginBottom: 40 }}>
                     {lowerArch.map((num, i) => <ToothNode key={num} num={num} index={i} isUpper={false} />)}
                 </div>
 
