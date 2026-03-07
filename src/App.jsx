@@ -1365,6 +1365,7 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
     const [selectedDate, setSelectedDate] = React.useState(new Date().toLocaleDateString('en-CA')); // YYYY-MM-DD local
 
     const renderHeatmap = () => {
+        const [tooltip, setTooltip] = React.useState({ show: false, content: null, time: '', label: '', x: 0, y: 0 });
         const times = ['8:00', '8:30', '9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '1:00', '1:30', '2:00', '2:30', '3:00', '3:30', '4:00', '4:30', '5:00', '5:30'];
 
         const practiceDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -1372,20 +1373,20 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
         const empty = () => ({ utilized: false });
 
         const practiceData = [
-            [apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Tom R.', 'Dr. Jensen', 'Exam'), empty(), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), empty(), empty(), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), empty(), apt('Anna W.', 'Dr. Jensen', 'Exam'), apt('Anna W.', 'Dr. Jensen', 'Exam'), empty(), empty(), empty(), empty()], // Mon
-            [apt('Tim L.', 'Hyg. Sarah', 'Prophy'), apt('Tim L.', 'Hyg. Sarah', 'Prophy'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), apt('Jon N.', 'Hyg. Sarah', 'SRP'), apt('Jon N.', 'Hyg. Sarah', 'SRP'), apt('Emergency', 'Dr. Smith', 'Ext'), apt('Emergency', 'Dr. Smith', 'Ext'), apt('Consult', 'Dr. Smith', 'Implant'), empty(), apt('Dan F.', 'Dr. Lee', 'Invisalign'), apt('Dan F.', 'Dr. Lee', 'Invisalign'), empty(), empty(), empty()], // Tue (Very full)
-            [empty(), empty(), apt('Pam H.', 'Dr. Lee', 'Filling'), apt('Pam H.', 'Dr. Lee', 'Filling'), apt('Pam H.', 'Dr. Lee', 'Filling'), empty(), empty(), empty(), empty(), empty(), apt('Ed C.', 'Dr. Lee', 'Crown'), apt('Ed C.', 'Dr. Lee', 'Crown'), apt('Ed C.', 'Dr. Lee', 'Crown'), empty(), empty(), empty(), empty(), empty(), empty(), empty()], // Wed (Low util detected)
-            [apt('Rob P.', 'Dr. Lee', 'Exam'), apt('Rob P.', 'Dr. Lee', 'Exam'), apt('Sue B.', 'Hyg. Mike', 'Prophy'), apt('Sue B.', 'Hyg. Mike', 'Prophy'), apt('Jay Z.', 'Hyg. Mike', 'Prophy'), apt('Jay Z.', 'Hyg. Mike', 'Prophy'), apt('Ron M.', 'Hyg. Mike', 'SRP'), apt('Ron M.', 'Hyg. Mike', 'SRP'), empty(), empty(), apt('Bea A.', 'Hyg. Mike', 'Prophy'), apt('Bea A.', 'Hyg. Mike', 'Prophy'), apt('Lin T.', 'Hyg. Mike', 'Prophy'), apt('Lin T.', 'Hyg. Mike', 'Prophy'), empty(), empty(), empty(), empty(), empty(), empty()], // Thu
-            [apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Tom R.', 'Dr. Jensen', 'Exam'), empty(), empty(), empty(), empty(), empty(), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), empty(), apt('Anna W.', 'Dr. Jensen', 'Exam'), apt('Anna W.', 'Dr. Jensen', 'Exam'), empty(), empty(), empty(), empty()], // Fri
+            [apt('Sarah K.', 'Dr. Cifor', 'Crown Prep'), apt('Sarah K.', 'Dr. Cifor', 'Crown Prep'), apt('Mike T.', 'Dr. Cifor', 'Filling'), apt('Mike T.', 'Dr. Cifor', 'Filling'), apt('Tom R.', 'Dr. Cifor', 'Exam'), empty(), apt('Lisa M.', 'Dr. Cifor', 'Root Canal'), apt('Lisa M.', 'Dr. Cifor', 'Root Canal'), empty(), empty(), apt('James B.', 'Dr. Cifor', 'Bridge'), apt('James B.', 'Dr. Cifor', 'Bridge'), apt('James B.', 'Dr. Cifor', 'Bridge'), empty(), apt('Anna W.', 'Dr. Cifor', 'Exam'), apt('Anna W.', 'Dr. Cifor', 'Exam'), empty(), empty(), empty(), empty()], // Mon
+            [apt('Tim L.', 'RDH Martinez', 'Prophy'), apt('Tim L.', 'RDH Martinez', 'Prophy'), apt('Sam S.', 'RDH Martinez', 'SRP'), apt('Sam S.', 'RDH Martinez', 'SRP'), apt('Sam S.', 'RDH Martinez', 'SRP'), apt('Kim K.', 'RDH Martinez', 'Prophy'), apt('Kim K.', 'RDH Martinez', 'Prophy'), apt('Roy D.', 'RDH Martinez', 'Prophy'), apt('Roy D.', 'RDH Martinez', 'Prophy'), apt('Jon N.', 'RDH Martinez', 'SRP'), apt('Jon N.', 'RDH Martinez', 'SRP'), apt('Emergency', 'Dr. Vargas', 'Ext'), apt('Emergency', 'Dr. Vargas', 'Ext'), apt('Consult', 'Dr. Vargas', 'Implant'), empty(), apt('Dan F.', 'Dr. Vargas', 'Invisalign'), apt('Dan F.', 'Dr. Vargas', 'Invisalign'), empty(), empty(), empty()], // Tue (Very full)
+            [empty(), empty(), apt('Pam H.', 'Dr. Vargas', 'Filling'), apt('Pam H.', 'Dr. Vargas', 'Filling'), apt('Pam H.', 'Dr. Vargas', 'Filling'), empty(), empty(), empty(), empty(), empty(), apt('Ed C.', 'Dr. Vargas', 'Crown'), apt('Ed C.', 'Dr. Vargas', 'Crown'), apt('Ed C.', 'Dr. Vargas', 'Crown'), empty(), empty(), empty(), empty(), empty(), empty(), empty()], // Wed (Low util detected)
+            [apt('Rob P.', 'Dr. Vargas', 'Exam'), apt('Rob P.', 'Dr. Vargas', 'Exam'), apt('Sue B.', 'RDH Davis', 'Prophy'), apt('Sue B.', 'RDH Davis', 'Prophy'), apt('Jay Z.', 'RDH Davis', 'Prophy'), apt('Jay Z.', 'RDH Davis', 'Prophy'), apt('Ron M.', 'RDH Davis', 'SRP'), apt('Ron M.', 'RDH Davis', 'SRP'), empty(), empty(), apt('Bea A.', 'RDH Davis', 'Prophy'), apt('Bea A.', 'RDH Davis', 'Prophy'), apt('Lin T.', 'RDH Davis', 'Prophy'), apt('Lin T.', 'RDH Davis', 'Prophy'), empty(), empty(), empty(), empty(), empty(), empty()], // Thu
+            [apt('Sarah K.', 'Dr. Cifor', 'Crown Prep'), apt('Sarah K.', 'Dr. Cifor', 'Crown Prep'), apt('Mike T.', 'Dr. Cifor', 'Filling'), apt('Mike T.', 'Dr. Cifor', 'Filling'), apt('Tom R.', 'Dr. Cifor', 'Exam'), empty(), empty(), empty(), empty(), empty(), apt('James B.', 'Dr. Cifor', 'Bridge'), apt('James B.', 'Dr. Cifor', 'Bridge'), apt('James B.', 'Dr. Cifor', 'Bridge'), empty(), apt('Anna W.', 'Dr. Cifor', 'Exam'), apt('Anna W.', 'Dr. Cifor', 'Exam'), empty(), empty(), empty(), empty()], // Fri
         ];
 
         const roomLabels = ['Room 1', 'Room 2', 'Room 3', 'Room 4', 'Room 5'];
         const roomData = [
-            [apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Tom R.', 'Dr. Jensen', 'Exam'), empty(), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), empty(), empty(), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), empty(), apt('Anna W.', 'Dr. Jensen', 'Exam'), apt('Anna W.', 'Dr. Jensen', 'Exam'), empty(), empty(), empty(), empty()], // Room 1
-            [apt('Tim L.', 'Hyg. Sarah', 'Prophy'), apt('Tim L.', 'Hyg. Sarah', 'Prophy'), empty(), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), empty(), empty(), empty(), empty(), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), empty(), apt('Jon N.', 'Hyg. Sarah', 'SRP'), apt('Jon N.', 'Hyg. Sarah', 'SRP'), empty(), empty(), empty()],   // Room 2
-            [empty(), empty(), apt('Emergency', 'Dr. Smith', 'Ext'), apt('Emergency', 'Dr. Smith', 'Ext'), empty(), empty(), empty(), empty(), empty(), empty(), empty(), empty(), apt('Consult', 'Dr. Smith', 'Implant'), empty(), empty(), empty(), empty(), empty(), empty(), empty()],      // Room 3 (Low Util)
-            [apt('Dan F.', 'Dr. Lee', 'Invisalign'), apt('Dan F.', 'Dr. Lee', 'Invisalign'), empty(), empty(), apt('Pam H.', 'Dr. Lee', 'Filling'), apt('Pam H.', 'Dr. Lee', 'Filling'), apt('Pam H.', 'Dr. Lee', 'Filling'), empty(), empty(), empty(), apt('Ed C.', 'Dr. Lee', 'Crown'), apt('Ed C.', 'Dr. Lee', 'Crown'), apt('Ed C.', 'Dr. Lee', 'Crown'), empty(), empty(), empty(), apt('Rob P.', 'Dr. Lee', 'Exam'), empty(), empty(), empty()],   // Room 4
-            [apt('Sue B.', 'Hyg. Mike', 'Prophy'), apt('Sue B.', 'Hyg. Mike', 'Prophy'), apt('Jay Z.', 'Hyg. Mike', 'Prophy'), apt('Jay Z.', 'Hyg. Mike', 'Prophy'), empty(), empty(), apt('Ron M.', 'Hyg. Mike', 'SRP'), apt('Ron M.', 'Hyg. Mike', 'SRP'), empty(), empty(), apt('Bea A.', 'Hyg. Mike', 'Prophy'), apt('Bea A.', 'Hyg. Mike', 'Prophy'), empty(), apt('Lin T.', 'Hyg. Mike', 'Prophy'), apt('Lin T.', 'Hyg. Mike', 'Prophy'), empty(), empty(), empty(), empty(), empty()],   // Room 5
+            [apt('Sarah K.', 'Dr. Cifor', 'Crown Prep'), apt('Sarah K.', 'Dr. Cifor', 'Crown Prep'), apt('Mike T.', 'Dr. Cifor', 'Filling'), apt('Mike T.', 'Dr. Cifor', 'Filling'), apt('Tom R.', 'Dr. Cifor', 'Exam'), empty(), apt('Lisa M.', 'Dr. Cifor', 'Root Canal'), apt('Lisa M.', 'Dr. Cifor', 'Root Canal'), empty(), empty(), apt('James B.', 'Dr. Cifor', 'Bridge'), apt('James B.', 'Dr. Cifor', 'Bridge'), apt('James B.', 'Dr. Cifor', 'Bridge'), empty(), apt('Anna W.', 'Dr. Cifor', 'Exam'), apt('Anna W.', 'Dr. Cifor', 'Exam'), empty(), empty(), empty(), empty()], // Room 1
+            [apt('Tim L.', 'RDH Martinez', 'Prophy'), apt('Tim L.', 'RDH Martinez', 'Prophy'), empty(), apt('Sam S.', 'RDH Martinez', 'SRP'), apt('Sam S.', 'RDH Martinez', 'SRP'), apt('Sam S.', 'RDH Martinez', 'SRP'), empty(), empty(), empty(), empty(), apt('Kim K.', 'RDH Martinez', 'Prophy'), apt('Kim K.', 'RDH Martinez', 'Prophy'), apt('Roy D.', 'RDH Martinez', 'Prophy'), apt('Roy D.', 'RDH Martinez', 'Prophy'), empty(), apt('Jon N.', 'RDH Martinez', 'SRP'), apt('Jon N.', 'RDH Martinez', 'SRP'), empty(), empty(), empty()],   // Room 2
+            [empty(), empty(), apt('Emergency', 'Dr. Vargas', 'Ext'), apt('Emergency', 'Dr. Vargas', 'Ext'), empty(), empty(), empty(), empty(), empty(), empty(), empty(), empty(), apt('Consult', 'Dr. Vargas', 'Implant'), empty(), empty(), empty(), empty(), empty(), empty(), empty()],      // Room 3 (Low Util)
+            [apt('Dan F.', 'Dr. Vargas', 'Invisalign'), apt('Dan F.', 'Dr. Vargas', 'Invisalign'), empty(), empty(), apt('Pam H.', 'Dr. Vargas', 'Filling'), apt('Pam H.', 'Dr. Vargas', 'Filling'), apt('Pam H.', 'Dr. Vargas', 'Filling'), empty(), empty(), empty(), apt('Ed C.', 'Dr. Vargas', 'Crown'), apt('Ed C.', 'Dr. Vargas', 'Crown'), apt('Ed C.', 'Dr. Vargas', 'Crown'), empty(), empty(), empty(), apt('Rob P.', 'Dr. Vargas', 'Exam'), empty(), empty(), empty()],   // Room 4
+            [apt('Sue B.', 'RDH Davis', 'Prophy'), apt('Sue B.', 'RDH Davis', 'Prophy'), apt('Jay Z.', 'RDH Davis', 'Prophy'), apt('Jay Z.', 'RDH Davis', 'Prophy'), empty(), empty(), apt('Ron M.', 'RDH Davis', 'SRP'), apt('Ron M.', 'RDH Davis', 'SRP'), empty(), empty(), apt('Bea A.', 'RDH Davis', 'Prophy'), apt('Bea A.', 'RDH Davis', 'Prophy'), empty(), apt('Lin T.', 'RDH Davis', 'Prophy'), apt('Lin T.', 'RDH Davis', 'Prophy'), empty(), empty(), empty(), empty(), empty()],   // Room 5
         ];
 
         const yLabels = heatmapView === "practice" ? practiceDays : roomLabels;
@@ -1454,7 +1455,6 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
                                     {chunks.map((chunk) => (
                                         <div
                                             key={`${rowLabel}-${times[chunk.startIndex]}`}
-                                            title={getTooltip(chunk.val, rowLabel, times[chunk.startIndex])}
                                             style={{
                                                 gridColumn: `span ${chunk.span}`,
                                                 height: 48,
@@ -1468,8 +1468,22 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
                                                 justifyContent: 'center',
                                                 overflow: 'hidden'
                                             }}
-                                            onMouseOver={(e) => { e.currentTarget.style.opacity = 0.8; e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.zIndex = 10; e.currentTarget.style.position = 'relative'; }}
-                                            onMouseOut={(e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.zIndex = 1; }}
+                                            onMouseOver={(e) => {
+                                                e.currentTarget.style.opacity = 0.8;
+                                                e.currentTarget.style.transform = 'scale(1.02)';
+                                                e.currentTarget.style.zIndex = 10;
+                                                e.currentTarget.style.position = 'relative';
+                                                setTooltip({ show: true, content: chunk.val, time: times[chunk.startIndex], label: rowLabel, x: e.clientX, y: e.clientY });
+                                            }}
+                                            onMouseMove={(e) => {
+                                                setTooltip(prev => ({ ...prev, x: e.clientX, y: e.clientY }));
+                                            }}
+                                            onMouseOut={(e) => {
+                                                e.currentTarget.style.opacity = 1;
+                                                e.currentTarget.style.transform = 'scale(1)';
+                                                e.currentTarget.style.zIndex = 1;
+                                                setTooltip({ show: false, content: null, time: '', label: '', x: 0, y: 0 });
+                                            }}
                                         >
                                             {(typeof chunk.val === 'object' ? chunk.val.utilized : chunk.val >= 50) ? (
                                                 <span style={{ fontSize: 11, fontWeight: 700, color: '#FFFFFF', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', padding: '0 8px' }}>
@@ -1494,6 +1508,28 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
                         <span>Occupied</span>
                     </div>
                 </div>
+
+                {tooltip.show && (
+                    <div style={{
+                        position: 'fixed',
+                        left: tooltip.x + 15,
+                        top: tooltip.y + 15,
+                        background: '#111827',
+                        color: '#FFFFFF',
+                        padding: '10px 14px',
+                        borderRadius: 8,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        zIndex: 99999,
+                        pointerEvents: 'none',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        whiteSpace: 'pre-wrap',
+                        lineHeight: 1.5,
+                        letterSpacing: '-0.3px'
+                    }}>
+                        {getTooltip(tooltip.content, tooltip.label, tooltip.time)}
+                    </div>
+                )}
             </div>
         );
     };
