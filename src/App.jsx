@@ -1368,20 +1368,12 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
         const times = ['8:00', '8:30', '9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '1:00', '1:30', '2:00', '2:30', '3:00', '3:30', '4:00', '4:30', '5:00', '5:30'];
 
         const practiceDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-        const genPData = (pattern) => {
-            const row = [];
-            for (let i = 0; i < 20; i++) {
-                row.push(pattern[i] ? 100 : 0);
-            }
-            return row;
-        };
-
         const practiceData = [
-            genPData([1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]), // Mon
-            genPData([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0]), // Tue
-            genPData([0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0]), // Wed (Low util detected)
-            genPData([1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0]), // Thu
-            genPData([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]), // Fri
+            [apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Tom R.', 'Dr. Jensen', 'Exam'), empty(), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), apt('Lisa M.', 'Dr. Jensen', 'Root Canal'), empty(), empty(), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), empty(), apt('Anna W.', 'Dr. Jensen', 'Exam'), apt('Anna W.', 'Dr. Jensen', 'Exam'), empty(), empty(), empty(), empty()], // Mon
+            [apt('Tim L.', 'Hyg. Sarah', 'Prophy'), apt('Tim L.', 'Hyg. Sarah', 'Prophy'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Sam S.', 'Hyg. Sarah', 'SRP'), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Kim K.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), apt('Roy D.', 'Hyg. Sarah', 'Prophy'), apt('Jon N.', 'Hyg. Sarah', 'SRP'), apt('Jon N.', 'Hyg. Sarah', 'SRP'), apt('Emergency', 'Dr. Smith', 'Ext'), apt('Emergency', 'Dr. Smith', 'Ext'), apt('Consult', 'Dr. Smith', 'Implant'), empty(), apt('Dan F.', 'Dr. Lee', 'Invisalign'), apt('Dan F.', 'Dr. Lee', 'Invisalign'), empty(), empty(), empty()], // Tue (Very full)
+            [empty(), empty(), apt('Pam H.', 'Dr. Lee', 'Filling'), apt('Pam H.', 'Dr. Lee', 'Filling'), apt('Pam H.', 'Dr. Lee', 'Filling'), empty(), empty(), empty(), empty(), empty(), apt('Ed C.', 'Dr. Lee', 'Crown'), apt('Ed C.', 'Dr. Lee', 'Crown'), apt('Ed C.', 'Dr. Lee', 'Crown'), empty(), empty(), empty(), empty(), empty(), empty(), empty()], // Wed (Low util detected)
+            [apt('Rob P.', 'Dr. Lee', 'Exam'), apt('Rob P.', 'Dr. Lee', 'Exam'), apt('Sue B.', 'Hyg. Mike', 'Prophy'), apt('Sue B.', 'Hyg. Mike', 'Prophy'), apt('Jay Z.', 'Hyg. Mike', 'Prophy'), apt('Jay Z.', 'Hyg. Mike', 'Prophy'), apt('Ron M.', 'Hyg. Mike', 'SRP'), apt('Ron M.', 'Hyg. Mike', 'SRP'), empty(), empty(), apt('Bea A.', 'Hyg. Mike', 'Prophy'), apt('Bea A.', 'Hyg. Mike', 'Prophy'), apt('Lin T.', 'Hyg. Mike', 'Prophy'), apt('Lin T.', 'Hyg. Mike', 'Prophy'), empty(), empty(), empty(), empty(), empty(), empty()], // Thu
+            [apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Sarah K.', 'Dr. Jensen', 'Crown Prep'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Mike T.', 'Dr. Jensen', 'Filling'), apt('Tom R.', 'Dr. Jensen', 'Exam'), empty(), empty(), empty(), empty(), empty(), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), apt('James B.', 'Dr. Jensen', 'Bridge'), empty(), apt('Anna W.', 'Dr. Jensen', 'Exam'), apt('Anna W.', 'Dr. Jensen', 'Exam'), empty(), empty(), empty(), empty()], // Fri
         ];
 
         const roomLabels = ['Room 1', 'Room 2', 'Room 3', 'Room 4', 'Room 5'];
