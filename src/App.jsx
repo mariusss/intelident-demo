@@ -2833,13 +2833,31 @@ AI Confidence: 96% match with standard of care protocols.`;
             const verticalOffset = Math.pow(distanceFromCenter, 2) * 0.8;
             const translateY = isUpper ? verticalOffset : -verticalOffset;
 
+            // Anatomical Shapes based on Universal Numbering System
+            let tWidth = 32;
+            let tRadius = isUpper ? "6px 6px 16px 16px" : "16px 16px 6px 6px";
+
+            if ([1, 2, 3, 14, 15, 16, 17, 18, 19, 30, 31, 32].includes(num)) {
+                tWidth = 38; // Molars - blocky and wide
+                tRadius = isUpper ? "8px 8px 12px 12px" : "12px 12px 8px 8px";
+            } else if ([4, 5, 12, 13, 20, 21, 28, 29].includes(num)) {
+                tWidth = 28; // Premolars - narrow but somewhat rounded
+                tRadius = isUpper ? "8px 8px 16px 16px" : "16px 16px 8px 8px";
+            } else if ([6, 11, 22, 27].includes(num)) {
+                tWidth = 26; // Canines - pointy (high biting edge radius)
+                tRadius = isUpper ? "6px 6px 24px 24px" : "24px 24px 6px 6px";
+            } else {
+                tWidth = 28; // Incisors - flat cutting edge (low radius)
+                tRadius = isUpper ? "12px 12px 4px 4px" : "4px 4px 12px 12px";
+            }
+
             return (
                 <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, transform: `translateY(${translateY}px)` }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED }}>{num}</div>
                     <div
                         onClick={() => handleToothClick(num)}
                         style={{
-                            width: 32, height: 40, borderRadius: "6px 6px 16px 16px",
+                            width: tWidth, height: 40, borderRadius: tRadius,
                             background: data.status === "Healthy" ? GEO_WHITE : `${getToothColor(data.status)}15`,
                             border: `2px solid ${isSelected ? GEO_BLACK : getToothColor(data.status)}`,
                             cursor: "pointer", transition: "all 0.2s",
