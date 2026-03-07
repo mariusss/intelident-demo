@@ -74,7 +74,7 @@ const TIMELINE_EVENTS = [
         notes: "4 BWX taken. No new caries detected. Discussed crown on #19.",
         codes: ["D0120", "D0274"],
         aiNote: {
-            title: "SOAP Note Auto-Generated",
+            title: "OAP Note Auto-Generated",
             provider: "AI Assistant",
             notes: "Clinical note generated from procedure codes and approved by Dr. Vargas."
         }
@@ -653,7 +653,7 @@ export function AiNotesPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobile
     const handleGenerate = () => {
         setGenerating(true);
         setNote("");
-        const draft = "SOAP NOTE:\n\nS: Patient presents for routine hygiene exam. Reports no pain or sensitivity.\nO: Visual exam reveals generalized mild plaque. Gums pink and healthy. No visible caries.\nA: Generalized gingivitis, mild.\nP: Prophylaxis completed. Patient instructed on proper flossing technique. Recare set for 6 months.";
+        const draft = "OAP NOTE:\n\nO: Patient presents for routine hygiene exam. Reports no pain or sensitivity. Visual exam reveals generalized mild plaque. Gums pink and healthy. No visible caries.\nA: Generalized gingivitis, mild.\nP: Prophylaxis completed. Patient instructed on proper flossing technique. Recare set for 6 months.";
         let i = 0;
         const interval = setInterval(() => {
             setNote(prev => prev + draft.charAt(i));
@@ -687,7 +687,7 @@ export function AiNotesPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobile
                         {/* User Message */}
                         <div style={{ alignSelf: "flex-end", maxWidth: "85%" }}>
                             <div style={{ background: GEO_BG, padding: "16px 20px", borderRadius: "20px 20px 4px 20px", fontSize: 15, color: GEO_TEXT_MAIN, lineHeight: 1.5, border: `1px solid #E5E7EB` }}>
-                                Generate a SOAP note for Sarah Chen's hygiene visit today.
+                                Generate an OAP note for Sarah Chen's hygiene visit today.
                             </div>
                             <div style={{ fontSize: 12, color: GEO_TEXT_MUTED, marginTop: 6, textAlign: "right" }}>Dr. Cifor • 9:41 AM</div>
                         </div>
@@ -699,7 +699,7 @@ export function AiNotesPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobile
                             </div>
                             <div>
                                 <div style={{ background: GEO_WHITE, border: `1px solid #E5E7EB`, padding: "16px 20px", borderRadius: "4px 20px 20px 20px", fontSize: 15, color: GEO_TEXT_MAIN, lineHeight: 1.5, boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
-                                    I'd be happy to generate a SOAP note for Sarah. I have analyzed the appointment data and your clinical dictation.
+                                    I'd be happy to generate an OAP note for Sarah. I have analyzed the appointment data and your clinical dictation.
                                     {!note && !generating && (
                                         <div style={{ marginTop: 16 }}>
                                             <button onClick={handleGenerate} style={{ padding: "10px 16px", background: GEO_BG, border: `1px solid #E5E7EB`, borderRadius: 8, fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, transition: "all 0.2s" }}>
@@ -732,7 +732,7 @@ export function AiNotesPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobile
                 <div style={{ flex: 1, background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW, display: "flex", flexDirection: "column" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
                         <h3 style={{ fontSize: 18, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0 }}>Clinical Documentation</h3>
-                        <div style={{ padding: "4px 12px", background: "#E8F5E9", color: GEO_GREEN, borderRadius: GEO_PILL, fontSize: 13, fontWeight: 600 }}>SOAP Note</div>
+                        <div style={{ padding: "4px 12px", background: "#E8F5E9", color: GEO_GREEN, borderRadius: GEO_PILL, fontSize: 13, fontWeight: 600 }}>OAP Note</div>
                     </div>
 
                     <div style={{ flex: 1, background: GEO_BG, borderRadius: 16, padding: 32, fontSize: 15, color: GEO_TEXT_MAIN, lineHeight: 1.6, whiteSpace: "pre-wrap", overflowY: "auto", fontFamily: note ? "monospace" : "inherit", border: `1px solid #E5E7EB`, position: 'relative' }}>
@@ -1238,7 +1238,7 @@ export function VoiceAgentPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMob
                                             <td colSpan="5" style={{ padding: "40px 0", textAlign: "center", color: GEO_TEXT_MUTED, fontSize: 15 }}>
                                                 <CheckCircle size={32} color={GEO_GREEN} style={{ marginBottom: 16 }} />
                                                 <div style={{ fontWeight: 600, color: GEO_TEXT_MAIN }}>You're all caught up!</div>
-                                                <div>SOAP NOTE:</div>
+                                                <div>OAP NOTE:</div>
                                             </td>
                                         </tr>
                                     )}
@@ -2151,7 +2151,7 @@ export function PatientDetailPageUI2({ patient, onBack, currentUI, setUI, TIMELI
                                         {ev.codes.map(c => <span key={c} style={{ border: "1px solid #E5E7EB", padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 600, color: "#8A8D93" }}>{c}</span>)}
                                     </div>
 
-                                    {/* Nested AI SOAP Note */}
+                                    {/* Nested AI OAP Note */}
                                     {ev.aiNote && (
                                         <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px dashed #E5E7EB" }}>
                                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
@@ -2827,11 +2827,11 @@ AI Confidence: 96% match with standard of care protocols.`;
             const data = teeth[num];
             const isSelected = selectedTooth === num;
 
-            // Calculate parabolic arch offset (U-shape)
+            // Calculate parabolic arch offset (Oval-shape)
             // Center is at index 7.5 (between indices 7 and 8)
             const distanceFromCenter = Math.abs(index - 7.5);
             const verticalOffset = Math.pow(distanceFromCenter, 2) * 1.8;
-            const translateY = isUpper ? -verticalOffset : verticalOffset;
+            const translateY = isUpper ? verticalOffset : -verticalOffset;
 
             return (
                 <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, transform: `translateY(${translateY}px)` }}>

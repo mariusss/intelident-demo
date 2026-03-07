@@ -16,7 +16,7 @@ Promise.all([
   createRoot(document.getElementById('root')).render(
     <StrictMode>
       {isPitch ? <PitchDeck /> : <App />}
-      <div style={{ position: 'fixed', bottom: 10, left: 10, background: 'red', color: 'white', padding: 5, zIndex: 9999 }}>React is Mounted</div>
+
     </StrictMode>,
   )
 }).catch(e => {
