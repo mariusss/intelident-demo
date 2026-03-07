@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 import {
     LayoutDashboard, Users, Calendar, FileText, BarChart3, Settings, Search, Bell, Phone, Mail, Filter, ChevronDown, Stethoscope, MessageSquare, Clipboard, PhoneCall, Globe, Copy, Play, Square, Plus, Trash2, GripVertical, Download, Eye, File, Activity, UsersRound, CalendarCheck, Wallet, ArrowDownToLine, MoreHorizontal, Clock, Check, CheckCircle, Shield, Sparkles, TrendingUp, Type, CalendarDays, AlignLeft, ListChecks, Hash, CircleDot, Edit3, Repeat, Camera, Image as ImageIcon, Mic, ArrowRight, Loader2, Menu, X, BadgePercent, AlertTriangle, FileHeart, XOctagon, ExternalLink, Megaphone, UserPlus, Printer, MoreVertical, ShieldAlert
 } from "lucide-react";
+import { Dental3DModel } from './Dental3DModel';
 
 // ═══════════════════════════════════════════
 // BRAND CONSTANTS (UI1)
@@ -2823,6 +2824,7 @@ export function ClinicalChartPageUI2({ currentUI, setUI, isMobileMenuOpen, setIs
 
     const [analyzingXray, setAnalyzingXray] = useState(false);
     const [xrayAnalyzed, setXrayAnalyzed] = useState(false);
+    const [viewMode, setViewMode] = useState("3D"); // Default to the new 3D view
 
     const handleToothClick = (num) => {
         setSelectedTooth(selectedTooth === num ? null : num);
@@ -3063,6 +3065,16 @@ AI Confidence: 96% match with standard of care protocols.`;
                                 </button>
                             </div>
                             <div style={{ display: "flex", gap: 12 }}>
+                                {activeTab === "tooth" && (
+                                    <div style={{ display: "flex", background: GEO_BG, borderRadius: GEO_PILL, padding: 4 }}>
+                                        <button onClick={() => setViewMode("2D")} style={{ padding: "6px 16px", borderRadius: GEO_PILL, border: "none", background: viewMode === "2D" ? GEO_WHITE : "transparent", fontSize: 13, fontWeight: 700, color: GEO_TEXT_MAIN, cursor: "pointer", boxShadow: viewMode === "2D" ? "0 2px 8px rgba(0,0,0,0.1)" : "none", transition: "all 0.2s" }}>
+                                            2D
+                                        </button>
+                                        <button onClick={() => setViewMode("3D")} style={{ padding: "6px 16px", borderRadius: GEO_PILL, border: "none", background: viewMode === "3D" ? GEO_WHITE : "transparent", fontSize: 13, fontWeight: 700, color: GEO_TEXT_MAIN, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: viewMode === "3D" ? "0 2px 8px rgba(0,0,0,0.1)" : "none", transition: "all 0.2s" }}>
+                                            <span style={{ width: 6, height: 6, borderRadius: 3, background: GEO_GREEN }}></span> 3D
+                                        </button>
+                                    </div>
+                                )}
                                 <button style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: `1px solid ${GEO_BG}`, background: GEO_BG, fontSize: 13, fontWeight: 600, color: GEO_TEXT_MAIN, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
                                     <Clock size={14} /> History
                                 </button>
@@ -3074,7 +3086,13 @@ AI Confidence: 96% match with standard of care protocols.`;
 
                         {/* Chart Area */}
                         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            {activeTab === "tooth" ? renderToothChart() : renderPerioChart()}
+                            {activeTab === "tooth" ? (
+                                viewMode === "3D" ? (
+                                    <Dental3DModel teethData={teeth} selectedTooth={selectedTooth} onSelectTooth={handleToothClick} />
+                                ) : (
+                                    renderToothChart()
+                                )
+                            ) : renderPerioChart()}
                         </div>
                     </div>
                 </div>

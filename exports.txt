@@ -1,0 +1,19 @@
+export function SidebarUI2({ currentPage, onNavigate, isExpanded, setIsExpanded, isMobileMenuOpen, setIsMobileMenuOpen, voiceEscalationCount }) {
+export function MobileHeaderUI2({ isMobileMenuOpen, setIsMobileMenuOpen, onNavigate }) {
+export function TopGreetingUI2({ isMobileMenuOpen, setIsMobileMenuOpen, subtitle }) {
+export function StatCardUI2({ icon: Icon, title, value, change, isPositive }) {
+export function DashboardPageUI2({ onNavigatePage, onSelectPatient, WEEKLY_PRODUCTION, SCHEDULE_DATA, PATIENT_DATA, isMobileMenuOpen, setIsMobileMenuOpen, voiceEscalationCount }) {
+export function PatientListPageUI2({ currentUI, setUI, onNavigatePage, onSelectPatient, PATIENT_DATA, isMobileMenuOpen, setIsMobileMenuOpen, currentPath }) {
+export function AiNotesPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export function PlaceholderPageUI2({ currentUI, setUI, title, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export function SmartSchedulerPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen, PATIENT_DATA, onSelectPatient, onNavigatePage }) {
+export function VoiceAgentPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen, escalations, setEscalations, handleMarkDone }) {
+export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export function FormBuilderPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export function SettingsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export function IntegrationsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export function PatientDetailPageUI2({ patient, onBack, currentUI, setUI, TIMELINE_EVENTS, MEDICAL_HISTORY, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export function BillingPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export function RecallPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export function ClinicalChartPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+export function CommunicationsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
