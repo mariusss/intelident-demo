@@ -1253,6 +1253,113 @@ export function VoiceAgentPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMob
     );
 }
 
+const CustomDatePicker = ({ selectedDate, onChange }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dateObj = new Date(selectedDate);
+    const month = dateObj.toLocaleString('default', { month: 'long', timeZone: 'UTC' });
+    const year = dateObj.getUTCFullYear();
+    const day = dateObj.getUTCDate();
+
+    // Very basic calendar math for rendering days
+    const firstDay = new Date(Date.UTC(year, dateObj.getUTCMonth(), 1)).getUTCDay();
+    const daysInMonth = new Date(Date.UTC(year, dateObj.getUTCMonth() + 1, 0)).getUTCDate();
+
+    // Create array of days for grid
+    const daysArray = Array.from({ length: 42 }, (_, i) => {
+        const dayNum = i - firstDay + 1;
+        return (dayNum > 0 && dayNum <= daysInMonth) ? dayNum : null;
+    });
+
+    return (
+        <div style={{ position: 'relative' }}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '8px 16px',
+                    borderRadius: 8,
+                    border: '1px solid #E5E7EB',
+                    background: isOpen ? '#F9FAFB' : '#FFFFFF',
+                    color: '#374151',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+            >
+                <Calendar size={16} strokeWidth={2.5} color="#6B7280" />
+                <span>{`${month} ${day}, ${year}`}</span>
+                <ChevronDown size={14} strokeWidth={2.5} color="#9CA3AF" style={{ marginLeft: 4, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            </button>
+
+            {isOpen && (
+                <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: 8,
+                    background: '#FFFFFF',
+                    borderRadius: 16,
+                    padding: 16,
+                    width: 280,
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                    border: '1px solid #E5E7EB',
+                    zIndex: 100
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                        <button style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, color: '#6B7280' }} onClick={() => onChange(new Date(Date.UTC(year, dateObj.getUTCMonth() - 1, 1)).toISOString().split('T')[0])}>
+                            <ChevronDown size={16} style={{ transform: 'rotate(90deg)' }} />
+                        </button>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>{month} {year}</div>
+                        <button style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, color: '#6B7280' }} onClick={() => onChange(new Date(Date.UTC(year, dateObj.getUTCMonth() + 1, 1)).toISOString().split('T')[0])}>
+                            <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
+                        </button>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 8, textAlign: 'center' }}>
+                        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+                            <div key={d} style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF' }}>{d}</div>
+                        ))}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+                        {daysArray.map((d, i) => (
+                            <button
+                                key={i}
+                                disabled={!d}
+                                onClick={() => {
+                                    if (d) {
+                                        const newD = new Date(Date.UTC(year, dateObj.getUTCMonth(), d));
+                                        onChange(newD.toISOString().split('T')[0]);
+                                        setIsOpen(false);
+                                    }
+                                }}
+                                style={{
+                                    height: 32,
+                                    borderRadius: 8,
+                                    border: 'none',
+                                    background: d === day ? '#111827' : 'transparent',
+                                    color: !d ? 'transparent' : (d === day ? '#FFFFFF' : '#374151'),
+                                    fontSize: 13,
+                                    fontWeight: d === day ? 700 : 500,
+                                    cursor: d ? 'pointer' : 'default',
+                                }}
+                                onMouseOver={e => { if (d && d !== day) e.currentTarget.style.backgroundColor = '#F3F4F6'; }}
+                                onMouseOut={e => { if (d && d !== day) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                            >
+                                {d}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
     const [heatmapView, setHeatmapView] = React.useState("practice");
     const [selectedDate, setSelectedDate] = React.useState(new Date().toLocaleDateString('en-CA')); // YYYY-MM-DD local
@@ -1366,22 +1473,9 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                             {heatmapView === "rooms" && (
-                                <input
-                                    type="date"
-                                    value={selectedDate}
-                                    onChange={(e) => setSelectedDate(e.target.value)}
-                                    style={{
-                                        padding: '6px 12px',
-                                        borderRadius: 8,
-                                        border: '1px solid #D1D5DB',
-                                        background: '#FFFFFF',
-                                        color: '#374151',
-                                        fontSize: 13,
-                                        fontWeight: 500,
-                                        fontFamily: 'inherit',
-                                        cursor: 'pointer',
-                                        outline: 'none',
-                                    }}
+                                <CustomDatePicker
+                                    selectedDate={selectedDate}
+                                    onChange={setSelectedDate}
                                 />
                             )}
                             <div style={{ display: 'flex', background: '#F3F4F6', borderRadius: 8, padding: 4 }}>
