@@ -136,8 +136,10 @@ export function SidebarUI2({ currentPage, onNavigate, isExpanded, setIsExpanded,
     const menuItems = [
         { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
         { id: "patients", icon: Users, label: "Patients" },
+        { id: "chart", icon: Stethoscope, label: "Clinical Chart" },
         { id: "schedule", icon: Calendar, label: "Schedule" },
         { id: "reactivation", icon: CalendarCheck, label: "Reactivation" },
+        { id: "communications", icon: MessageSquare, label: "Communications" },
         { id: "notes", icon: FileText, label: "AI Notes" },
         { id: "billing", icon: Wallet, label: "Billing" },
         { id: "voice", icon: PhoneCall, label: "Voice Agent" },
@@ -806,10 +808,12 @@ export function SmartSchedulerPageUI2({ currentUI, setUI, isMobileMenuOpen, setI
         if (simState !== "idle" && simState !== "finished") return;
         setSimState("cancelled");
         setApts(prev => prev.filter(a => !a.isTarget));
+    };
 
-        setTimeout(() => setSimState("searching"), 2000);
-        setTimeout(() => setSimState("ranking"), 4000);
-        setTimeout(() => setSimState("calling"), 6000);
+    const triggerSmartFill = () => {
+        setSimState("searching");
+        setTimeout(() => setSimState("ranking"), 2000);
+        setTimeout(() => setSimState("calling"), 4500);
         setTimeout(() => {
             setSimState("filled");
             setApts(prev => [...prev, {
@@ -824,7 +828,7 @@ export function SmartSchedulerPageUI2({ currentUI, setUI, isMobileMenuOpen, setI
                 isFilled: true
             }]);
             setTimeout(() => setSimState("finished"), 3000);
-        }, 8000);
+        }, 7000);
     };
 
     return (
@@ -836,9 +840,16 @@ export function SmartSchedulerPageUI2({ currentUI, setUI, isMobileMenuOpen, setI
                 <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
                         <h2 style={{ fontSize: 24, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0 }}>Chair Allocation</h2>
-                        <button onClick={triggerSimulation} style={{ display: "flex", alignItems: "center", gap: 8, background: "#1C1E23", color: GEO_WHITE, border: "none", padding: "10px 20px", borderRadius: GEO_PILL, fontSize: 13, fontWeight: 600, cursor: "pointer", opacity: simState === "idle" || simState === "finished" ? 1 : 0.5 }}>
-                            <Play size={14} fill="currentColor" /> Simulate Cancellation Event
-                        </button>
+                        <div style={{ display: "flex", gap: 12 }}>
+                            {simState === "cancelled" && (
+                                <button onClick={triggerSmartFill} style={{ display: "flex", alignItems: "center", gap: 8, background: GEO_GREEN, color: GEO_WHITE, border: "none", padding: "10px 20px", borderRadius: GEO_PILL, fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(0, 182, 122, 0.2)", animation: "fadeIn 0.3s ease-out" }}>
+                                    <Sparkles size={14} fill="currentColor" /> Activate Smart Fill
+                                </button>
+                            )}
+                            <button onClick={triggerSimulation} style={{ display: "flex", alignItems: "center", gap: 8, background: "#1C1E23", color: GEO_WHITE, border: "none", padding: "10px 20px", borderRadius: GEO_PILL, fontSize: 13, fontWeight: 600, cursor: "pointer", opacity: simState === "idle" || simState === "finished" ? 1 : 0.5 }}>
+                                <Play size={14} fill="currentColor" /> Simulate Cancellation Event
+                            </button>
+                        </div>
                     </div>
 
                     <div style={{ border: `1px solid #E5E7EB`, borderRadius: 16, overflow: "hidden", display: "flex", flexDirection: "column" }}>
@@ -957,7 +968,7 @@ export function SmartSchedulerPageUI2({ currentUI, setUI, isMobileMenuOpen, setI
                                     <div style={{ width: 24, height: 24, borderRadius: 12, background: "#EF4444", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><X size={12} color="white" strokeWidth={3} /></div>
                                     <div>
                                         <div style={{ fontWeight: 600, fontSize: 14 }}>Patient Cancellation Detected</div>
-                                        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>James Okafor (Extraction) cancelled via SMS. $1,250 production lost.</div>
+                                        <div className="typewriter-text" style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>James Okafor (Extraction) cancelled via SMS. $1,250 production lost.</div>
                                     </div>
                                 </div>
                             )}
@@ -969,7 +980,7 @@ export function SmartSchedulerPageUI2({ currentUI, setUI, isMobileMenuOpen, setI
                                     </div>
                                     <div>
                                         <div style={{ fontWeight: 600, fontSize: 14 }}>Searching Waitlist & Records</div>
-                                        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>Scanning 1,842 patients for matching treatment type and availability...</div>
+                                        <div className="typewriter-text" style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>Scanning 1,842 patients for matching treatment type and availability...</div>
                                     </div>
                                 </div>
                             )}
@@ -981,7 +992,7 @@ export function SmartSchedulerPageUI2({ currentUI, setUI, isMobileMenuOpen, setI
                                     </div>
                                     <div>
                                         <div style={{ fontWeight: 600, fontSize: 14, color: "#FFD100" }}>Ranking Candidates</div>
-                                        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>Ranked top 3 candidates by production value and waitlist priority.</div>
+                                        <div className="typewriter-text" style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>Ranked top 3 candidates by production value and waitlist priority.</div>
                                     </div>
                                 </div>
                             )}
@@ -993,7 +1004,7 @@ export function SmartSchedulerPageUI2({ currentUI, setUI, isMobileMenuOpen, setI
                                     </div>
                                     <div>
                                         <div style={{ fontWeight: 600, fontSize: 14, color: "#C4B5FD" }}>Contacting Patient #1</div>
-                                        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>Sending automated SMS to Elena R. regarding Implant Consult slot...</div>
+                                        <div className="typewriter-text" style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>Sending automated SMS to Elena R. regarding Implant Consult slot...</div>
                                     </div>
                                 </div>
                             )}
@@ -1003,7 +1014,7 @@ export function SmartSchedulerPageUI2({ currentUI, setUI, isMobileMenuOpen, setI
                                     <div style={{ width: 24, height: 24, borderRadius: 12, background: "#00B67A", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Shield size={12} color="white" /></div>
                                     <div>
                                         <div style={{ fontWeight: 600, fontSize: 14, color: "#00B67A" }}>Slot Filled Automatically</div>
-                                        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>Elena R. accepted via SMS link. $1,400 production secured. Calendar updated.</div>
+                                        <div className="typewriter-text" style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 }}>Elena R. accepted via SMS link. $1,400 production secured. Calendar updated.</div>
                                     </div>
                                 </div>
                             )}
@@ -1015,6 +1026,16 @@ export function SmartSchedulerPageUI2({ currentUI, setUI, isMobileMenuOpen, setI
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(10px); }
                     to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes typing {
+                    from { width: 0; }
+                    to { width: 100%; }
+                }
+                .typewriter-text {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    display: inline-block;
+                    animation: typing 2.5s steps(40, end) forwards;
                 }
             `}</style>
         </div>
@@ -1409,6 +1430,51 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            {/* NEW: AI Growth Recommendations Panel */}
+            <div style={{ background: "linear-gradient(to right, #F8FAFC, #FFFFFF)", borderRadius: 24, padding: 32, border: `1px solid #E5E7EB`, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", marginTop: 32 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 20, background: `${GEO_GREEN}15`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <TrendingUp size={20} color={GEO_GREEN} />
+                    </div>
+                    <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>AI Growth Recommendations</h3>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }}>
+                    {/* Rec 1 */}
+                    <div style={{ background: GEO_WHITE, border: `1px solid ${GEO_BG}`, borderRadius: 16, padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>Optimization</span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: GEO_GREEN }}>+$12k / mo</span>
+                        </div>
+                        <h4 style={{ fontSize: 16, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0 }}>Expand Friday Hours</h4>
+                        <p style={{ fontSize: 14, color: GEO_TEXT_MUTED, margin: 0, lineHeight: 1.5 }}>Friday morning hygiene is operating at 100% capacity for 6 consecutive weeks. Adding a part-time hygienist on Friday mornings would absorb $12k in spillover demand.</p>
+                        <button style={{ marginTop: "auto", padding: "10px 0", borderRadius: GEO_PILL, border: `1px solid ${GEO_GREEN}`, background: "transparent", color: GEO_GREEN, fontWeight: 600, fontSize: 14, cursor: "pointer", transition: "all 0.2s" }} onMouseOver={e => { e.currentTarget.style.background = GEO_GREEN; e.currentTarget.style.color = "white" }} onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = GEO_GREEN }}>Analyze ROI Payload</button>
+                    </div>
+
+                    {/* Rec 2 */}
+                    <div style={{ background: GEO_WHITE, border: `1px solid ${GEO_BG}`, borderRadius: 16, padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>Campaign</span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: GEO_GREEN }}>+$8k / mo</span>
+                        </div>
+                        <h4 style={{ fontSize: 16, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0 }}>Unfinished Treatment Plans</h4>
+                        <p style={{ fontSize: 14, color: GEO_TEXT_MUTED, margin: 0, lineHeight: 1.5 }}>There are 84 patients with unscheduled restorative work (&gt;$1,000) whose insurance benefits reset in 60 days. Launch the 'Use It or Lose It' drip campaign.</p>
+                        <button style={{ marginTop: "auto", padding: "10px 0", borderRadius: GEO_PILL, border: "none", background: GEO_BLACK, color: GEO_WHITE, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Deploy Text Campaign</button>
+                    </div>
+
+                    {/* Rec 3 */}
+                    <div style={{ background: GEO_WHITE, border: `1px solid ${GEO_BG}`, borderRadius: 16, padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>Efficiency</span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: "#F59E0B" }}>Medium Priority</span>
+                        </div>
+                        <h4 style={{ fontSize: 16, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0 }}>Automate Review Requests</h4>
+                        <p style={{ fontSize: 14, color: GEO_TEXT_MUTED, margin: 0, lineHeight: 1.5 }}>You have received exactly 0 Google Reviews this week despite 45 completed appointments. Enable AI post-visit SMS intercepts for 5-star experiences.</p>
+                        <button style={{ marginTop: "auto", padding: "10px 0", borderRadius: GEO_PILL, border: `1px solid ${GEO_TEXT_MUTED}`, background: "transparent", color: GEO_TEXT_MAIN, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Configure Triggers</button>
                     </div>
                 </div>
             </div>
@@ -2658,6 +2724,26 @@ export function BillingPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobile
     const [isAutoBuilding, setIsAutoBuilding] = useState(false);
     const [isCorrecting, setIsCorrecting] = useState(false);
 
+    // New Feature States
+    const [isRunningEligibility, setIsRunningEligibility] = useState(false);
+    const [eligibilityDone, setEligibilityDone] = useState(false);
+    const [showAppealModal, setShowAppealModal] = useState(false);
+    const [generatingAppeal, setGeneratingAppeal] = useState(false);
+
+    const handleRunEligibility = () => {
+        setIsRunningEligibility(true);
+        setTimeout(() => {
+            setIsRunningEligibility(false);
+            setEligibilityDone(true);
+        }, 3000);
+    };
+
+    const handleAutoAppeal = () => {
+        setShowAppealModal(true);
+        setGeneratingAppeal(true);
+        setTimeout(() => setGeneratingAppeal(false), 2000);
+    };
+
     const handleScrubClaim = () => {
         setIsScrubbing(true);
         setTimeout(() => {
@@ -2760,278 +2846,103 @@ export function BillingPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobile
             </div>
 
             {view === "claims" && (
-                <div className="mobile-no-padding-card" style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW, flex: 1 }}>
-                    <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Recent Claims</h3>
-                    <div className="table-scroll-mobile">
-                        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
-                            <thead>
-                                <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>ID</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Patient</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Provider</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Date</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>CDT Codes</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Billed Amount</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Ins Est</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Status</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {mockClaims.map((claim, idx) => (
-                                    <tr key={idx} style={{ borderBottom: `1px solid #F4F5F7`, cursor: "pointer", transition: "background 0.2s", background: claim.status === "Ready for Review" ? "#8B5CF608" : "transparent" }} onMouseOver={e => e.currentTarget.style.background = "#F9FAFB"} onMouseOut={e => e.currentTarget.style.background = claim.status === "Ready for Review" ? "#8B5CF608" : "transparent"} onClick={() => { setSelectedClaim(claim); setView("claim-detail"); window.history.pushState(null, '', `/billing/claims/${claim.id}`); }}>
-                                        <td style={{ padding: "20px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.id}</td>
-                                        <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.patient}</td>
-                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{claim.provider}</td>
-                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{claim.date}</td>
-                                        <td style={{ padding: "20px 0", fontSize: 14, fontFamily: "monospace", color: GEO_TEXT_MAIN }}>{claim.codes}</td>
-                                        <td style={{ padding: "20px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.billed}</td>
-                                        <td style={{ padding: "20px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.insEst}</td>
-                                        <td style={{ padding: "20px 0" }}>
-                                            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: GEO_PILL, fontSize: 12, fontWeight: 600, color: claim.statusColor, background: `${claim.statusColor}15` }}>
-                                                <CircleDot size={12} fill={claim.statusColor} /> {claim.status}
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: "20px 0", textAlign: "right" }}>
-                                            <button style={{ background: "transparent", border: "none", cursor: "pointer", color: GEO_TEXT_MUTED }}><MoreHorizontal size={20} /></button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
-            {view === "claim-detail" && selectedClaim && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 24, flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                        <button onClick={() => { setView("claims"); window.history.pushState(null, '', `/billing`); }} style={{ width: 44, height: 44, borderRadius: 22, border: `1px solid #E5E7EB`, background: GEO_WHITE, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "transform 0.1s" }} onMouseDown={e => e.currentTarget.style.transform = "scale(0.95)"} onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}>
-                            <ArrowDownToLine size={20} color={GEO_TEXT_MAIN} style={{ transform: "rotate(90deg)" }} />
-                        </button>
-                        <div>
-                            <h2 style={{ fontSize: 24, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>Claim {selectedClaim.id}</h2>
-                            <div style={{ fontSize: 14, color: GEO_TEXT_MUTED, marginTop: 4 }}>{selectedClaim.patient} • {selectedClaim.date}</div>
-                        </div>
-                        <div style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: GEO_PILL, fontSize: 14, fontWeight: 700, color: selectedClaim.statusColor, background: `${selectedClaim.statusColor}15` }}>
-                            <CircleDot size={14} fill={selectedClaim.statusColor} /> {selectedClaim.status}
-                        </div>
-                    </div>
-
-                    <div className="stack-on-mobile" style={{ display: "flex", gap: 30 }}>
-                        <div className="mobile-no-padding-card" style={{ flex: 2, background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
-                            <h3 style={{ fontSize: 18, fontWeight: 600, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Procedure Line Items</h3>
-                            <div className="table-scroll-mobile">
-                                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 500 }}>
-                                    <thead>
-                                        <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
-                                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Code</th>
-                                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Description</th>
-                                            <th style={{ padding: "0 0 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Fee</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr style={{ borderBottom: `1px solid #F4F5F7` }}>
-                                            <td style={{ padding: "16px 0", fontSize: 14, fontFamily: "monospace", color: GEO_TEXT_MAIN }}>D2740</td>
-                                            <td style={{ padding: "16px 0", fontSize: 14, color: GEO_TEXT_MAIN }}>Crown - porcelain/ceramic</td>
-                                            <td style={{ padding: "16px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN, textAlign: "right" }}>{selectedClaim.billed}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div className="mobile-padding" style={{ flex: 1, display: "flex", flexDirection: "column", gap: 24 }}>
-                            {selectedClaim.status === "Needs Attention" && !hasScrubbed && (
-                                <div style={{ background: GEO_WHITE, border: `1px solid #E5E7EB`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-                                    <div style={{ background: "#FACC1515", width: 64, height: 64, borderRadius: 32, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                                        <Shield size={32} color="#EAB308" />
-                                    </div>
-                                    <h4 style={{ fontSize: 18, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 8px 0" }}>Ready for AI Pre-Submission Scrub</h4>
-                                    <p style={{ fontSize: 14, color: GEO_TEXT_MUTED, margin: "0 0 24px 0", maxWidth: 300, lineHeight: 1.5 }}>
-                                        Run this claim through the Intelident AI rules engine to catch rejections before submission.
-                                    </p>
-                                    <button onClick={handleScrubClaim} disabled={isScrubbing} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: isScrubbing ? "#E5E7EB" : GEO_BLACK, color: isScrubbing ? GEO_TEXT_MUTED : GEO_WHITE, fontWeight: 600, fontSize: 14, cursor: isScrubbing ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 8, transition: "background 0.2s" }}>
-                                        {isScrubbing ? (
-                                            <>
-                                                <div style={{ width: 14, height: 14, borderRadius: 7, border: "2px solid currentColor", borderRightColor: "transparent", animation: "spin 1s linear infinite" }} />
-                                                Scanning claim for errors...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Sparkles size={16} /> Scrub Claim with AI
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            )}
-
-                            {selectedClaim.status === "Needs Attention" && hasScrubbed && (
-                                <div style={{ background: "#FEF9C3", border: `1px solid #FACC15`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden" }}>
-                                    <div style={{ position: "absolute", top: -20, right: -20, opacity: 0.1 }}><Shield size={120} color="#EAB308" /></div>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                                        <Sparkles size={20} color="#EAB308" />
-                                        <span style={{ fontSize: 18, fontWeight: 700, color: "#CA8A04" }}>Pre-Submission Scrubber Result</span>
-                                    </div>
-                                    <div style={{ fontSize: 15, color: "#854D0E", lineHeight: 1.6, fontWeight: 500 }}>
-                                        AI detected a potential rejection: <strong>Missing Narrative</strong> for D2740 (Crown) indicating why an existing crown is being replaced.
-                                    </div>
-                                    <div style={{ background: "rgba(255,255,255,0.6)", borderRadius: 12, padding: 16, marginTop: 16, border: "1px dashed #FACC15", fontSize: 14, color: "#A16207" }}>
-                                        <div style={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Auto-Drafted Narrative:</div>
-                                        "Tooth 14 existing crown has recurrent decay on margins and open contacts causing food impaction. Original placement &gt; 5 years ago."
-                                    </div>
-                                    <button style={{ marginTop: 24, padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: "#EAB308", color: "#FFFFFF", fontWeight: 700, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, width: "100%", justifyContent: "center", boxShadow: "0 4px 12px rgba(234, 179, 8, 0.3)" }}>
-                                        <CheckCircle size={16} /> Attach Auto-Narrative & Submit
-                                    </button>
-                                </div>
-                            )}
-
-                            {selectedClaim.status === "Denied" && (
-                                <div style={{ background: "#FFF0F0", border: `1px solid #FF3B30`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden" }}>
-                                    <div style={{ position: "absolute", top: -20, right: -20, opacity: 0.1 }}><Shield size={120} color="#FF3B30" /></div>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                                        <div style={{ background: "#FF3B30", color: "white", padding: "4px 8px", borderRadius: 8, fontSize: 12, fontWeight: 800 }}>DENIAL EOB Scanned</div>
-                                    </div>
-                                    <div style={{ fontSize: 15, color: "#1C1E23", lineHeight: 1.6, fontWeight: 500 }}>
-                                        {selectedClaim.aiNote}
-                                    </div>
-                                    <button onClick={() => handleAutoCorrect(selectedClaim.id)} disabled={isCorrecting} style={{ marginTop: 24, padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: isCorrecting ? "#E5E7EB" : "#111827", color: isCorrecting ? GEO_TEXT_MUTED : "#FFFFFF", fontWeight: 600, fontSize: 14, cursor: isCorrecting ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 8, width: "100%", justifyContent: "center", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)", transition: "background 0.2s" }}>
-                                        {isCorrecting ? (
-                                            <>
-                                                <div style={{ width: 14, height: 14, borderRadius: 7, border: "2px solid currentColor", borderRightColor: "transparent", animation: "spin 1s linear infinite" }} />
-                                                Regenerating claim...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Sparkles size={16} color="#00B67A" /> Execute Auto-Correction
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            )}
-
-                            {selectedClaim.status === "Resubmitted" && (
-                                <div style={{ background: "#F0FDF4", border: `1px solid #22C55E`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden" }}>
-                                    <div style={{ position: "absolute", top: -20, right: -20, opacity: 0.1 }}><Shield size={120} color="#22C55E" /></div>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                                        <Sparkles size={20} color="#16A34A" />
-                                        <span style={{ fontSize: 18, fontWeight: 700, color: "#16A34A" }}>Auto-Correction Successful</span>
-                                    </div>
-                                    <div style={{ fontSize: 15, color: "#166534", lineHeight: 1.6, fontWeight: 500 }}>
-                                        {selectedClaim.aiNote}
-                                    </div>
-                                </div>
-                            )}
-
-                            <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
-                                <h3 style={{ fontSize: 18, fontWeight: 600, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Status Timeline</h3>
-                                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                                    <div style={{ display: "flex", gap: 16 }}>
-                                        <div style={{ width: 12, height: 12, borderRadius: 6, background: selectedClaim.statusColor, marginTop: 4, outline: `4px solid ${selectedClaim.statusColor}20` }} />
-                                        <div>
-                                            <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{selectedClaim.status}</div>
-                                            <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, marginTop: 4 }}>Oct 25, 2023 10:45 AM</div>
-                                        </div>
-                                    </div>
-                                    <div style={{ display: "flex", gap: 16 }}>
-                                        <div style={{ width: 12, height: 12, borderRadius: 6, background: GEO_BG, marginTop: 4 }} />
-                                        <div>
-                                            <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>Submitted via Clearinghouse</div>
-                                            <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, marginTop: 4 }}>Oct 24, 2023 5:30 PM</div>
-                                        </div>
-                                    </div>
-                                    <div style={{ display: "flex", gap: 16 }}>
-                                        <div style={{ width: 12, height: 12, borderRadius: 6, background: GEO_BG, marginTop: 4 }} />
-                                        <div>
-                                            <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>Claim Created</div>
-                                            <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, marginTop: 4 }}>Oct 24, 2023 4:15 PM</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {view === "aging" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 32, flex: 1 }}>
-                    {/* AR Intelligence Panel */}
-                    <div className="mobile-no-padding-card" style={{ background: GEO_BLACK, borderRadius: GEO_RADIUS, padding: 32, boxShadow: "0 12px 24px rgba(0,0,0,0.2)", position: "relative", overflow: "hidden", display: "flex", gap: 32, alignItems: "center" }}>
-                        <div style={{ position: "absolute", top: -40, right: -40, opacity: 0.05 }}><Sparkles size={240} color={GEO_WHITE} /></div>
-
-                        <div style={{ flex: 1 }}>
+                    {/* NEW: 3 AI Panels */}
+                    <div className="stack-on-mobile" style={{ display: "flex", gap: 24, width: "100%" }}>
+                        {/* Panel 1: AI Eligibility */}
+                        <div style={{ flex: 1, background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: GEO_SHADOW }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                                <Sparkles size={18} color="#00B67A" />
-                                <span style={{ color: GEO_WHITE, fontWeight: 700, fontSize: 14, letterSpacing: 1, textTransform: "uppercase" }}>AR Intelligence Insights</span>
-                            </div>
-                            <h3 style={{ color: GEO_WHITE, fontSize: 24, fontWeight: 600, margin: "0 0 16px 0", lineHeight: 1.3 }}>
-                                "I identified two major bottlenecks in your Revenue Cycle today."
-                            </h3>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                                <div style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "rgba(255,255,255,0.1)", padding: 16, borderRadius: 12, border: "1px solid rgba(255,255,255,0.05)" }}>
-                                    <Shield size={20} color="#FFD100" style={{ marginTop: 2 }} />
-                                    <div>
-                                        <div style={{ color: GEO_WHITE, fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Payer Alert: Delta Dental</div>
-                                        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.5 }}>Delta Dental processing times are currently delayed by 5 days system-wide. 12 of your claims are affected but do not require action yet.</div>
-                                    </div>
+                                <div style={{ width: 32, height: 32, borderRadius: 8, background: `${GEO_GREEN}15`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <Shield size={16} color={GEO_GREEN} />
                                 </div>
-                                <div style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "rgba(255,255,255,0.1)", padding: 16, borderRadius: 12, border: "1px solid rgba(255,255,255,0.05)" }}>
-                                    <Activity size={20} color="#00B67A" style={{ marginTop: 2 }} />
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ color: GEO_WHITE, fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Collection Opportunity: 31-60 Day Balances</div>
-                                        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.5 }}>You have $1,250 in 31-60 day aging. Historic data shows an 85% collection likelihood if SMS statements are sent today.</div>
-                                    </div>
-                                    <button style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: "none", background: "#00B67A", color: GEO_WHITE, fontWeight: 700, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
-                                        Send SMS Statements
-                                    </button>
+                                <h3 style={{ fontSize: 16, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>AI Eligibility Engine</h3>
+                            </div>
+                            <p style={{ margin: "0 0 20px 0", fontSize: 13, color: GEO_TEXT_MUTED, lineHeight: 1.5 }}>Automatically verifies active coverage, maximums, and frequency limits for all patients on today's schedule.</p>
+
+                            {!eligibilityDone ? (
+                                <button onClick={handleRunEligibility} disabled={isRunningEligibility} style={{ width: "100%", padding: "12px", borderRadius: GEO_PILL, border: "none", background: isRunningEligibility ? "#E5E7EB" : GEO_BLACK, color: isRunningEligibility ? GEO_TEXT_MUTED : GEO_WHITE, fontWeight: 600, fontSize: 14, cursor: isRunningEligibility ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.2s" }}>
+                                    {isRunningEligibility ? <><Loader2 size={16} className="lucide-spin" style={{ animation: "spin 2s linear infinite" }} /> Connecting to Clearinghouse...</> : <><Sparkles size={16} /> Run for All Today's Patients</>}
+                                </button>
+                            ) : (
+                                <div style={{ width: "100%", padding: "12px", borderRadius: GEO_PILL, background: `${GEO_GREEN}15`, color: GEO_GREEN, fontWeight: 600, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                                    <CheckCircle size={16} /> 42/42 Verified Successfully
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Panel 2: AI Co-Pay Predictor */}
+                        <div style={{ flex: 1, background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: GEO_SHADOW }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                                <div style={{ width: 32, height: 32, borderRadius: 8, background: `#8B5CF615`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <Wallet size={16} color="#8B5CF6" />
+                                </div>
+                                <h3 style={{ fontSize: 16, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>AI Co-Pay Predictor</h3>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13, padding: "8px 12px", background: GEO_BG, borderRadius: 6 }}>
+                                    <span style={{ color: GEO_TEXT_MUTED, fontWeight: 600 }}>D2740 (Crown) - Delta Dental</span>
+                                    <span style={{ color: GEO_TEXT_MAIN, fontWeight: 700 }}>$450 Est. You Collect</span>
+                                </div>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13, padding: "8px 12px", background: GEO_BG, borderRadius: 6 }}>
+                                    <span style={{ color: GEO_TEXT_MUTED, fontWeight: 600 }}>D4341 (SRP) - MetLife</span>
+                                    <span style={{ color: GEO_TEXT_MAIN, fontWeight: 700 }}>$110 Est. You Collect</span>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Panel 3: Denial Fighter */}
+                        <div style={{ flex: 1, background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: GEO_SHADOW }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                                <div style={{ width: 32, height: 32, borderRadius: 8, background: `#EF444415`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <XOctagon size={16} color="#EF4444" />
+                                </div>
+                                <h3 style={{ fontSize: 16, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>Denial Fighter</h3>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                                <div style={{ fontSize: 32, fontWeight: 800, color: "#EF4444", lineHeight: 1 }}>3</div>
+                                <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, fontWeight: 600, lineHeight: 1.3 }}>Actionable<br />Denials</div>
+                            </div>
+                            <button onClick={handleAutoAppeal} style={{ width: "100%", padding: "12px", borderRadius: GEO_PILL, border: "2px solid #EF4444", background: "transparent", color: "#EF4444", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.2s" }} onMouseOver={e => { e.currentTarget.style.background = "#EF4444"; e.currentTarget.style.color = "white" }} onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#EF4444" }}>
+                                <Sparkles size={16} /> Generate Auto-Appeals
+                            </button>
                         </div>
                     </div>
 
-                    <div className="grid-stack-on-mobile mobile-padding" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 24 }}>
-                        <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", border: `1px solid #E5E7EB` }}>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>Current (0-30 days)</div>
-                            <div style={{ fontSize: 32, fontWeight: 800, color: GEO_TEXT_MAIN, marginTop: 12 }}>$4,500</div>
-                        </div>
-                        <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", border: `1px solid #E5E7EB` }}>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>31-60 Days</div>
-                            <div style={{ fontSize: 32, fontWeight: 800, color: GEO_TEXT_MAIN, marginTop: 12 }}>$1,250</div>
-                        </div>
-                        <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", border: `1px solid #E5E7EB` }}>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>61-90 Days</div>
-                            <div style={{ fontSize: 32, fontWeight: 800, color: "#FFD100", marginTop: 12 }}>$850</div>
-                        </div>
-                        <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", border: `1px solid #E5E7EB` }}>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>90+ Days</div>
-                            <div style={{ fontSize: 32, fontWeight: 800, color: "#FF3B30", marginTop: 12 }}>$1,420</div>
-                        </div>
-                    </div>
-
-                    <div className="mobile-no-padding-card" style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
-                        <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Patient Balances</h3>
+                    <div className="mobile-no-padding-card" style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW, flex: 1 }}>
+                        <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Recent Claims</h3>
                         <div className="table-scroll-mobile">
-                            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
                                 <thead>
                                     <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>ID</th>
                                         <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Patient</th>
-                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Current</th>
-                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>31-60</th>
-                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>61-90</th>
-                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>90+</th>
-                                        <th style={{ padding: "0 0 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Total Balance</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Provider</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Date</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>CDT Codes</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Billed Amount</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Ins Est</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Status</th>
+                                        <th style={{ padding: "0 0 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {MOCK_AGING.map((row, idx) => (
-                                        <tr key={idx} style={{ borderBottom: `1px solid #F4F5F7` }}>
-                                            <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{row.patient}</td>
-                                            <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{row.current}</td>
-                                            <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{row.over30}</td>
-                                            <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{row.over60}</td>
-                                            <td style={{ padding: "20px 0", fontSize: 14, color: "#FF3B30", fontWeight: 600 }}>{row.over90}</td>
-                                            <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 700, color: GEO_TEXT_MAIN, textAlign: "right" }}>{row.total}</td>
+                                    {mockClaims.map((claim, idx) => (
+                                        <tr key={idx} style={{ borderBottom: `1px solid #F4F5F7`, cursor: "pointer", transition: "background 0.2s", background: claim.status === "Ready for Review" ? "#8B5CF608" : "transparent" }} onMouseOver={e => e.currentTarget.style.background = "#F9FAFB"} onMouseOut={e => e.currentTarget.style.background = claim.status === "Ready for Review" ? "#8B5CF608" : "transparent"} onClick={() => { setSelectedClaim(claim); setView("claim-detail"); window.history.pushState(null, '', `/billing/claims/${claim.id}`); }}>
+                                            <td style={{ padding: "20px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.id}</td>
+                                            <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.patient}</td>
+                                            <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{claim.provider}</td>
+                                            <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{claim.date}</td>
+                                            <td style={{ padding: "20px 0", fontSize: 14, fontFamily: "monospace", color: GEO_TEXT_MAIN }}>{claim.codes}</td>
+                                            <td style={{ padding: "20px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.billed}</td>
+                                            <td style={{ padding: "20px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN }}>{claim.insEst}</td>
+                                            <td style={{ padding: "20px 0" }}>
+                                                <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: GEO_PILL, fontSize: 12, fontWeight: 600, color: claim.statusColor, background: `${claim.statusColor}15` }}>
+                                                    <CircleDot size={12} fill={claim.statusColor} /> {claim.status}
+                                                </div>
+                                            </td>
+                                            <td style={{ padding: "20px 0", textAlign: "right" }}>
+                                                <button style={{ background: "transparent", border: "none", cursor: "pointer", color: GEO_TEXT_MUTED }}><MoreHorizontal size={20} /></button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -3040,8 +2951,292 @@ export function BillingPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobile
                     </div>
                 </div>
             )}
+
+            {/* Denial Appeal Modal Add-On */}
+            {showAppealModal && (
+                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }}>
+                    <div style={{ background: GEO_WHITE, borderRadius: 24, width: 600, maxWidth: "90%", padding: 40, position: "relative", boxShadow: "0 24px 48px rgba(0,0,0,0.2)", display: "flex", flexDirection: "column", maxHeight: "80vh" }}>
+                        <button onClick={() => setShowAppealModal(false)} style={{ position: "absolute", top: 24, right: 24, background: "transparent", border: "none", cursor: "pointer", padding: 8, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }} onMouseOver={e => e.currentTarget.style.background = GEO_BG} onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+                            <X size={20} color={GEO_TEXT_MUTED} />
+                        </button>
+
+                        <h2 style={{ fontSize: 24, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 8px 0", display: "flex", alignItems: "center", gap: 12 }}>
+                            <Sparkles size={24} color={GEO_GREEN} /> AI Appeal Generator
+                        </h2>
+                        <p style={{ margin: "0 0 24px 0", fontSize: 15, color: GEO_TEXT_MUTED }}>Drafting clinical narratives based on the original clinical notes to fight recent denials.</p>
+
+                        <div style={{ flex: 1, border: `1px solid ${GEO_BG}`, borderRadius: 12, padding: 24, background: "#F9FAFB", overflowY: "auto", fontFamily: "monospace", fontSize: 14, color: GEO_TEXT_MAIN, whiteSpace: "pre-wrap" }}>
+                            {generatingAppeal ? (
+                                <div style={{ display: "flex", alignItems: "center", gap: 12, color: GEO_TEXT_MUTED, height: "100%", justifyContent: "center" }}>
+                                    <Loader2 size={24} className="lucide-spin" style={{ animation: "spin 2s linear infinite" }} /> Synthesizing clinical grounds for appeal...
+                                </div>
+                            ) : (
+                                `To Whom It May Concern at Delta Dental:
+
+I am writing to formally appeal the denial of claim CLM-9021 for patient Sarah Chen regarding the placement of a D2740 (Crown - Porcelain/Ceramic) on tooth #19.
+
+The claim was denied stating "Missing Tooth Number or Arch". As you can see from the provided originally synthesized clinical notes by our AI charting system, the fracture and extensive mesio-occlusal-distal decay were explicitly charted for tooth #19. 
+
+We have updated the primary claim record to append tooth #19 and are attaching the original radiograph for your review. Please reconsider this claim for payment as this was medically necessary to prevent catastrophic tooth failure.
+
+Sincerely,
+Intelident.ai on behalf of Dr. Cifor`
+                            )}
+                        </div>
+
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: 16, marginTop: 32 }}>
+                            <button onClick={() => setShowAppealModal(false)} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: `1px solid ${GEO_TEXT_MUTED}`, background: "transparent", fontWeight: 600, fontSize: 15, color: GEO_TEXT_MUTED, cursor: "pointer" }}>Cancel</button>
+                            <button disabled={generatingAppeal} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: GEO_GREEN, fontWeight: 600, fontSize: 15, color: GEO_WHITE, cursor: generatingAppeal ? "not-allowed" : "pointer", boxShadow: "0 4px 12px rgba(0, 182, 122, 0.2)", display: "flex", alignItems: "center", gap: 8, opacity: generatingAppeal ? 0.5 : 1 }} onClick={() => setShowAppealModal(false)}>
+                                <Check size={18} /> Submit Appeal Bundle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-    );
+    )
+}
+
+{
+    view === "claim-detail" && selectedClaim && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 24, flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <button onClick={() => { setView("claims"); window.history.pushState(null, '', `/billing`); }} style={{ width: 44, height: 44, borderRadius: 22, border: `1px solid #E5E7EB`, background: GEO_WHITE, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "transform 0.1s" }} onMouseDown={e => e.currentTarget.style.transform = "scale(0.95)"} onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}>
+                    <ArrowDownToLine size={20} color={GEO_TEXT_MAIN} style={{ transform: "rotate(90deg)" }} />
+                </button>
+                <div>
+                    <h2 style={{ fontSize: 24, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>Claim {selectedClaim.id}</h2>
+                    <div style={{ fontSize: 14, color: GEO_TEXT_MUTED, marginTop: 4 }}>{selectedClaim.patient} • {selectedClaim.date}</div>
+                </div>
+                <div style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: GEO_PILL, fontSize: 14, fontWeight: 700, color: selectedClaim.statusColor, background: `${selectedClaim.statusColor}15` }}>
+                    <CircleDot size={14} fill={selectedClaim.statusColor} /> {selectedClaim.status}
+                </div>
+            </div>
+
+            <div className="stack-on-mobile" style={{ display: "flex", gap: 30 }}>
+                <div className="mobile-no-padding-card" style={{ flex: 2, background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
+                    <h3 style={{ fontSize: 18, fontWeight: 600, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Procedure Line Items</h3>
+                    <div className="table-scroll-mobile">
+                        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 500 }}>
+                            <thead>
+                                <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Code</th>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Description</th>
+                                    <th style={{ padding: "0 0 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Fee</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style={{ borderBottom: `1px solid #F4F5F7` }}>
+                                    <td style={{ padding: "16px 0", fontSize: 14, fontFamily: "monospace", color: GEO_TEXT_MAIN }}>D2740</td>
+                                    <td style={{ padding: "16px 0", fontSize: 14, color: GEO_TEXT_MAIN }}>Crown - porcelain/ceramic</td>
+                                    <td style={{ padding: "16px 0", fontSize: 14, fontWeight: 600, color: GEO_TEXT_MAIN, textAlign: "right" }}>{selectedClaim.billed}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="mobile-padding" style={{ flex: 1, display: "flex", flexDirection: "column", gap: 24 }}>
+                    {selectedClaim.status === "Needs Attention" && !hasScrubbed && (
+                        <div style={{ background: GEO_WHITE, border: `1px solid #E5E7EB`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+                            <div style={{ background: "#FACC1515", width: 64, height: 64, borderRadius: 32, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                                <Shield size={32} color="#EAB308" />
+                            </div>
+                            <h4 style={{ fontSize: 18, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 8px 0" }}>Ready for AI Pre-Submission Scrub</h4>
+                            <p style={{ fontSize: 14, color: GEO_TEXT_MUTED, margin: "0 0 24px 0", maxWidth: 300, lineHeight: 1.5 }}>
+                                Run this claim through the Intelident AI rules engine to catch rejections before submission.
+                            </p>
+                            <button onClick={handleScrubClaim} disabled={isScrubbing} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: isScrubbing ? "#E5E7EB" : GEO_BLACK, color: isScrubbing ? GEO_TEXT_MUTED : GEO_WHITE, fontWeight: 600, fontSize: 14, cursor: isScrubbing ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 8, transition: "background 0.2s" }}>
+                                {isScrubbing ? (
+                                    <>
+                                        <div style={{ width: 14, height: 14, borderRadius: 7, border: "2px solid currentColor", borderRightColor: "transparent", animation: "spin 1s linear infinite" }} />
+                                        Scanning claim for errors...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles size={16} /> Scrub Claim with AI
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    )}
+
+                    {selectedClaim.status === "Needs Attention" && hasScrubbed && (
+                        <div style={{ background: "#FEF9C3", border: `1px solid #FACC15`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden" }}>
+                            <div style={{ position: "absolute", top: -20, right: -20, opacity: 0.1 }}><Shield size={120} color="#EAB308" /></div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                                <Sparkles size={20} color="#EAB308" />
+                                <span style={{ fontSize: 18, fontWeight: 700, color: "#CA8A04" }}>Pre-Submission Scrubber Result</span>
+                            </div>
+                            <div style={{ fontSize: 15, color: "#854D0E", lineHeight: 1.6, fontWeight: 500 }}>
+                                AI detected a potential rejection: <strong>Missing Narrative</strong> for D2740 (Crown) indicating why an existing crown is being replaced.
+                            </div>
+                            <div style={{ background: "rgba(255,255,255,0.6)", borderRadius: 12, padding: 16, marginTop: 16, border: "1px dashed #FACC15", fontSize: 14, color: "#A16207" }}>
+                                <div style={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Auto-Drafted Narrative:</div>
+                                "Tooth 14 existing crown has recurrent decay on margins and open contacts causing food impaction. Original placement &gt; 5 years ago."
+                            </div>
+                            <button style={{ marginTop: 24, padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: "#EAB308", color: "#FFFFFF", fontWeight: 700, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, width: "100%", justifyContent: "center", boxShadow: "0 4px 12px rgba(234, 179, 8, 0.3)" }}>
+                                <CheckCircle size={16} /> Attach Auto-Narrative & Submit
+                            </button>
+                        </div>
+                    )}
+
+                    {selectedClaim.status === "Denied" && (
+                        <div style={{ background: "#FFF0F0", border: `1px solid #FF3B30`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden" }}>
+                            <div style={{ position: "absolute", top: -20, right: -20, opacity: 0.1 }}><Shield size={120} color="#FF3B30" /></div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                                <div style={{ background: "#FF3B30", color: "white", padding: "4px 8px", borderRadius: 8, fontSize: 12, fontWeight: 800 }}>DENIAL EOB Scanned</div>
+                            </div>
+                            <div style={{ fontSize: 15, color: "#1C1E23", lineHeight: 1.6, fontWeight: 500 }}>
+                                {selectedClaim.aiNote}
+                            </div>
+                            <button onClick={() => handleAutoCorrect(selectedClaim.id)} disabled={isCorrecting} style={{ marginTop: 24, padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: isCorrecting ? "#E5E7EB" : "#111827", color: isCorrecting ? GEO_TEXT_MUTED : "#FFFFFF", fontWeight: 600, fontSize: 14, cursor: isCorrecting ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 8, width: "100%", justifyContent: "center", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)", transition: "background 0.2s" }}>
+                                {isCorrecting ? (
+                                    <>
+                                        <div style={{ width: 14, height: 14, borderRadius: 7, border: "2px solid currentColor", borderRightColor: "transparent", animation: "spin 1s linear infinite" }} />
+                                        Regenerating claim...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles size={16} color="#00B67A" /> Execute Auto-Correction
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    )}
+
+                    {selectedClaim.status === "Resubmitted" && (
+                        <div style={{ background: "#F0FDF4", border: `1px solid #22C55E`, borderRadius: GEO_RADIUS, padding: 32, position: "relative", overflow: "hidden" }}>
+                            <div style={{ position: "absolute", top: -20, right: -20, opacity: 0.1 }}><Shield size={120} color="#22C55E" /></div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                                <Sparkles size={20} color="#16A34A" />
+                                <span style={{ fontSize: 18, fontWeight: 700, color: "#16A34A" }}>Auto-Correction Successful</span>
+                            </div>
+                            <div style={{ fontSize: 15, color: "#166534", lineHeight: 1.6, fontWeight: 500 }}>
+                                {selectedClaim.aiNote}
+                            </div>
+                        </div>
+                    )}
+
+                    <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
+                        <h3 style={{ fontSize: 18, fontWeight: 600, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Status Timeline</h3>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                            <div style={{ display: "flex", gap: 16 }}>
+                                <div style={{ width: 12, height: 12, borderRadius: 6, background: selectedClaim.statusColor, marginTop: 4, outline: `4px solid ${selectedClaim.statusColor}20` }} />
+                                <div>
+                                    <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{selectedClaim.status}</div>
+                                    <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, marginTop: 4 }}>Oct 25, 2023 10:45 AM</div>
+                                </div>
+                            </div>
+                            <div style={{ display: "flex", gap: 16 }}>
+                                <div style={{ width: 12, height: 12, borderRadius: 6, background: GEO_BG, marginTop: 4 }} />
+                                <div>
+                                    <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>Submitted via Clearinghouse</div>
+                                    <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, marginTop: 4 }}>Oct 24, 2023 5:30 PM</div>
+                                </div>
+                            </div>
+                            <div style={{ display: "flex", gap: 16 }}>
+                                <div style={{ width: 12, height: 12, borderRadius: 6, background: GEO_BG, marginTop: 4 }} />
+                                <div>
+                                    <div style={{ fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>Claim Created</div>
+                                    <div style={{ fontSize: 13, color: GEO_TEXT_MUTED, marginTop: 4 }}>Oct 24, 2023 4:15 PM</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+{
+    view === "aging" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 32, flex: 1 }}>
+            {/* AR Intelligence Panel */}
+            <div className="mobile-no-padding-card" style={{ background: GEO_BLACK, borderRadius: GEO_RADIUS, padding: 32, boxShadow: "0 12px 24px rgba(0,0,0,0.2)", position: "relative", overflow: "hidden", display: "flex", gap: 32, alignItems: "center" }}>
+                <div style={{ position: "absolute", top: -40, right: -40, opacity: 0.05 }}><Sparkles size={240} color={GEO_WHITE} /></div>
+
+                <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                        <Sparkles size={18} color="#00B67A" />
+                        <span style={{ color: GEO_WHITE, fontWeight: 700, fontSize: 14, letterSpacing: 1, textTransform: "uppercase" }}>AR Intelligence Insights</span>
+                    </div>
+                    <h3 style={{ color: GEO_WHITE, fontSize: 24, fontWeight: 600, margin: "0 0 16px 0", lineHeight: 1.3 }}>
+                        "I identified two major bottlenecks in your Revenue Cycle today."
+                    </h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "rgba(255,255,255,0.1)", padding: 16, borderRadius: 12, border: "1px solid rgba(255,255,255,0.05)" }}>
+                            <Shield size={20} color="#FFD100" style={{ marginTop: 2 }} />
+                            <div>
+                                <div style={{ color: GEO_WHITE, fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Payer Alert: Delta Dental</div>
+                                <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.5 }}>Delta Dental processing times are currently delayed by 5 days system-wide. 12 of your claims are affected but do not require action yet.</div>
+                            </div>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "rgba(255,255,255,0.1)", padding: 16, borderRadius: 12, border: "1px solid rgba(255,255,255,0.05)" }}>
+                            <Activity size={20} color="#00B67A" style={{ marginTop: 2 }} />
+                            <div style={{ flex: 1 }}>
+                                <div style={{ color: GEO_WHITE, fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Collection Opportunity: 31-60 Day Balances</div>
+                                <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, lineHeight: 1.5 }}>You have $1,250 in 31-60 day aging. Historic data shows an 85% collection likelihood if SMS statements are sent today.</div>
+                            </div>
+                            <button style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: "none", background: "#00B67A", color: GEO_WHITE, fontWeight: 700, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+                                Send SMS Statements
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid-stack-on-mobile mobile-padding" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 24 }}>
+                <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", border: `1px solid #E5E7EB` }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>Current (0-30 days)</div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: GEO_TEXT_MAIN, marginTop: 12 }}>$4,500</div>
+                </div>
+                <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", border: `1px solid #E5E7EB` }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>31-60 Days</div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: GEO_TEXT_MAIN, marginTop: 12 }}>$1,250</div>
+                </div>
+                <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", border: `1px solid #E5E7EB` }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>61-90 Days</div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: "#FFD100", marginTop: 12 }}>$850</div>
+                </div>
+                <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: "0 4px 12px rgba(0,0,0,0.02)", border: `1px solid #E5E7EB` }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: GEO_TEXT_MUTED, textTransform: "uppercase" }}>90+ Days</div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: "#FF3B30", marginTop: 12 }}>$1,420</div>
+                </div>
+            </div>
+
+            <div className="mobile-no-padding-card" style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Patient Balances</h3>
+                <div className="table-scroll-mobile">
+                    <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                        <thead>
+                            <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
+                                <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Patient</th>
+                                <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Current</th>
+                                <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>31-60</th>
+                                <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>61-90</th>
+                                <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>90+</th>
+                                <th style={{ padding: "0 0 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Total Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {MOCK_AGING.map((row, idx) => (
+                                <tr key={idx} style={{ borderBottom: `1px solid #F4F5F7` }}>
+                                    <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{row.patient}</td>
+                                    <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{row.current}</td>
+                                    <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{row.over30}</td>
+                                    <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{row.over60}</td>
+                                    <td style={{ padding: "20px 0", fontSize: 14, color: "#FF3B30", fontWeight: 600 }}>{row.over90}</td>
+                                    <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 700, color: GEO_TEXT_MAIN, textAlign: "right" }}>{row.total}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    )
 }
 
 // ==========================================
@@ -3170,39 +3365,88 @@ export function RecallPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileM
             )}
 
             {view === "campaigns" && (
-                <div className="mobile-no-padding-card" style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW, flex: 1 }}>
-                    <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 24px 0" }}>Patient Reactivation Campaigns</h3>
-                    <div className="table-scroll-mobile" style={{ width: "100%", overflowX: "auto" }}>
-                        <table style={{ width: "100%", minWidth: 800, borderCollapse: "collapse" }}>
-                            <thead>
-                                <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Patient</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Last Visit</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Last Contact</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Campaign Status</th>
-                                    <th style={{ padding: "0 0 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {MOCK_REACTIVATION.map((row, idx) => (
-                                    <tr key={idx} style={{ borderBottom: `1px solid #F4F5F7` }}>
-                                        <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{row.name}</td>
-                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{row.lastVisit}</td>
-                                        <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{row.lastContact}</td>
-                                        <td style={{ padding: "20px 0" }}>
-                                            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: GEO_PILL, fontSize: 12, fontWeight: 600, color: row.status === "Booked" ? GEO_GREEN : (row.status === "Opened" ? "#007AFF" : (row.status === "Sent" ? "#FFD100" : GEO_TEXT_MUTED)), background: `${row.status === "Booked" ? GEO_GREEN : (row.status === "Opened" ? "#007AFF" : (row.status === "Sent" ? "#FFD100" : GEO_TEXT_MUTED))}15` }}>
-                                                <CircleDot size={12} fill={row.status === "Booked" ? GEO_GREEN : (row.status === "Opened" ? "#007AFF" : (row.status === "Sent" ? "#FFD100" : GEO_TEXT_MUTED))} /> {row.status}
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: "20px 0", textAlign: "right" }}>
-                                            <button onClick={() => openContactModal(row)} style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: `1px solid #E5E7EB`, background: GEO_WHITE, color: GEO_TEXT_MAIN, fontWeight: 600, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, transition: "background 0.2s" }} onMouseOver={e => e.currentTarget.style.background = GEO_BG} onMouseOut={e => e.currentTarget.style.background = GEO_WHITE}>
-                                                <Mail size={14} /> 1-Click Send
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                <div style={{ display: "flex", flexDirection: "column", gap: 24, flex: 1 }}>
+                    {/* Auto-Sequence Control Panel */}
+                    <div className="mobile-no-padding-card" style={{ background: "linear-gradient(135deg, #1C1E23 0%, #333 100%)", borderRadius: 24, padding: 32, boxShadow: "0 12px 24px rgba(0,0,0,0.15)", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                                <Sparkles size={24} color={GEO_GREEN} />
+                                <h3 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>AI Auto-Sequence Protocol</h3>
+                            </div>
+                            <p style={{ color: "rgba(255,255,255,0.7)", margin: 0, fontSize: 15, maxWidth: 500, lineHeight: 1.5 }}>When enabled, the AI automatically categorizes overdue patients and executes a multi-stage outreach campaign with intelligent delay intervals.</p>
+                        </div>
+
+                        {/* Fake iOS-style Toggle */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: GEO_GREEN }}>SYSTEM ACTIVE</span>
+                            <div style={{ width: 60, height: 32, background: GEO_GREEN, borderRadius: 16, position: "relative", cursor: "pointer", transition: "background 0.3s" }}>
+                                <div style={{ width: 26, height: 26, background: "white", borderRadius: 13, position: "absolute", top: 3, right: 3, boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Step-by-Step Sequence Editor */}
+                    <div className="mobile-no-padding-card" style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW, flex: 1 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>Multi-Step Outreach Plan</h3>
+                            <button style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: `1px solid ${GEO_GREEN}`, background: "transparent", color: GEO_GREEN, fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}><Plus size={14} /> Add Step</button>
+                        </div>
+
+                        {/* Timeline Steps */}
+                        <div style={{ display: "flex", flexDirection: "column", position: "relative" }}>
+                            <div style={{ position: "absolute", left: 16, top: 0, bottom: 0, width: 2, background: "#F3F4F6", zIndex: 0 }} />
+
+                            {/* Step 1 */}
+                            <div style={{ display: "flex", gap: 24, marginBottom: 32, position: "relative", zIndex: 1 }}>
+                                <div style={{ width: 34, height: 34, borderRadius: 17, background: GEO_GREEN, border: "4px solid white", display: "flex", alignItems: "center", justifyItems: "center", flexShrink: 0, boxShadow: "0 4px 8px rgba(0,182,122,0.2)" }}>
+                                    <span style={{ color: "white", fontSize: 12, fontWeight: 800, margin: "auto" }}>1</span>
+                                </div>
+                                <div style={{ flex: 1, background: GEO_WHITE, border: `1px solid #E5E7EB`, borderRadius: 16, padding: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                                        <div>
+                                            <div style={{ fontSize: 13, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", marginBottom: 4 }}>Day 0 • SMS Text</div>
+                                            <div style={{ fontSize: 18, fontWeight: 700, color: GEO_TEXT_MAIN }}>The Friendly Nudge</div>
+                                        </div>
+                                        <div style={{ background: "#F0FDF4", color: GEO_GREEN, padding: "4px 12px", borderRadius: GEO_PILL, fontSize: 12, fontWeight: 700 }}>24% Conversion</div>
+                                    </div>
+                                    <p style={{ color: GEO_TEXT_MUTED, fontSize: 14, margin: 0, lineHeight: 1.5, background: "#F9FAFB", padding: 16, borderRadius: 12, fontStyle: "italic" }}>"Hi [First Name], it's been a while since your last visit. We'd love to see you! We have some openings next week. Reply YES to book."</p>
+                                </div>
+                            </div>
+
+                            {/* Step 2 */}
+                            <div style={{ display: "flex", gap: 24, marginBottom: 32, position: "relative", zIndex: 1 }}>
+                                <div style={{ width: 34, height: 34, borderRadius: 17, background: GEO_TEXT_MAIN, border: "4px solid white", display: "flex", alignItems: "center", justifyItems: "center", flexShrink: 0, boxShadow: "0 4px 8px rgba(0,0,0,0.1)" }}>
+                                    <span style={{ color: "white", fontSize: 12, fontWeight: 800, margin: "auto" }}>2</span>
+                                </div>
+                                <div style={{ flex: 1, background: GEO_WHITE, border: `1px solid #E5E7EB`, borderRadius: 16, padding: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                                        <div>
+                                            <div style={{ fontSize: 13, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", marginBottom: 4 }}>Day 5 • Email w/ Image</div>
+                                            <div style={{ fontSize: 18, fontWeight: 700, color: GEO_TEXT_MAIN }}>Insurance Benefit Reminder</div>
+                                        </div>
+                                        <div style={{ background: "#F0FDF4", color: GEO_GREEN, padding: "4px 12px", borderRadius: GEO_PILL, fontSize: 12, fontWeight: 700 }}>18% Conversion</div>
+                                    </div>
+                                    <p style={{ color: GEO_TEXT_MUTED, fontSize: 14, margin: 0, lineHeight: 1.5, background: "#F9FAFB", padding: 16, borderRadius: 12, fontStyle: "italic" }}>Generates a dynamic email highlighting their remaining insurance benefits for the year, prompting them to 'use it before losing it'.</p>
+                                </div>
+                            </div>
+
+                            {/* Step 3 */}
+                            <div style={{ display: "flex", gap: 24, position: "relative", zIndex: 1 }}>
+                                <div style={{ width: 34, height: 34, borderRadius: 17, background: "#FF3B30", border: "4px solid white", display: "flex", alignItems: "center", justifyItems: "center", flexShrink: 0, boxShadow: "0 4px 8px rgba(255, 59, 48, 0.2)" }}>
+                                    <span style={{ color: "white", fontSize: 12, fontWeight: 800, margin: "auto" }}>3</span>
+                                </div>
+                                <div style={{ flex: 1, background: GEO_WHITE, border: `1px solid #E5E7EB`, borderRadius: 16, padding: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                                        <div>
+                                            <div style={{ fontSize: 13, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", marginBottom: 4 }}>Day 14 • SMS Intercept</div>
+                                            <div style={{ fontSize: 18, fontWeight: 700, color: GEO_TEXT_MAIN }}>Front Desk Intervention</div>
+                                        </div>
+                                        <div style={{ background: "#F4F5F7", color: GEO_TEXT_MUTED, padding: "4px 12px", borderRadius: GEO_PILL, fontSize: 12, fontWeight: 700 }}>Final Attempt</div>
+                                    </div>
+                                    <p style={{ color: GEO_TEXT_MUTED, fontSize: 14, margin: 0, lineHeight: 1.5, background: "#F9FAFB", padding: 16, borderRadius: 12, fontStyle: "italic" }}>Moves the patient card to the Front Desk 'To-Call' list if no response is received after texts and emails.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -3242,6 +3486,672 @@ export function RecallPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileM
                     </div>
                 </div>
             )}
+        </div>
+    );
+}
+// ==========================================
+// UI2: CLINICAL CHART PAGE
+// ==========================================
+export function ClinicalChartPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+    const [activeTab, setActiveTab] = useState("tooth");
+    const [selectedTooth, setSelectedTooth] = useState(null);
+    const [teeth, setTeeth] = useState(() => {
+        const initial = {};
+        for (let i = 1; i <= 32; i++) initial[i] = { status: "Healthy", condition: "" };
+        // Demo data
+        initial[19] = { status: "Proposed", condition: "Crown - PFM" };
+        initial[3] = { status: "Watch", condition: "Early Caries" };
+        initial[14] = { status: "Proposed", condition: "DO Composite" };
+        initial[1] = { status: "Missing", condition: "Extracted" };
+        initial[16] = { status: "Missing", condition: "Extracted" };
+        initial[17] = { status: "Missing", condition: "Extracted" };
+        initial[32] = { status: "Missing", condition: "Extracted" };
+        initial[8] = { status: "Existing", condition: "Veneer" };
+        initial[9] = { status: "Existing", condition: "Veneer" };
+        return initial;
+    });
+
+    const [perioScores, setPerioScores] = useState(() => {
+        const initial = {};
+        for (let i = 1; i <= 32; i++) initial[i] = [3, 2, 3]; // Default healthy buccal
+        // Add some demo pockets
+        initial[19] = [4, 5, 4];
+        initial[14] = [5, 6, 4];
+        initial[3] = [3, 4, 3];
+        return initial;
+    });
+
+    const [generating, setGenerating] = useState(false);
+    const [note, setNote] = useState("");
+
+    const [analyzingXray, setAnalyzingXray] = useState(false);
+    const [xrayAnalyzed, setXrayAnalyzed] = useState(false);
+
+    const handleToothClick = (num) => {
+        setSelectedTooth(selectedTooth === num ? null : num);
+    };
+
+    const handleStatusChange = (num, status) => {
+        setTeeth(prev => ({ ...prev, [num]: { ...prev[num], status } }));
+        setSelectedTooth(null);
+    };
+
+    const getToothColor = (status) => {
+        switch (status) {
+            case "Healthy": return GEO_GREEN;
+            case "Existing": return "#3B82F6"; // Blue
+            case "Proposed": return "#EF4444"; // Red
+            case "Missing": return "#94A3B8"; // Grey
+            case "Watch": return "#F59E0B"; // Yellow
+            default: return GEO_BG;
+        }
+    };
+
+    const getPerioColor = (score) => {
+        if (score >= 6) return "#EF4444";
+        if (score >= 4) return "#F59E0B";
+        return GEO_GREEN;
+    };
+
+    const handleGenerate = () => {
+        setGenerating(true);
+        setNote("");
+        const draft = `CLINICAL DICTATION & TREATMENT PLAN:
+
+Findings:
+- Tooth #19: Lingual cusp fracture observed. High risk of complete structural failure.
+- Tooth #14: Disto-occlusal radiolucency consistent with progressive caries.
+- Tooth #3: Deep occlusal pit, monitoring for decay.
+
+Recommended Treatment Plan:
+1. D2740 - Crown (Porcelain/Ceramic) on Tooth #19 to prevent further fracture.
+2. D2392 - Resin-based composite (Two surfaces, posterior) on Tooth #14.
+
+AI Confidence: 96% match with standard of care protocols.`;
+
+        let i = 0;
+        const interval = setInterval(() => {
+            setNote(prev => prev + draft.charAt(i));
+            i++;
+            if (i > draft.length - 1) {
+                clearInterval(interval);
+                setGenerating(false);
+            }
+        }, 15);
+    };
+
+    const handleAnalyzeXray = () => {
+        setAnalyzingXray(true);
+        setTimeout(() => {
+            setAnalyzingXray(false);
+            setXrayAnalyzed(true);
+        }, 2000);
+    };
+
+    // Tooth SVGs (Simplified representation)
+    const renderToothChart = () => {
+        const upperArch = Array.from({ length: 16 }, (_, i) => i + 1);
+        const lowerArch = Array.from({ length: 16 }, (_, i) => 32 - i);
+
+        const ToothNode = ({ num }) => {
+            const data = teeth[num];
+            const isSelected = selectedTooth === num;
+            return (
+                <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED }}>{num}</div>
+                    <div
+                        onClick={() => handleToothClick(num)}
+                        style={{
+                            width: 32, height: 40, borderRadius: "6px 6px 16px 16px",
+                            background: data.status === "Healthy" ? GEO_WHITE : `${getToothColor(data.status)}15`,
+                            border: `2px solid ${isSelected ? GEO_BLACK : getToothColor(data.status)}`,
+                            cursor: "pointer", transition: "all 0.2s",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            boxShadow: isSelected ? "0 4px 12px rgba(0,0,0,0.15)" : "none",
+                            transform: isSelected ? "scale(1.1)" : "scale(1)"
+                        }}
+                    >
+                        {data.status === "Missing" ? <X size={16} color={getToothColor(data.status)} /> : null}
+                    </div>
+
+                    {/* Popup */}
+                    {isSelected && (
+                        <div style={{ position: "absolute", top: 60, left: "50%", transform: "translateX(-50%)", background: GEO_WHITE, borderRadius: 12, padding: 12, boxShadow: "0 10px 25px rgba(0,0,0,0.1)", zIndex: 100, width: 160, border: `1px solid ${GEO_BG}` }}>
+                            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8, color: GEO_TEXT_MAIN, textAlign: "center" }}>Tooth #{num}</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                {["Healthy", "Existing", "Proposed", "Watch", "Missing"].map(status => (
+                                    <button
+                                        key={status}
+                                        onClick={() => handleStatusChange(num, status)}
+                                        style={{
+                                            background: "transparent", border: "none", padding: "6px 8px", borderRadius: 6, fontSize: 13, fontWeight: 600,
+                                            color: data.status === status ? getToothColor(status) : GEO_TEXT_MAIN,
+                                            backgroundColor: data.status === status ? `${getToothColor(status)}10` : "transparent",
+                                            cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 6
+                                        }}
+                                        onMouseOver={e => e.currentTarget.style.backgroundColor = GEO_BG}
+                                        onMouseOut={e => e.currentTarget.style.backgroundColor = data.status === status ? `${getToothColor(status)}10` : "transparent"}
+                                    >
+                                        <div style={{ width: 8, height: 8, borderRadius: 4, background: getToothColor(status) }} />
+                                        {status}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        return (
+            <div style={{ display: "flex", flexDirection: "column", gap: 32, alignItems: "center", width: "100%", padding: "20px 0" }}>
+                {/* Upper Arch */}
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", width: "100%" }}>
+                    {upperArch.map(num => <ToothNode key={num} num={num} />)}
+                </div>
+                {/* Lower Arch */}
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", width: "100%" }}>
+                    {lowerArch.map(num => <ToothNode key={num} num={num} />)}
+                </div>
+
+                {/* Legend */}
+                <div style={{ display: "flex", gap: 20, marginTop: 20, flexWrap: "wrap", justifyContent: "center" }}>
+                    {[
+                        { label: "Healthy", color: GEO_GREEN },
+                        { label: "Existing", color: "#3B82F6" },
+                        { label: "Proposed", color: "#EF4444" },
+                        { label: "Watch", color: "#F59E0B" },
+                        { label: "Missing", color: "#94A3B8" }
+                    ].map(leg => (
+                        <div key={leg.label} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: GEO_TEXT_MUTED }}>
+                            <div style={{ width: 12, height: 12, borderRadius: 2, border: `2px solid ${leg.color}`, background: `${leg.color}20` }} />
+                            {leg.label}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
+    const renderPerioChart = () => {
+        const upperArch = Array.from({ length: 16 }, (_, i) => i + 1);
+        const lowerArch = Array.from({ length: 16 }, (_, i) => 32 - i);
+
+        const PerioRow = ({ arch }) => (
+            <div style={{ display: "flex", gap: 4, justifyContent: "center", width: "100%" }}>
+                {arch.map(num => {
+                    const scores = perioScores[num] || [3, 3, 3];
+                    return (
+                        <div key={num} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: GEO_TEXT_MUTED }}>{num}</div>
+                            <div style={{ display: "flex", gap: 2 }}>
+                                {scores.map((s, i) => (
+                                    <div key={i} style={{ width: 16, height: 24, fontSize: 11, fontWeight: 700, color: GEO_WHITE, background: getPerioColor(s), display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 2 }}>
+                                        {s}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+
+        return (
+            <div style={{ display: "flex", flexDirection: "column", gap: 32, alignItems: "center", width: "100%", padding: "20px 0" }}>
+                <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: GEO_TEXT_MUTED, textAlign: "center", marginBottom: 8 }}>Upper Buccal</div>
+                    <PerioRow arch={upperArch} />
+                </div>
+                <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: GEO_TEXT_MUTED, textAlign: "center", marginBottom: 8 }}>Lower Buccal</div>
+                    <PerioRow arch={lowerArch} />
+                </div>
+
+                <div style={{ background: "#F8FAFC", padding: 16, borderRadius: 12, width: "100%", border: `1px solid ${GEO_BG}`, marginTop: 16 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, color: GEO_TEXT_MAIN, fontWeight: 600, fontSize: 14, marginBottom: 8 }}>
+                        <TrendingUp size={16} color={GEO_GREEN} /> AI Perio Trend Analysis
+                    </div>
+                    <p style={{ margin: 0, fontSize: 13, color: GEO_TEXT_MUTED, lineHeight: 1.5 }}>
+                        Patient shows <strong>0.3mm average reduction</strong> in pocket depths compared to previous exam (6 months ago). Areas of concern remain at #14 (Disto-buccal 6mm) and #19 (Mesio-buccal 5mm). Recommended: Focused scaling and localized antibiotic delivery.
+                    </p>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div className="mobile-no-padding-main" style={{ padding: "20px 40px", flex: 1, display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+            <TopGreetingUI2 currentUI={currentUI} setUI={setUI} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} subtitle="Examining Sarah Chen (ID: 00192)" />
+
+            <div className="stack-on-mobile" style={{ display: "flex", gap: 24, flex: 1 }}>
+
+                {/* LEFT PANEL: Charts */}
+                <div style={{ flex: 2, display: "flex", flexDirection: "column", gap: 24 }}>
+                    <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW, flex: 1, display: "flex", flexDirection: "column" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, borderBottom: `1px solid ${GEO_BG}`, paddingBottom: 16 }}>
+                            <div style={{ display: "flex", gap: 16 }}>
+                                <button onClick={() => setActiveTab("tooth")} style={{ background: "transparent", border: "none", fontSize: 18, fontWeight: 700, color: activeTab === "tooth" ? GEO_TEXT_MAIN : GEO_TEXT_MUTED, cursor: "pointer", position: "relative", padding: "0 4px" }}>
+                                    Tooth Chart
+                                    {activeTab === "tooth" && <div style={{ position: "absolute", bottom: -17, left: 0, right: 0, height: 3, background: GEO_GREEN, borderRadius: "3px 3px 0 0" }} />}
+                                </button>
+                                <button onClick={() => setActiveTab("perio")} style={{ background: "transparent", border: "none", fontSize: 18, fontWeight: 700, color: activeTab === "perio" ? GEO_TEXT_MAIN : GEO_TEXT_MUTED, cursor: "pointer", position: "relative", padding: "0 4px" }}>
+                                    Perio Chart
+                                    {activeTab === "perio" && <div style={{ position: "absolute", bottom: -17, left: 0, right: 0, height: 3, background: GEO_GREEN, borderRadius: "3px 3px 0 0" }} />}
+                                </button>
+                            </div>
+                            <div style={{ display: "flex", gap: 12 }}>
+                                <button style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: `1px solid ${GEO_BG}`, background: GEO_BG, fontSize: 13, fontWeight: 600, color: GEO_TEXT_MAIN, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                                    <Clock size={14} /> History
+                                </button>
+                                <button style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: `1px solid ${GEO_BG}`, background: GEO_WHITE, fontSize: 13, fontWeight: 600, color: GEO_TEXT_MAIN, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                                    <Image size={14} /> Layout
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Chart Area */}
+                        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            {activeTab === "tooth" ? renderToothChart() : renderPerioChart()}
+                        </div>
+                    </div>
+                </div>
+
+                {/* RIGHT PANEL: AI Assists */}
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 24 }}>
+
+                    {/* AI Diagnostic Assist (X-Ray) */}
+                    <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: GEO_SHADOW }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                            <div style={{ width: 32, height: 32, borderRadius: 8, background: `${GEO_GREEN}15`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <Sparkles size={16} color={GEO_GREEN} />
+                            </div>
+                            <h3 style={{ fontSize: 16, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0 }}>AI Diagnostic Assist</h3>
+                        </div>
+
+                        <div style={{ width: "100%", height: 180, background: "#1a1a1a", borderRadius: 12, position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16, border: `2px solid ${GEO_BG}` }}>
+                            {/* Fake X-Ray Background */}
+                            <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, opacity: 0.6, backgroundImage: "linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222), linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222)", backgroundSize: "10px 10px", backgroundPosition: "0 0, 5px 5px" }} />
+                            <div style={{ width: "80%", height: "60%", border: "2px solid #555", borderRadius: "100px / 50px", opacity: 0.5 }} />
+
+                            {/* Analysis Overlay */}
+                            {xrayAnalyzed && (
+                                <>
+                                    <div style={{ position: "absolute", top: "40%", left: "30%", width: 24, height: 24, border: "2px solid #EF4444", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <div style={{ position: "absolute", top: -10, right: -10, width: 16, height: 16, background: "#EF4444", color: "white", fontSize: 10, fontWeight: 800, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>1</div>
+                                    </div>
+                                    <div style={{ position: "absolute", top: "50%", right: "25%", width: 30, height: 20, border: "2px solid #F59E0B", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <div style={{ position: "absolute", top: -10, right: -10, width: 16, height: 16, background: "#F59E0B", color: "white", fontSize: 10, fontWeight: 800, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>2</div>
+                                    </div>
+                                    <div style={{ position: "absolute", bottom: "20%", left: "45%", width: 40, height: 10, border: "2px dashed #94A3B8", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <div style={{ position: "absolute", top: -10, right: -10, width: 16, height: 16, background: "#94A3B8", color: "white", fontSize: 10, fontWeight: 800, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>3</div>
+                                    </div>
+                                </>
+                            )}
+
+                            {!xrayAnalyzed && !analyzingXray && (
+                                <button onClick={handleAnalyzeXray} style={{ zIndex: 10, padding: "10px 20px", borderRadius: GEO_PILL, border: `1px solid rgba(255,255,255,0.2)`, background: "rgba(0,0,0,0.6)", color: "white", fontSize: 14, fontWeight: 600, cursor: "pointer", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", gap: 8 }}>
+                                    <Image size={16} /> Analyze Panorex
+                                </button>
+                            )}
+                            {analyzingXray && (
+                                <div style={{ zIndex: 10, padding: "10px 20px", borderRadius: GEO_PILL, border: `1px solid rgba(0, 182, 122, 0.4)`, background: "rgba(0, 182, 122, 0.1)", color: GEO_GREEN, fontSize: 14, fontWeight: 600, backdropFilter: "blur(4px)", display: "flex", alignItems: "center", gap: 8 }}>
+                                    <Loader2 size={16} className="lucide-spin" style={{ animation: "spin 2s linear infinite" }} /> Running AI Models...
+                                </div>
+                            )}
+                        </div>
+
+                        {xrayAnalyzed && (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                <div style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "#FEF2F2", padding: 12, borderRadius: 8 }}>
+                                    <div style={{ width: 20, height: 20, background: "#EF4444", color: "white", fontSize: 11, fontWeight: 800, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>1</div>
+                                    <div>
+                                        <div style={{ fontSize: 13, fontWeight: 700, color: "#991B1B" }}>Tooth #19 — Periapical Radiolucency</div>
+                                        <div style={{ fontSize: 12, color: "#B91C1C", marginTop: 2 }}>72% confidence line • Probable failing endo or acute infection.</div>
+                                    </div>
+                                    <div style={{ padding: "2px 6px", background: "#EF4444", color: "white", borderRadius: 4, fontSize: 10, fontWeight: 700, marginLeft: "auto" }}>URGENT</div>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "#FFFBEB", padding: 12, borderRadius: 8 }}>
+                                    <div style={{ width: 20, height: 20, background: "#F59E0B", color: "white", fontSize: 11, fontWeight: 800, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>2</div>
+                                    <div>
+                                        <div style={{ fontSize: 13, fontWeight: 700, color: "#92400E" }}>Tooth #14 — Interproximal Caries</div>
+                                        <div style={{ fontSize: 12, color: "#B45309", marginTop: 2 }}>85% confidence • Distal surface encoaching on DEJ.</div>
+                                    </div>
+                                    <div style={{ padding: "2px 6px", background: "#FDE68A", color: "#92400E", borderRadius: 4, fontSize: 10, fontWeight: 700, marginLeft: "auto" }}>WATCH</div>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "#F8FAFC", padding: 12, borderRadius: 8 }}>
+                                    <div style={{ width: 20, height: 20, background: "#94A3B8", color: "white", fontSize: 11, fontWeight: 800, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>3</div>
+                                    <div>
+                                        <div style={{ fontSize: 13, fontWeight: 700, color: "#334155" }}>Bone Loss Pattern</div>
+                                        <div style={{ fontSize: 12, color: "#475569", marginTop: 2 }}>68% confidence • Moderate generalized horizontal.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* AI Dictation */}
+                    <div style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 24, boxShadow: GEO_SHADOW, flex: 1, display: "flex", flexDirection: "column" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                            <div style={{ width: 32, height: 32, borderRadius: 8, background: `${GEO_GREEN}15`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <Mic size={16} color={GEO_GREEN} />
+                            </div>
+                            <h3 style={{ fontSize: 16, fontWeight: 600, color: GEO_TEXT_MAIN, margin: 0 }}>AI Dictation & Notes</h3>
+                        </div>
+
+                        <div style={{ flex: 1, background: GEO_BG, borderRadius: 12, padding: 16, fontSize: 14, color: GEO_TEXT_MAIN, lineHeight: 1.6, whiteSpace: "pre-wrap", overflowY: "auto", fontFamily: note ? "monospace" : "inherit", border: `1px solid ${GEO_BG}`, position: 'relative' }}>
+                            {generating && !note ? (
+                                <div style={{ display: "flex", alignItems: "center", gap: 12, color: GEO_TEXT_MUTED, position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                                    <Loader2 size={24} className="lucide-spin" style={{ animation: "spin 2s linear infinite" }} /> Transcribing...
+                                </div>
+                            ) : note ? note : <span style={{ color: GEO_TEXT_MUTED }}>"Tooth 19 has a cracked cusp, recommend full coverage crown..."</span>}
+                        </div>
+
+                        <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
+                            <div style={{ flex: 1, background: GEO_BG, borderRadius: GEO_PILL, padding: "10px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                                <div style={{ width: 8, height: 8, borderRadius: 4, background: "#EF4444", animation: "pulse 2s infinite" }} />
+                                <span style={{ fontSize: 14, color: GEO_TEXT_MUTED }}>Listening...</span>
+                            </div>
+                            <button onClick={handleGenerate} style={{ padding: "10px 20px", borderRadius: GEO_PILL, border: "none", background: GEO_GREEN, fontSize: 14, fontWeight: 600, color: GEO_WHITE, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, boxShadow: "0 4px 12px rgba(0, 182, 122, 0.2)" }}>
+                                <FileText size={16} /> Generate Tx Plan
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <style>{`
+                @keyframes pulse {
+                    0% { opacity: 1; transform: scale(1); }
+                    50% { opacity: 0.5; transform: scale(1.2); }
+                    100% { opacity: 1; transform: scale(1); }
+                }
+            `}</style>
+        </div>
+    );
+}
+
+// ==========================================
+// UI2: COMMUNICATIONS HUB PAGE
+// ==========================================
+export function CommunicationsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobileMenuOpen }) {
+    const [activeTab, setActiveTab] = useState("inbox");
+    const [selectedChat, setSelectedChat] = useState(1);
+
+    // Campaign Gen States
+    const [showCampaignModal, setShowCampaignModal] = useState(false);
+    const [promptText, setPromptText] = useState("");
+    const [generatingCampaign, setGeneratingCampaign] = useState(false);
+    const [campaignReady, setCampaignReady] = useState(false);
+
+    const INBOX_DATA = [
+        { id: 1, name: "David Kim", lastMsg: "Yes, I can make the 2pm on Thursday.", date: "10:42 AM", unread: false, aiFlag: false },
+        { id: 2, name: "Sarah Chen", lastMsg: "My temporary crown just fell off while eating lunch!!", date: "9:15 AM", unread: true, aiFlag: true },
+        { id: 3, name: "Michael Ross", lastMsg: "Can we push my cleaning to next month?", date: "Yesterday", unread: true, aiFlag: false },
+        { id: 4, name: "Emma Watson", lastMsg: "Thanks for the appointment reminder.", date: "Tuesday", unread: false, aiFlag: false }
+    ];
+
+    const CAMPAIGN_DATA = [
+        { name: "Unscheduled Treatment (Hi-Value)", trigger: "Treatment > $1000, Unscheduled > 30 days", audience: 142, conversion: "18.5%", status: "Active" },
+        { name: "Overdue Hygiene (6+ months)", trigger: "No future appt, Last appt > 6mo", audience: 308, conversion: "12.2%", status: "Active" },
+        { name: "End of Year Benefits Reminder", trigger: "Remaining Max > $500, Appt in Nov/Dec", audience: 410, conversion: "N/A", status: "Draft" },
+    ];
+
+    const NO_SHOW_DATA = [
+        { name: "Amanda Knox", appt: "Tomorrow, 2:00 PM", score: "94%", risk: "High", insight: "Has cancelled last 2 appointments with <24h notice. Unconfirmed." },
+        { name: "James Smith", appt: "Today, 4:30 PM", score: "88%", risk: "High", insight: "Late arrival history. Usually responds to SMS 1 hour prior." },
+        { name: "Olivia Jones", appt: "Friday, 9:00 AM", score: "62%", risk: "Medium", insight: "Confirmed via email, but has a 10% historical no-show rate." }
+    ];
+
+    const handleGenerateCampaign = () => {
+        setGeneratingCampaign(true);
+        setTimeout(() => {
+            setGeneratingCampaign(false);
+            setCampaignReady(true);
+        }, 3000);
+    };
+
+    const renderInbox = () => (
+        <div style={{ display: "flex", flex: 1, height: "100%", overflow: "hidden", background: GEO_WHITE, borderRadius: GEO_RADIUS, boxShadow: GEO_SHADOW, border: `1px solid ${GEO_BG}` }}>
+            {/* Thread List */}
+            <div style={{ width: 320, borderRight: `1px solid ${GEO_BG}`, display: "flex", flexDirection: "column" }}>
+                <div style={{ padding: 20, borderBottom: `1px solid ${GEO_BG}` }}>
+                    <input type="text" placeholder="Search patients or messages..." style={{ width: "100%", padding: "10px 16px", borderRadius: GEO_PILL, border: `1px solid ${GEO_BG}`, background: "#F9FAFB", outline: "none", boxSizing: "border-box", fontSize: 14 }} />
+                </div>
+                <div style={{ flex: 1, overflowY: "auto" }}>
+                    {INBOX_DATA.map(chat => (
+                        <div key={chat.id} onClick={() => setSelectedChat(chat.id)} style={{ padding: 20, borderBottom: `1px solid ${GEO_BG}`, cursor: "pointer", background: selectedChat === chat.id ? "#F9FAFB" : "transparent", display: "flex", gap: 12, transition: "background 0.2s" }} onMouseOver={e => e.currentTarget.style.background = "#F9FAFB"} onMouseOut={e => e.currentTarget.style.background = selectedChat === chat.id ? "#F9FAFB" : "transparent"}>
+                            <div style={{ width: 44, height: 44, borderRadius: 22, background: GEO_BG, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, color: GEO_TEXT_MUTED, flexShrink: 0 }}>
+                                {chat.name.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <div style={{ flex: 1, overflow: "hidden" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, alignItems: "center" }}>
+                                    <span style={{ fontWeight: chat.unread ? 700 : 600, color: GEO_TEXT_MAIN, fontSize: 15 }}>{chat.name}</span>
+                                    <span style={{ fontSize: 12, color: GEO_TEXT_MUTED }}>{chat.date}</span>
+                                </div>
+                                <div style={{ fontSize: 13, color: chat.unread ? GEO_TEXT_MAIN : GEO_TEXT_MUTED, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontWeight: chat.unread ? 600 : 400 }}>{chat.lastMsg}</div>
+                                {chat.aiFlag && (
+                                    <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 12, background: "#FEF2F2", color: "#EF4444", fontSize: 11, fontWeight: 700, marginTop: 8 }}>
+                                        <AlertTriangle size={12} /> AI URGENCY FLAG
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Active Thread */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#F9FAFB" }}>
+                <div style={{ padding: "20px 32px", borderBottom: `1px solid ${GEO_BG}`, background: GEO_WHITE, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 24, background: GEO_BG, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, color: GEO_TEXT_MUTED }}>
+                            {INBOX_DATA.find(c => c.id === selectedChat)?.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div>
+                            <div style={{ fontWeight: 700, fontSize: 18, color: GEO_TEXT_MAIN }}>{INBOX_DATA.find(c => c.id === selectedChat)?.name}</div>
+                            <div style={{ fontSize: 13, color: GEO_TEXT_MUTED }}>Patient ID: 59912 • Last Visit: 2 mos ago</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ flex: 1, padding: 32, overflowY: "auto", display: "flex", flexDirection: "column", gap: 24 }}>
+                    {selectedChat === 2 ? (
+                        <>
+                            <div style={{ alignSelf: "flex-end", maxWidth: "70%", background: GEO_BLACK, color: "white", padding: "12px 16px", borderRadius: "16px 16px 4px 16px", fontSize: 15, lineHeight: 1.5 }}>
+                                Hi Sarah, this is Intelident.ai calling to confirm your appointment for next Wednesday.
+                            </div>
+                            <div style={{ alignSelf: "flex-start", maxWidth: "70%", background: GEO_WHITE, color: GEO_TEXT_MAIN, padding: "12px 16px", borderRadius: "16px 16px 16px 4px", fontSize: 15, lineHeight: 1.5, border: `1px solid ${GEO_BG}`, boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
+                                Yes, confirmed.
+                            </div>
+                            <div style={{ alignSelf: "flex-start", maxWidth: "70%", background: GEO_WHITE, color: GEO_TEXT_MAIN, padding: "12px 16px", borderRadius: "16px 16px 16px 4px", fontSize: 15, lineHeight: 1.5, border: `1px solid #FECACA`, boxShadow: "0 4px 12px rgba(239, 68, 68, 0.1)" }}>
+                                Wait actually, my temporary crown just fell off while eating lunch!! What should I do? It kind of hurts.
+                            </div>
+                            <div style={{ alignSelf: "flex-end", maxWidth: "70%", background: "#F0FDF4", color: GEO_TEXT_MAIN, padding: "12px 16px", borderRadius: "16px 16px 4px 16px", fontSize: 15, lineHeight: 1.5, border: `1px solid #BBF7D0` }}>
+                                <div style={{ fontSize: 11, fontWeight: 700, color: GEO_GREEN, marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}><Sparkles size={12} /> AI DRAFT SUGGESTION</div>
+                                Oh no! We need to get you in as soon as possible to re-cement it and protect the tooth. Dr. Cifor has an emergency opening today at 3:30 PM. Does that work for you?
+                            </div>
+                        </>
+                    ) : (
+                        <div style={{ alignSelf: "center", color: GEO_TEXT_MUTED, fontSize: 14 }}>Select a thread to view history.</div>
+                    )}
+                </div>
+
+                <div style={{ padding: 24, background: GEO_WHITE, borderTop: `1px solid ${GEO_BG}` }}>
+                    <div style={{ display: "flex", gap: 12 }}>
+                        <input type="text" placeholder="Type a message..." defaultValue={selectedChat === 2 ? "Oh no! We need to get you in as soon as possible to re-cement it and protect the tooth. Dr. Cifor has an emergency opening today at 3:30 PM. Does that work for you?" : ""} style={{ flex: 1, padding: "14px 20px", borderRadius: GEO_PILL, border: `1px solid ${GEO_BG}`, background: "#F9FAFB", outline: "none", fontSize: 15, color: GEO_TEXT_MAIN }} />
+                        <button style={{ width: 48, height: 48, borderRadius: 24, background: GEO_GREEN, border: "none", color: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(0, 182, 122, 0.2)" }}>
+                            <ArrowRight size={20} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderCampaigns = () => (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>Active Drip Sequences</h3>
+                <button onClick={() => setShowCampaignModal(true)} style={{ padding: "10px 20px", borderRadius: GEO_PILL, border: "none", background: GEO_BLACK, color: GEO_WHITE, fontWeight: 600, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                    <Plus size={16} /> New AI Campaign
+                </button>
+            </div>
+
+            <div className="mobile-no-padding-card" style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
+                    <thead>
+                        <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
+                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Campaign Name</th>
+                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Trigger Logic</th>
+                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Audience Size</th>
+                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Conversion</th>
+                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Status</th>
+                            <th style={{ padding: "0 0 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {CAMPAIGN_DATA.map((row, idx) => (
+                            <tr key={idx} style={{ borderBottom: `1px solid #F4F5F7` }}>
+                                <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{row.name}</td>
+                                <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MUTED }}>{row.trigger}</td>
+                                <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{row.audience} pts</td>
+                                <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_GREEN }}>{row.conversion}</td>
+                                <td style={{ padding: "20px 0" }}>
+                                    <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: GEO_PILL, fontSize: 12, fontWeight: 600, color: row.status === "Active" ? GEO_GREEN : GEO_TEXT_MUTED, background: `${row.status === "Active" ? GEO_GREEN : GEO_TEXT_MUTED}15` }}>
+                                        <CircleDot size={12} fill={row.status === "Active" ? GEO_GREEN : GEO_TEXT_MUTED} /> {row.status}
+                                    </div>
+                                </td>
+                                <td style={{ padding: "20px 0", textAlign: "right" }}>
+                                    <button style={{ background: "transparent", border: "none", cursor: "pointer", color: GEO_TEXT_MUTED }}><MoreHorizontal size={20} /></button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {showCampaignModal && (
+                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }}>
+                    <div style={{ background: GEO_WHITE, borderRadius: 24, width: 700, maxWidth: "90%", padding: 40, position: "relative", boxShadow: "0 24px 48px rgba(0,0,0,0.2)", display: "flex", flexDirection: "column", maxHeight: "90vh" }}>
+                        <button onClick={() => { setShowCampaignModal(false); setCampaignReady(false); setPromptText(""); }} style={{ position: "absolute", top: 24, right: 24, background: "transparent", border: "none", cursor: "pointer", padding: 8, borderRadius: "50%" }}>
+                            <X size={20} color={GEO_TEXT_MUTED} />
+                        </button>
+
+                        <h2 style={{ fontSize: 24, fontWeight: 700, color: GEO_TEXT_MAIN, margin: "0 0 8px 0", display: "flex", alignItems: "center", gap: 12 }}>
+                            <Sparkles size={24} color={GEO_GREEN} /> AI Text-to-Campaign Builder
+                        </h2>
+                        <p style={{ margin: "0 0 24px 0", fontSize: 15, color: GEO_TEXT_MUTED }}>Describe the patients you want to reach and the goal of the outreach.</p>
+
+                        {!campaignReady ? (
+                            <>
+                                <textarea value={promptText} onChange={e => setPromptText(e.target.value)} placeholder="e.g., Send a promo to patients who had Invisalign consults but never moved forward. Offer them $500 off if they start before December 31st." style={{ width: "100%", height: 120, padding: 16, borderRadius: 12, border: `1px solid ${GEO_BG}`, background: "#F9FAFB", outline: "none", fontSize: 15, fontFamily: "inherit", resize: "none", boxSizing: "border-box", marginBottom: 24 }} />
+
+                                <div style={{ display: "flex", justifyContent: "flex-end", gap: 16 }}>
+                                    <button disabled={generatingCampaign || !promptText} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: GEO_GREEN, fontWeight: 600, fontSize: 15, color: GEO_WHITE, cursor: (generatingCampaign || !promptText) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 8, opacity: (generatingCampaign || !promptText) ? 0.5 : 1 }} onClick={handleGenerateCampaign}>
+                                        {generatingCampaign ? <><Loader2 size={18} className="lucide-spin" style={{ animation: "spin 2s linear infinite" }} /> Generating AI Audience & Copy...</> : <><Sparkles size={18} /> Generate Campaign</>}
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 24, overflowY: "auto" }}>
+                                <div style={{ background: "#F8FAFC", borderRadius: 12, padding: 20, border: `1px solid ${GEO_BG}` }}>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", marginBottom: 8 }}>Target Audience Discovered</div>
+                                    <div style={{ fontSize: 24, fontWeight: 800, color: GEO_TEXT_MAIN, display: "flex", alignItems: "center", gap: 12 }}>
+                                        314 Patients <span style={{ fontSize: 13, fontWeight: 600, padding: "4px 8px", background: "#DBEAFE", color: "#1D4ED8", borderRadius: 12 }}>Invisalign Consult without Tx</span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: GEO_TEXT_MUTED, textTransform: "uppercase", marginBottom: 8 }}>Generated SMS Sequence</div>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                        <div style={{ background: GEO_WHITE, padding: 16, borderRadius: 12, border: `1px solid ${GEO_BG}` }}>
+                                            <div style={{ fontSize: 12, fontWeight: 700, color: GEO_GREEN, marginBottom: 4 }}>Message 1 (Send Tomorrow at 10 AM)</div>
+                                            <div style={{ fontSize: 15, color: GEO_TEXT_MAIN }}>"Hi [First Name], it's Dr. Cifor's office! We're offering $500 off Invisalign treatment if you start before Dec 31st. Want me to send over the details?"</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: "flex", justifyContent: "flex-end", gap: 16, marginTop: 12 }}>
+                                    <button onClick={() => { setShowCampaignModal(false); setCampaignReady(false); setPromptText(""); }} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: `1px solid ${GEO_TEXT_MUTED}`, background: "transparent", fontWeight: 600, fontSize: 15, color: GEO_TEXT_MUTED, cursor: "pointer" }}>Cancel</button>
+                                    <button style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: GEO_BLACK, fontWeight: 600, fontSize: 15, color: GEO_WHITE, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }} onClick={() => { setShowCampaignModal(false); setCampaignReady(false); setPromptText(""); }}>
+                                        <Play size={18} /> Launch Campaign
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
+    const renderNoShow = () => (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: GEO_TEXT_MAIN, margin: 0 }}>No-Show Prevention AI</h3>
+                <div style={{ fontSize: 14, color: GEO_TEXT_MUTED }}>Analyzing next 72 hours of appointments...</div>
+            </div>
+
+            <div className="mobile-no-padding-card" style={{ background: GEO_WHITE, borderRadius: GEO_RADIUS, padding: 32, boxShadow: GEO_SHADOW }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
+                    <thead>
+                        <tr style={{ borderBottom: `2px solid #F4F5F7` }}>
+                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Patient</th>
+                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Appointment</th>
+                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Flight Risk Score</th>
+                            <th style={{ padding: "0 0 16px 0", textAlign: "left", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>AI Insight Context</th>
+                            <th style={{ padding: "0 0 16px 0", textAlign: "right", color: GEO_TEXT_MUTED, fontSize: 13, textTransform: "uppercase", fontWeight: 700 }}>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {NO_SHOW_DATA.map((row, idx) => (
+                            <tr key={idx} style={{ borderBottom: `1px solid #F4F5F7` }}>
+                                <td style={{ padding: "20px 0", fontSize: 15, fontWeight: 600, color: GEO_TEXT_MAIN }}>{row.name}</td>
+                                <td style={{ padding: "20px 0", fontSize: 14, color: GEO_TEXT_MAIN, fontWeight: 600 }}>{row.appt}</td>
+                                <td style={{ padding: "20px 0" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <div style={{ fontSize: 15, fontWeight: 700, color: row.risk === "High" ? "#EF4444" : "#F59E0B" }}>{row.score}</div>
+                                        <div style={{ width: 60, height: 6, background: GEO_BG, borderRadius: 3, overflow: "hidden" }}>
+                                            <div style={{ width: row.score, height: "100%", background: row.risk === "High" ? "#EF4444" : "#F59E0B" }} />
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style={{ padding: "20px 0", fontSize: 13, color: GEO_TEXT_MUTED, maxWidth: 300, lineHeight: 1.5 }}>{row.insight}</td>
+                                <td style={{ padding: "20px 0", textAlign: "right" }}>
+                                    <button style={{ padding: "8px 16px", borderRadius: GEO_PILL, border: "none", background: GEO_BLACK, color: GEO_WHITE, fontWeight: 600, fontSize: 13, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                        <Shield size={14} /> Send Human Touch
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="mobile-no-padding-main" style={{ padding: "20px 40px", flex: 1, display: "flex", flexDirection: "column", boxSizing: "border-box", height: "calc(100vh - 40px)" }}>
+            <TopGreetingUI2 currentUI={currentUI} setUI={setUI} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} subtitle="Manage patient conversations and automated campaigns." />
+
+            <div className="stack-on-mobile" style={{ display: "flex", gap: 16, marginBottom: 24, marginTop: 12 }}>
+                <button onClick={() => setActiveTab("inbox")} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: activeTab === "inbox" ? GEO_BLACK : GEO_WHITE, color: activeTab === "inbox" ? GEO_WHITE : GEO_TEXT_MAIN, fontWeight: 600, fontSize: 15, cursor: "pointer", transition: "all 0.2s", boxShadow: activeTab === "inbox" ? "0 8px 16px rgba(0,0,0,0.15)" : GEO_SHADOW, display: "flex", alignItems: "center", gap: 8 }}>
+                    <MessageSquare size={16} /> Inbox
+                </button>
+                <button onClick={() => setActiveTab("campaigns")} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: activeTab === "campaigns" ? GEO_BLACK : GEO_WHITE, color: activeTab === "campaigns" ? GEO_WHITE : GEO_TEXT_MAIN, fontWeight: 600, fontSize: 15, cursor: "pointer", transition: "all 0.2s", boxShadow: activeTab === "campaigns" ? "0 8px 16px rgba(0,0,0,0.15)" : GEO_SHADOW, display: "flex", alignItems: "center", gap: 8 }}>
+                    <Megaphone size={16} /> Automated Campaigns
+                </button>
+                <button onClick={() => setActiveTab("noshow")} style={{ padding: "12px 24px", borderRadius: GEO_PILL, border: "none", background: activeTab === "noshow" ? GEO_BLACK : GEO_WHITE, color: activeTab === "noshow" ? GEO_WHITE : GEO_TEXT_MAIN, fontWeight: 600, fontSize: 15, cursor: "pointer", transition: "all 0.2s", boxShadow: activeTab === "noshow" ? "0 8px 16px rgba(0,0,0,0.15)" : GEO_SHADOW, display: "flex", alignItems: "center", gap: 8 }}>
+                    <ShieldAlert size={16} /> No-Show Prevention
+                </button>
+            </div>
+
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+                {activeTab === "inbox" && renderInbox()}
+                {activeTab === "campaigns" && renderCampaigns()}
+                {activeTab === "noshow" && renderNoShow()}
+            </div>
         </div>
     );
 }
@@ -3353,6 +4263,8 @@ export default function App() {
 
     const renderPage = () => {
         switch (currentPage) {
+            case "chart": return <ClinicalChartPageUI2 isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />;
+            case "communications": return <CommunicationsPageUI2 isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />;
             case "dashboard": return <DashboardPageUI2 onNavigatePage={handleNavigate} onSelectPatient={handleSelectPatient} WEEKLY_PRODUCTION={WEEKLY_PRODUCTION} SCHEDULE_DATA={SCHEDULE_DATA} PATIENT_DATA={PATIENTS} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} voiceEscalationCount={escalations.length} />;
             case "patients": return <PatientListPageUI2 onNavigatePage={handleNavigate} onSelectPatient={handleSelectPatient} PATIENT_DATA={PATIENTS} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} currentPath={currentPath} />;
             case "patient-detail": return selectedPatient ? <PatientDetailPageUI2 patient={selectedPatient} onBack={() => { setSelectedPatient(null); setCurrentPage("patients"); window.history.pushState(null, '', '/patients'); setCurrentPath('/patients'); }} TIMELINE_EVENTS={TIMELINE_EVENTS} MEDICAL_HISTORY={MEDICAL_HISTORY} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} /> : <DashboardPageUI2 onNavigatePage={handleNavigate} onSelectPatient={handleSelectPatient} WEEKLY_PRODUCTION={WEEKLY_PRODUCTION} SCHEDULE_DATA={SCHEDULE_DATA} PATIENT_DATA={PATIENTS} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} voiceEscalationCount={escalations.length} />;
