@@ -191,7 +191,7 @@ export function Dental3DModel({ teethData, selectedTooth, onSelectTooth, onStatu
 
     return (
         <div style={{ width: '100%', height: '100%', minHeight: '500px', background: 'linear-gradient(to bottom, #f0fdf4 0%, #e0f2fe 100%)', borderRadius: 24, overflow: 'hidden', position: 'relative', border: '1px solid #E5E7EB', boxShadow: '0 10px 30px rgba(0,182,122,0.05)' }}>
-            <Canvas camera={{ position: [0, 1, 8], fov: 45 }}>
+            <Canvas camera={{ position: [0, 1, 8], fov: 45 }} onPointerMissed={() => onSelectTooth(null)}>
                 <ambientLight intensity={0.5} />
                 <hemisphereLight skyColor={"#ffffff"} groundColor={"#a7f3d0"} intensity={0.8} />
                 <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
