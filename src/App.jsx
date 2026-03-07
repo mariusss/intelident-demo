@@ -1416,36 +1416,81 @@ export function AnalyticsPageUI2({ currentUI, setUI, isMobileMenuOpen, setIsMobi
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', overflowX: 'auto', paddingBottom: 8 }}>
-                <div style={{ display: 'flex', gap: 2, paddingLeft: 60 }}>
-                    {times.map((t, i) => (
-                        <div key={t} style={{ flex: 1, minWidth: 24, textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#9CA3AF', opacity: i % 2 !== 0 ? 0 : 1 }}>
-                            {t}
+                <div style={{ minWidth: 800 }}> {/* Wrapper to force scrolling on narrow screens */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <div style={{ width: 60, flexShrink: 0 }} />
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(20, 1fr)', gap: 2, flex: 1 }}>
+                            {times.map((t, i) => (
+                                <div key={t} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#9CA3AF', opacity: i % 2 !== 0 ? 0 : 1 }}>
+                                    {t}
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
-                {yLabels.map((rowLabel, dIdx) => (
-                    <div key={rowLabel} style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                        <div style={{ width: 60, fontSize: 13, fontWeight: 700, color: '#6B7280', textAlign: 'right', paddingRight: 8 }}>{rowLabel}</div>
-                        {matrix[dIdx].map((val, tIdx) => (
-                            <div
-                                key={`${rowLabel}-${times[tIdx]}`}
-                                title={getTooltip(val, rowLabel, times[tIdx])}
-                                style={{
-                                    flex: 1,
-                                    minWidth: 24,
-                                    height: 48,
-                                    background: getColor(val),
-                                    borderRadius: 4,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                    border: '1px solid rgba(0,0,0,0.04)'
-                                }}
-                                onMouseOver={(e) => { e.currentTarget.style.opacity = 0.8; e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.zIndex = 10; e.currentTarget.style.position = 'relative'; }}
-                                onMouseOut={(e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.zIndex = 1; }}
-                            />
-                        ))}
                     </div>
-                ))}
+                    {yLabels.map((rowLabel, dIdx) => {
+                        const rowData = matrix[dIdx];
+                        const chunks = [];
+                        let currentChunk = null;
+
+                        const isSameApt = (v1, v2) => {
+                            if (typeof v1 !== typeof v2) return false;
+                            if (typeof v1 === 'object' && v1 !== null && typeof v2 === 'object' && v2 !== null) {
+                                return v1.utilized === v2.utilized &&
+                                    v1.patient === v2.patient &&
+                                    v1.provider === v2.provider &&
+                                    v1.proc === v2.proc;
+                            }
+                            return v1 === v2;
+                        };
+
+                        rowData.forEach((val, i) => {
+                            if (!currentChunk) {
+                                currentChunk = { val, startIndex: i, span: 1 };
+                            } else if (isSameApt(val, currentChunk.val)) {
+                                currentChunk.span += 1;
+                            } else {
+                                chunks.push(currentChunk);
+                                currentChunk = { val, startIndex: i, span: 1 };
+                            }
+                        });
+                        if (currentChunk) chunks.push(currentChunk);
+
+                        return (
+                            <div key={rowLabel} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                                <div style={{ width: 60, flexShrink: 0, fontSize: 13, fontWeight: 700, color: '#6B7280', textAlign: 'right' }}>{rowLabel}</div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(20, 1fr)', gap: 2, flex: 1 }}>
+                                    {chunks.map((chunk) => (
+                                        <div
+                                            key={`${rowLabel}-${times[chunk.startIndex]}`}
+                                            title={getTooltip(chunk.val, rowLabel, times[chunk.startIndex])}
+                                            style={{
+                                                gridColumn: `span ${chunk.span}`,
+                                                height: 48,
+                                                background: getColor(chunk.val),
+                                                borderRadius: 4,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                border: '1px solid rgba(0,0,0,0.04)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                overflow: 'hidden'
+                                            }}
+                                            onMouseOver={(e) => { e.currentTarget.style.opacity = 0.8; e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.zIndex = 10; e.currentTarget.style.position = 'relative'; }}
+                                            onMouseOut={(e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.zIndex = 1; }}
+                                        >
+                                            {chunk.span > 1 && (typeof chunk.val === 'object' ? chunk.val.utilized : chunk.val >= 50) ? (
+                                                <span style={{ fontSize: 11, fontWeight: 700, color: '#FFFFFF', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', padding: '0 8px' }}>
+                                                    {typeof chunk.val === 'object' ? chunk.val.patient : 'Occupied'}
+                                                </span>
+                                            ) : null}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
                 {/* Legend */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, marginTop: 16, fontSize: 12, color: '#6B7280', fontWeight: 700 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
