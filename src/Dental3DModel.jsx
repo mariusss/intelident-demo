@@ -61,8 +61,10 @@ const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange
     // Rotation so it faces the arch curve normal
     const rotationY = -angle + Math.PI / 2;
 
-    // Advanced Enamel Material optimized to prevent overlapping flickers
-    // Reduced transmission to 0.1 to give it a solid "creamy" organic tooth look instead of pure glass
+    const isMissing = data?.status === 'Missing';
+    const toothColor = getToothColor ? getToothColor(data?.status || 'Healthy') : '#ffffff';
+
+    // Base Enamel Material for valid teeth
     const enamelMaterialProps = {
         transmission: 0.1,
         opacity: 1,
@@ -70,66 +72,45 @@ const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange
         roughness: 0.25,
         ior: 1.5,
         thickness: 1.0,
-        color: '#fffff8',
+        color: data?.status === 'Healthy' ? '#fffff8' : toothColor,
         clearcoat: 0.8,
         clearcoatRoughness: 0.1,
         transparent: true,
         side: THREE.FrontSide,
-        depthWrite: true // crucial to prevent internal z-fighting between adjacent teeth
+        depthWrite: true,
+        emissive: toothColor,
+        emissiveIntensity: data?.status !== 'Healthy' && data?.status !== 'Missing' ? 0.2 : 0 // slight glow for conditions
     };
-
-    const isMissing = data?.status === 'Missing';
-
-    if (isMissing) return null;
-
-    let isExisting = false;
-    let isProposed = false;
-    let isWatch = false;
-
-    if (data?.status === 'Existing') {
-        isExisting = true;
-    } else if (data?.status === 'Proposed') {
-        isProposed = true;
-    } else if (data?.status === 'Watch') {
-        isWatch = true;
-    }
 
     return (
         <group position={[x, y, z]} rotation={[0, rotationY, 0]}>
-            {/* Main Tooth Geometry */}
+            {/* Main Tooth Geometry OR Ghost Box for Missing */}
             <RoundedBox
                 ref={meshRef}
                 args={[tWidth, tHeight, tDepth]}
                 radius={tRadius}
                 smoothness={4}
                 onClick={(e) => { e.stopPropagation(); onSelect(num); }}
-                onPointerOver={() => setHovered(true)}
-                onPointerOut={() => setHovered(false)}
+                onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+                onPointerOut={(e) => { e.stopPropagation(); setHovered(false); }}
             >
-                <meshPhysicalMaterial
-                    {...enamelMaterialProps}
-                    emissive={hovered || isSelected ? '#a7f3d0' : '#000000'}
-                    emissiveIntensity={isSelected ? 0.4 : (hovered ? 0.15 : 0)}
-                />
+                {isMissing ? (
+                    <meshStandardMaterial
+                        color="#94A3B8"
+                        transparent
+                        opacity={0.15}
+                        wireframe={true}
+                        emissive={hovered || isSelected ? '#a7f3d0' : '#000000'}
+                        emissiveIntensity={isSelected ? 0.4 : (hovered ? 0.2 : 0)}
+                    />
+                ) : (
+                    <meshPhysicalMaterial
+                        {...enamelMaterialProps}
+                        emissive={hovered || isSelected ? '#a7f3d0' : enamelMaterialProps.emissive}
+                        emissiveIntensity={hovered || isSelected ? 0.4 : enamelMaterialProps.emissiveIntensity}
+                    />
+                )}
             </RoundedBox>
-
-            {/* Condition Overlays */}
-            {isExisting && (
-                <mesh position={[0, isUpper ? -tHeight / 2 + 0.15 : tHeight / 2 - 0.15, 0]}>
-                    <boxGeometry args={[tWidth * 0.4, 0.35, tDepth * 0.4]} />
-                    <meshStandardMaterial color="#3b82f6" metalness={0.5} roughness={0.3} depthWrite={true} />
-                </mesh>
-            )}
-
-            {isProposed && (
-                <RoundedBox args={[tWidth * 1.05, tHeight * 1.05, tDepth * 1.05]} radius={tRadius} smoothness={4}>
-                    <meshStandardMaterial color="#ef4444" transparent opacity={0.35} depthWrite={false} side={THREE.FrontSide} />
-                </RoundedBox>
-            )}
-
-            {isWatch && (
-                <PulsatingSphere isUpper={isUpper} tHeight={tHeight} tDepth={tDepth} />
-            )}
 
             {/* Number Label & Interactive Popup Overlay */}
             {(hovered || isSelected) && (
@@ -147,13 +128,13 @@ const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange
                                         key={status}
                                         onClick={(e) => { e.stopPropagation(); onStatusChange(num, status); }}
                                         style={{
-                                            background: data.status === status ? `${getToothColor(status)}15` : 'transparent',
+                                            background: data?.status === status ? `${getToothColor(status)}15` : 'transparent',
                                             border: 'none',
                                             padding: '6px 8px',
                                             borderRadius: 6,
                                             fontSize: 13,
                                             fontWeight: 600,
-                                            color: data.status === status ? getToothColor(status) : '#1f2937',
+                                            color: data?.status === status ? getToothColor(status) : '#1f2937',
                                             cursor: 'pointer',
                                             textAlign: 'left',
                                             display: 'flex',
@@ -161,8 +142,8 @@ const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange
                                             gap: 6,
                                             transition: 'all 0.2s'
                                         }}
-                                        onMouseOver={e => { if (data.status !== status) e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
-                                        onMouseOut={e => { if (data.status !== status) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                        onMouseOver={e => { if (data?.status !== status) e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
+                                        onMouseOut={e => { if (data?.status !== status) e.currentTarget.style.backgroundColor = 'transparent'; }}
                                     >
                                         <div style={{ width: 8, height: 8, borderRadius: 4, background: getToothColor(status) }} />
                                         {status}
@@ -177,18 +158,7 @@ const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange
     );
 };
 
-const PulsatingSphere = ({ isUpper, tHeight, tDepth }) => {
-    const meshRef = useRef();
-    useFrame((state) => {
-        const time = state.clock.getElapsedTime();
-        meshRef.current.scale.setScalar(1 + Math.sin(time * 5) * 0.2);
-    });
-    return (
-        <Sphere ref={meshRef} args={[0.1, 16, 16]} position={[0, isUpper ? -tHeight / 2 - 0.1 : tHeight / 2 + 0.1, 0]}>
-            <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={0.8} depthWrite={false} />
-        </Sphere>
-    );
-};
+// Removed PulsatingSphere as condition states are now represented via full mesh tinting
 
 const DentalArchGums = ({ isUpper }) => {
     const curve = useMemo(() => {
