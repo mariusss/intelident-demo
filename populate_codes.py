@@ -1,0 +1,68 @@
+import json
+
+cdt_codes = [
+    {"code": "D0120", "category": "Diagnostic", "desc": "Periodic oral evaluation - established patient", "treatmentArea": "Mouth"},
+    {"code": "D0140", "category": "Diagnostic", "desc": "Limited oral evaluation - problem focused", "treatmentArea": "Mouth"},
+    {"code": "D0150", "category": "Diagnostic", "desc": "Comprehensive oral evaluation - new or estab", "treatmentArea": "Mouth"},
+    {"code": "D0210", "category": "Diagnostic", "desc": "Intraoral - complete series of radiographic images", "treatmentArea": "Mouth"},
+    {"code": "D0220", "category": "Diagnostic", "desc": "Intraoral - periapical first radiographic image", "treatmentArea": "Mouth"},
+    {"code": "D0230", "category": "Diagnostic", "desc": "Intraoral - periapical each addl image", "treatmentArea": "Mouth"},
+    {"code": "D0272", "category": "Diagnostic", "desc": "Bitewings - two radiographic images", "treatmentArea": "Mouth"},
+    {"code": "D0274", "category": "Diagnostic", "desc": "Bitewings - four radiographic images", "treatmentArea": "Mouth"},
+    {"code": "D0330", "category": "Diagnostic", "desc": "Panoramic radiographic image", "treatmentArea": "Mouth"},
+    
+    {"code": "D1056", "category": "Preventive", "desc": "Prophylaxis with oral evaluation (custom)", "treatmentArea": "Mouth"},
+    {"code": "D1110", "category": "Preventive", "desc": "Prophylaxis - adult", "treatmentArea": "Mouth"},
+    {"code": "D1120", "category": "Preventive", "desc": "Prophylaxis - child", "treatmentArea": "Mouth"},
+    {"code": "D1206", "category": "Preventive", "desc": "Topical application of fluoride varnish", "treatmentArea": "Mouth"},
+    {"code": "D1351", "category": "Preventive", "desc": "Sealant - per tooth", "treatmentArea": "Tooth", "paintType": "Sealant"},
+    {"code": "D1353", "category": "Preventive", "desc": "Sealant repair - per tooth", "treatmentArea": "Tooth", "paintType": "Sealant"},
+    
+    {"code": "D2056", "category": "Restorative", "desc": "Resin-based composite - two surfaces, posterior primary", "treatmentArea": "Surface", "surfacesRequired": 2, "toothType": "Posterior", "material": "Composite"},
+    {"code": "D2140", "category": "Restorative", "desc": "Amalgam - one surface, prim/perm", "treatmentArea": "Surface", "surfacesRequired": 1, "material": "Amalgam"},
+    {"code": "D2150", "category": "Restorative", "desc": "Amalgam - two surfaces, prim/perm", "treatmentArea": "Surface", "surfacesRequired": 2, "material": "Amalgam"},
+    {"code": "D2330", "category": "Restorative", "desc": "Resin-based composite - 1 surface, anterior", "treatmentArea": "Surface", "surfacesRequired": 1, "toothType": "Anterior", "material": "Composite"},
+    {"code": "D2331", "category": "Restorative", "desc": "Resin-based composite - 2 surfaces, anterior", "treatmentArea": "Surface", "surfacesRequired": 2, "toothType": "Anterior", "material": "Composite"},
+    {"code": "D2391", "category": "Restorative", "desc": "Resin-based composite - 1 surface, posterior", "treatmentArea": "Surface", "surfacesRequired": 1, "toothType": "Posterior", "material": "Composite"},
+    {"code": "D2392", "category": "Restorative", "desc": "Resin-based composite - 2 surfaces, posterior", "treatmentArea": "Surface", "surfacesRequired": 2, "toothType": "Posterior", "material": "Composite"},
+    {"code": "D2740", "category": "Restorative", "desc": "Crown - porcelain/ceramic", "treatmentArea": "Tooth", "paintType": "Crown", "material": "Porcelain"},
+    {"code": "D2750", "category": "Restorative", "desc": "Crown - porcelain fused to high noble metal", "treatmentArea": "Tooth", "paintType": "Crown", "material": "PFM"},
+    {"code": "D2790", "category": "Restorative", "desc": "Crown - full cast high noble metal", "treatmentArea": "Tooth", "paintType": "Crown", "material": "Metal"},
+    {"code": "D2920", "category": "Restorative", "desc": "Re-cement or re-bond crown", "treatmentArea": "Tooth"},
+    {"code": "D2950", "category": "Restorative", "desc": "Core buildup, including any pins", "treatmentArea": "Tooth"},
+    
+    {"code": "D3056", "category": "Endodontics", "desc": "Apexification/recalcification - initial visit", "treatmentArea": "Tooth"},
+    {"code": "D3310", "category": "Endodontics", "desc": "Endodontic therapy, anterior tooth", "treatmentArea": "Tooth", "paintType": "RootCanal"},
+    {"code": "D3320", "category": "Endodontics", "desc": "Endodontic therapy, premolar tooth", "treatmentArea": "Tooth", "paintType": "RootCanal"},
+    {"code": "D3330", "category": "Endodontics", "desc": "Endodontic therapy, molar tooth", "treatmentArea": "Tooth", "paintType": "RootCanal"},
+
+    {"code": "D4341", "category": "Periodontics", "desc": "Perio scaling & root planing - 4+ teeth/quad", "treatmentArea": "Quadrant"},
+    {"code": "D4910", "category": "Periodontics", "desc": "Periodontal maintenance", "treatmentArea": "Mouth"},
+
+    {"code": "D5110", "category": "Prosthodontics", "desc": "Complete denture - maxillary", "treatmentArea": "Arch"},
+    {"code": "D5120", "category": "Prosthodontics", "desc": "Complete denture - mandibular", "treatmentArea": "Arch"},
+    {"code": "D5211", "category": "Prosthodontics", "desc": "Maxillary partial denture - resin base", "treatmentArea": "Arch"},
+    {"code": "D5511", "category": "Prosthodontics", "desc": "Repair broken complete denture base, mandibular", "treatmentArea": "Arch"},
+    {"code": "D5512", "category": "Prosthodontics", "desc": "Repair broken complete denture base, maxillary", "treatmentArea": "Arch"},
+    {"code": "D5520", "category": "Prosthodontics", "desc": "Replace missing or broken teeth - complete denture (each tooth)", "treatmentArea": "Tooth"},
+    {"code": "D5611", "category": "Prosthodontics", "desc": "Repair resin partial denture base, mandibular", "treatmentArea": "Arch"},
+    {"code": "D5612", "category": "Prosthodontics", "desc": "Repair resin partial denture base, maxillary", "treatmentArea": "Arch"},
+    {"code": "D5621", "category": "Prosthodontics", "desc": "Repair cast partial framework, mandibular", "treatmentArea": "Arch"},
+    {"code": "D5622", "category": "Prosthodontics", "desc": "Repair cast partial framework, maxillary", "treatmentArea": "Arch"},
+    {"code": "D5630", "category": "Prosthodontics", "desc": "Repair or replace broken clasp - per tooth", "treatmentArea": "Tooth"},
+    {"code": "D5640", "category": "Prosthodontics", "desc": "Replace broken teeth - per tooth", "treatmentArea": "Tooth"},
+
+    {"code": "D6010", "category": "Implants", "desc": "Surgical placement of implant body: endosteal", "treatmentArea": "Tooth", "paintType": "Implant"},
+    {"code": "D6056", "category": "Implants", "desc": "Prefabricated abutment", "treatmentArea": "Tooth"},
+    {"code": "D6065", "category": "Implants", "desc": "Implant supported porcelain/ceramic crown", "treatmentArea": "Tooth", "paintType": "Crown"},
+
+    {"code": "D7140", "category": "Oral Surgery", "desc": "Extraction, erupted tooth or exposed root", "treatmentArea": "Tooth", "paintType": "Extraction"},
+    {"code": "D7210", "category": "Oral Surgery", "desc": "Extraction, erupted tooth req removal of bone", "treatmentArea": "Tooth", "paintType": "Extraction"},
+    {"code": "D7230", "category": "Oral Surgery", "desc": "Removal of impacted tooth - partially bony", "treatmentArea": "Tooth", "paintType": "Extraction"},
+    {"code": "D7240", "category": "Oral Surgery", "desc": "Removal of impacted tooth - completely bony", "treatmentArea": "Tooth", "paintType": "Extraction"}
+]
+
+with open('src/data/cdtCodes.json', 'w') as f:
+    json.dump(cdt_codes, f, indent=2)
+
+print("Codes populated successfully!")

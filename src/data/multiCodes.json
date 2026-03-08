@@ -1,0 +1,92 @@
+[
+  {
+    "id": "xxNEW",
+    "name": "New Patient Exam",
+    "codes": [
+      "D0150",
+      "D1110",
+      "D0210"
+    ],
+    "desc": "Comp exam, prophy, FMX"
+  },
+  {
+    "id": "xxCCA",
+    "name": "Cont. Care Prophy, Adult",
+    "codes": [
+      "D1110",
+      "D0120",
+      "D0272"
+    ],
+    "desc": "Periodic exam, adult prophy, bitewings"
+  },
+  {
+    "id": "xx2sA",
+    "name": "DO Amalgam",
+    "codes": [
+      "D2150"
+    ],
+    "surfaces": [
+      "O",
+      "D"
+    ],
+    "desc": "Two surface amalgam"
+  },
+  {
+    "id": "xx2sC",
+    "name": "DO Composite, Posterior",
+    "codes": [
+      "D2392"
+    ],
+    "surfaces": [
+      "O",
+      "D"
+    ],
+    "desc": "Two surface composite"
+  },
+  {
+    "id": "xx3sC",
+    "name": "MOD Composite",
+    "codes": [
+      "D2393"
+    ],
+    "surfaces": [
+      "M",
+      "O",
+      "D"
+    ],
+    "desc": "Three surface composite"
+  },
+  {
+    "id": "xxBRG",
+    "name": "Bridge PFM",
+    "codes": [
+      "D6750",
+      "D6240"
+    ],
+    "type": "Bridge",
+    "desc": "Bridge retainers and pontic"
+  },
+  {
+    "id": "xxPeL",
+    "name": "Perio-Low Quad Scale",
+    "codes": [
+      "D4341",
+      "D4341"
+    ],
+    "quadrants": [
+      "LL",
+      "LR"
+    ],
+    "desc": "Lower arch SRP"
+  },
+  {
+    "id": "xxRCC",
+    "name": "Tx Root Canal & Crown",
+    "codes": [
+      "D3310",
+      "D2740",
+      "D2950"
+    ],
+    "desc": "Anterior RCT, build-up, and Crown"
+  }
+]
