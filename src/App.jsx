@@ -3108,6 +3108,11 @@ export function ClinicalChartPageUI2({ currentUI, setUI, isMobileMenuOpen, setIs
             .filter(k => k.startsWith(`${selectedTooth}-`) && selectedSurfaces[k])
             .map(k => k.split('-')[1]);
 
+        const fullToothProcedures = ["Crown", "Root Canal", "Extraction", "Implant"];
+        if (fullToothProcedures.includes(procName)) {
+            activeSurfaces.length = 0; // Clear surfaces for full tooth procedures
+        }
+
         const surfaceString = activeSurfaces.length > 0 ? activeSurfaces.join('') : 'ALL';
 
         // Dummy CDT generator
@@ -3276,16 +3281,16 @@ AI Confidence: 96% match with standard of care protocols.`;
             const data = teeth[num];
             const isSelected = selectedTooth === num;
 
-            // Arch curvature logic - fixed to create an open mouth (upper=n, lower=u)
+            // Arch curvature logic - Oval shape
             const distanceFromCenter = Math.abs(index - 7.5);
             const verticalOffset = Math.pow(distanceFromCenter, 2) * 1.5;
-            const translateY = isUpper ? -verticalOffset : verticalOffset;
+            const translateY = isUpper ? verticalOffset : -verticalOffset;
 
             // Is Anterior? (To swap O for I on the labels internally eventually)
             const isAnterior = (num >= 6 && num <= 11) || (num >= 22 && num <= 27);
 
             return (
-                <div style={{ position: "relative", display: "flex", flexDirection: isUpper ? "column" : "column-reverse", alignItems: "center", gap: 6, transform: `translateY(${translateY}px)`, zIndex: isSelected ? 50 : 1 }}>
+                <div style={{ position: "relative", display: "flex", flexDirection: isUpper ? "column-reverse" : "column", alignItems: "center", gap: 6, transform: `translateY(${translateY}px)`, zIndex: isSelected ? 50 : 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: isSelected ? GEO_BLUE : GEO_TEXT_MAIN, transition: "color 0.2s" }}>
                         {num}
                     </div>
@@ -3328,10 +3333,14 @@ AI Confidence: 96% match with standard of care protocols.`;
                                                     }));
                                                 }}
                                                 onMouseEnter={(e) => {
-                                                    if (!isSurfaceSelected) e.currentTarget.style.fill = '#EFF6FF';
+                                                    if (!isSurfaceSelected && (!data.surfaces || data.surfaces.length === 0 || !data.surfaces.includes(surface) || data.status === "Healthy" || data.status === "Missing")) {
+                                                        e.currentTarget.style.fill = '#EFF6FF';
+                                                    }
                                                 }}
                                                 onMouseLeave={(e) => {
-                                                    if (!isSurfaceSelected) e.currentTarget.style.fill = '#FFFFFF';
+                                                    if (!isSurfaceSelected && (!data.surfaces || data.surfaces.length === 0 || !data.surfaces.includes(surface) || data.status === "Healthy" || data.status === "Missing")) {
+                                                        e.currentTarget.style.fill = '#FFFFFF';
+                                                    }
                                                 }}
                                                 style={{ transition: 'fill 0.1s', cursor: 'pointer' }}
                                             />
@@ -3347,8 +3356,13 @@ AI Confidence: 96% match with standard of care protocols.`;
                         <div style={{ position: "absolute", top: 60, left: "50%", transform: "translateX(-50%)", background: GEO_WHITE, borderRadius: 16, padding: "16px", boxShadow: "0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)", zIndex: 100, width: 320 }}>
                             <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: GEO_TEXT_MAIN, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                 <span>Tooth #{num}</span>
-                                <div style={{ fontSize: 13, fontWeight: 600, color: GEO_BLUE }}>
-                                    {Object.keys(selectedSurfaces).filter(k => k.startsWith(`${num}-`) && selectedSurfaces[k]).map(k => k.split('-')[1]).join('') || 'Entire Tooth'}
+                                <div
+                                    onClick={() => setSelectedSurfaces({})}
+                                    style={{ fontSize: 13, fontWeight: 600, color: GEO_BLUE, cursor: "pointer", padding: "4px 8px", background: "#EFF6FF", borderRadius: 6, transition: "all 0.2s" }}
+                                    onMouseOver={e => e.currentTarget.style.background = "#DBEAFE"}
+                                    onMouseOut={e => e.currentTarget.style.background = "#EFF6FF"}
+                                >
+                                    {Object.keys(selectedSurfaces).filter(k => k.startsWith(`${num}-`) && selectedSurfaces[k]).map(k => k.split('-')[1]).join('') || 'Whole Tooth'}
                                 </div>
                             </div>
 
@@ -3426,11 +3440,11 @@ AI Confidence: 96% match with standard of care protocols.`;
         return (
             <div style={{ display: "flex", flexDirection: "column", gap: 32, alignItems: "center", width: "100%", padding: "20px 0" }}>
                 {/* Upper Arch */}
-                <div style={{ display: "flex", gap: 10, justifyContent: "center", width: "100%", marginTop: 40, marginBottom: 40 }}>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", width: "100%", marginTop: 40, marginBottom: 0 }}>
                     {upperArch.map((num, i) => <ToothNode key={num} num={num} index={i} isUpper={true} />)}
                 </div>
                 {/* Lower Arch */}
-                <div style={{ display: "flex", gap: 10, justifyContent: "center", width: "100%", marginTop: 40, marginBottom: 40 }}>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center", width: "100%", marginTop: 0, marginBottom: 40 }}>
                     {lowerArch.map((num, i) => <ToothNode key={num} num={num} index={i} isUpper={false} />)}
                 </div>
 
