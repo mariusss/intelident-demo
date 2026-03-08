@@ -3047,17 +3047,17 @@ export function ClinicalChartPageUI2({ currentUI, setUI, isMobileMenuOpen, setIs
     const [progressNotes, setProgressNotes] = useState([]);
     const [teeth, setTeeth] = useState(() => {
         const initial = {};
-        for (let i = 1; i <= 32; i++) initial[i] = { status: "Healthy", condition: "" };
+        for (let i = 1; i <= 32; i++) initial[i] = { status: "Healthy", condition: "", surfaces: [] };
         // Demo data
-        initial[19] = { status: "Proposed", condition: "Crown - PFM" };
-        initial[3] = { status: "Watch", condition: "Early Caries" };
-        initial[14] = { status: "Proposed", condition: "DO Composite" };
-        initial[1] = { status: "Missing", condition: "Extracted" };
-        initial[16] = { status: "Missing", condition: "Extracted" };
-        initial[17] = { status: "Missing", condition: "Extracted" };
-        initial[32] = { status: "Missing", condition: "Extracted" };
-        initial[8] = { status: "Existing", condition: "Veneer" };
-        initial[9] = { status: "Existing", condition: "Veneer" };
+        initial[19] = { status: "Proposed", condition: "Crown - PFM", surfaces: [] };
+        initial[3] = { status: "Watch", condition: "Early Caries", surfaces: ["O"] };
+        initial[14] = { status: "Proposed", condition: "DO Composite", surfaces: ["D", "O"] };
+        initial[1] = { status: "Missing", condition: "Extracted", surfaces: [] };
+        initial[16] = { status: "Missing", condition: "Extracted", surfaces: [] };
+        initial[17] = { status: "Missing", condition: "Extracted", surfaces: [] };
+        initial[32] = { status: "Missing", condition: "Extracted", surfaces: [] };
+        initial[8] = { status: "Existing", condition: "Veneer", surfaces: ["B"] };
+        initial[9] = { status: "Existing", condition: "Veneer", surfaces: ["B"] };
         return initial;
     });
 
@@ -3146,7 +3146,8 @@ export function ClinicalChartPageUI2({ currentUI, setUI, isMobileMenuOpen, setIs
             [selectedTooth]: {
                 ...prev[selectedTooth],
                 status: newStatus,
-                condition: `${procName} ${surfaceString !== 'ALL' ? surfaceString : ''}`.trim()
+                condition: `${procName} ${surfaceString !== 'ALL' ? surfaceString : ''}`.trim(),
+                surfaces: activeSurfaces
             }
         }));
 
@@ -3192,7 +3193,8 @@ export function ClinicalChartPageUI2({ currentUI, setUI, isMobileMenuOpen, setIs
                 [targetTooth]: {
                     ...prev[targetTooth],
                     status: "Existing",
-                    condition: "Amalgam MOD"
+                    condition: "Amalgam MOD",
+                    surfaces: ["M", "O", "D"]
                 }
             }));
 
@@ -3274,16 +3276,16 @@ AI Confidence: 96% match with standard of care protocols.`;
             const data = teeth[num];
             const isSelected = selectedTooth === num;
 
-            // Arch curvature logic
+            // Arch curvature logic - fixed to create an open mouth (upper=n, lower=u)
             const distanceFromCenter = Math.abs(index - 7.5);
             const verticalOffset = Math.pow(distanceFromCenter, 2) * 1.5;
-            const translateY = isUpper ? verticalOffset : -verticalOffset;
+            const translateY = isUpper ? -verticalOffset : verticalOffset;
 
             // Is Anterior? (To swap O for I on the labels internally eventually)
             const isAnterior = (num >= 6 && num <= 11) || (num >= 22 && num <= 27);
 
             return (
-                <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, transform: `translateY(${translateY}px)`, zIndex: isSelected ? 50 : 1 }}>
+                <div style={{ position: "relative", display: "flex", flexDirection: isUpper ? "column" : "column-reverse", alignItems: "center", gap: 6, transform: `translateY(${translateY}px)`, zIndex: isSelected ? 50 : 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: isSelected ? GEO_BLUE : GEO_TEXT_MAIN, transition: "color 0.2s" }}>
                         {num}
                     </div>
@@ -3316,7 +3318,7 @@ AI Confidence: 96% match with standard of care protocols.`;
                                             <path
                                                 key={surface}
                                                 d={SVG_PATHS[surface]}
-                                                fill={isSurfaceSelected ? '#DBEAFE' : '#FFFFFF'}
+                                                fill={(data.status !== "Healthy" && data.status !== "Missing" && (!data.surfaces || data.surfaces.length === 0 || data.surfaces.includes(surface))) ? getToothColor(data.status) : (isSurfaceSelected ? '#DBEAFE' : '#FFFFFF')}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleToothClick(num); // Ensure the tooth is the active one
@@ -3550,6 +3552,7 @@ AI Confidence: 96% match with standard of care protocols.`;
                                         getToothColor={getToothColor}
                                         handleProcedureClick={handleProcedureClick}
                                         selectedSurfaces={selectedSurfaces}
+                                        setSelectedSurfaces={setSelectedSurfaces}
                                         paletteTab={paletteTab}
                                         setPaletteTab={setPaletteTab}
                                     />

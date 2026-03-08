@@ -57,7 +57,7 @@ const computeArchPositions = (archArray, isUpper) => {
     });
 };
 
-const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange, getToothColor, handleProcedureClick, selectedSurfaces, paletteTab, setPaletteTab }) => {
+const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange, getToothColor, handleProcedureClick, selectedSurfaces, setSelectedSurfaces, paletteTab, setPaletteTab }) => {
     const meshRef = useRef();
     const [hovered, setHovered] = useState(false);
 
@@ -70,6 +70,9 @@ const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange
     const isMissing = data?.status === 'Missing';
     const toothColor = getToothColor ? getToothColor(data?.status || 'Healthy') : '#ffffff';
 
+    const hasFullToothCondition = data?.status !== 'Healthy' && data?.status !== 'Missing' && (!data?.surfaces || data.surfaces.length === 0);
+    const coreColor = hasFullToothCondition ? toothColor : '#fffff8';
+
     // Base Enamel Material for valid teeth
     const enamelMaterialProps = {
         transmission: 0.1,
@@ -78,19 +81,39 @@ const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange
         roughness: 0.25,
         ior: 1.5,
         thickness: 1.0,
-        color: data?.status === 'Healthy' ? '#fffff8' : toothColor,
+        color: coreColor,
         clearcoat: 0.8,
         clearcoatRoughness: 0.1,
         transparent: true,
         side: THREE.FrontSide,
         depthWrite: true,
-        emissive: toothColor,
-        emissiveIntensity: data?.status !== 'Healthy' && data?.status !== 'Missing' ? 0.2 : 0 // slight glow for conditions
+        emissive: isSelected || hovered ? '#a7f3d0' : (hasFullToothCondition ? toothColor : '#000000'),
+        emissiveIntensity: isSelected ? 0.2 : (hovered ? 0.1 : (hasFullToothCondition ? 0.2 : 0))
+    };
+
+    // 5-Surface Compound Geometry 'Veneer' Caps
+    // Caps are 0.01 units thick and overlap the slightly smaller core mapping to M-D-O-B-L
+    const capThickness = 0.01;
+    const caps = [
+        { id: 'M', pos: [-tWidth / 2 - capThickness / 2, 0, 0], args: [capThickness, tHeight * 0.8, tDepth * 0.8] },
+        { id: 'D', pos: [tWidth / 2 + capThickness / 2, 0, 0], args: [capThickness, tHeight * 0.8, tDepth * 0.8] },
+        { id: 'B', pos: [0, 0, tDepth / 2 + capThickness / 2], args: [tWidth * 0.8, tHeight * 0.8, capThickness] },
+        { id: 'L', pos: [0, 0, -tDepth / 2 - capThickness / 2], args: [tWidth * 0.8, tHeight * 0.8, capThickness] },
+        { id: 'O', pos: [0, isUpper ? -tHeight / 2 - capThickness / 2 : tHeight / 2 + capThickness / 2, 0], args: [tWidth * 0.8, capThickness, tDepth * 0.8] }
+    ];
+
+    const toggleSurface = (surfId) => {
+        if (!isSelected) {
+            onSelect(num);
+            return;
+        }
+        const key = `${num}-${surfId}`;
+        setSelectedSurfaces(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
     return (
         <group position={[x, y, z]} rotation={[0, rotationY, 0]}>
-            {/* Main Tooth Geometry OR Ghost Box for Missing */}
+            {/* Main Tooth Geometry Core OR Ghost Box for Missing */}
             <RoundedBox
                 ref={meshRef}
                 args={[tWidth, tHeight, tDepth]}
@@ -110,13 +133,52 @@ const Tooth3D = ({ num, isUpper, pos, data, onSelect, isSelected, onStatusChange
                         emissiveIntensity={isSelected ? 0.4 : (hovered ? 0.2 : 0)}
                     />
                 ) : (
-                    <meshPhysicalMaterial
-                        {...enamelMaterialProps}
-                        emissive={hovered || isSelected ? '#a7f3d0' : enamelMaterialProps.emissive}
-                        emissiveIntensity={hovered || isSelected ? 0.4 : enamelMaterialProps.emissiveIntensity}
-                    />
+                    <meshPhysicalMaterial {...enamelMaterialProps} />
                 )}
             </RoundedBox>
+
+            {/* Dynamic Surface Patches (M, O, D, B, L) */}
+            {!isMissing && caps.map(cap => {
+                const isSurfSelected = selectedSurfaces && selectedSurfaces[`${num}-${cap.id}`];
+                const hasSurfCondition = data?.status !== "Healthy" && data?.surfaces?.includes(cap.id);
+                const isVisible = isSurfSelected || hasSurfCondition;
+
+                // Blue if manually selected, otherwise match the status color (red/yellow/etc)
+                const capColor = isSurfSelected ? '#3B82F6' : toothColor;
+
+                return (
+                    <group key={cap.id}>
+                        {isVisible && (
+                            <RoundedBox
+                                position={cap.pos}
+                                args={cap.args}
+                                radius={0.01}
+                                smoothness={2}
+                                onClick={(e) => { e.stopPropagation(); toggleSurface(cap.id); }}
+                            >
+                                <meshStandardMaterial
+                                    color={capColor}
+                                    emissive={capColor}
+                                    emissiveIntensity={0.6}
+                                    roughness={0.2}
+                                    metalness={0.1}
+                                />
+                            </RoundedBox>
+                        )}
+
+                        {/* Invisible raycast hit-box covering the surface to allow clicking it before it glows */}
+                        {!isVisible && isSelected && (
+                            <mesh
+                                position={cap.pos}
+                                onClick={(e) => { e.stopPropagation(); toggleSurface(cap.id); }}
+                            >
+                                <boxGeometry args={[Math.max(cap.args[0], 0.2), Math.max(cap.args[1], 0.2), Math.max(cap.args[2], 0.2)]} />
+                                <meshBasicMaterial transparent opacity={0.0} depthWrite={false} color="#ff0000" />
+                            </mesh>
+                        )}
+                    </group>
+                )
+            })}
 
             {/* Number Label & Interactive Popup Overlay */}
             {(hovered || isSelected) && (
@@ -232,7 +294,7 @@ const DentalArchGums = ({ isUpper }) => {
     );
 };
 
-export function Dental3DModel({ teethData, selectedTooth, onSelectTooth, onStatusChange, getToothColor, handleProcedureClick, selectedSurfaces, paletteTab, setPaletteTab }) {
+export function Dental3DModel({ teethData, selectedTooth, onSelectTooth, onStatusChange, getToothColor, handleProcedureClick, selectedSurfaces, setSelectedSurfaces, paletteTab, setPaletteTab }) {
     const upperArch = Array.from({ length: 16 }, (_, i) => i + 1);
     const lowerArch = Array.from({ length: 16 }, (_, i) => 32 - i);
 
