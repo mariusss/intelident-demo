@@ -141,7 +141,7 @@ export function ToothChart2D({ teethState }) {
 
         const distanceFromCenter = Math.abs(index - 7.5);
         const verticalOffset = Math.pow(distanceFromCenter, 2) * 1.5;
-        const translateY = isUpper ? verticalOffset : -verticalOffset;
+        const translateY = isUpper ? -verticalOffset : verticalOffset;
 
         return (
             <div style={{ position: "relative", display: "flex", flexDirection: isUpper ? "column-reverse" : "column", alignItems: "center", gap: 6, transform: `translateY(${translateY}px)`, zIndex: isSelected ? 50 : 1 }}>
